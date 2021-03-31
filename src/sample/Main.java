@@ -12,7 +12,11 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
         primaryStage.setTitle("Wall Breaker");
-        primaryStage.setScene(new Scene(root));
+        Scene scene = new Scene(root);
+        String css = getClass().getResource("style.css").toExternalForm();
+        scene.getStylesheets().add(css);
+
+        primaryStage.setScene(scene);
         primaryStage.show();
     }
 
