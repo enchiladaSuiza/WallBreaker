@@ -10,9 +10,14 @@ public class TestDB {
         System.out.print("-> ");
         Datos test = new Datos("root", new Scanner(System.in).nextLine());
 
+        /*
         show(test);
         test.addProduct("Tornillo", 1.5, 1000, 11);
         show(test);
+
+        test.deleteProduct(15);
+        show(test);
+        */
 
         test.end();
     }
