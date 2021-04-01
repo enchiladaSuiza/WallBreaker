@@ -4,8 +4,8 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class DataBase {
-    private static final String url = "jdbc:mysql://localhost:3306/wallbreaker?serverTimezone=CST";
+public class ConexionBase {
+    private static final String url = "jdbc:mysql://localhost:3306/wallbreaker";
     private final Connection CNX;
 
     /**
@@ -14,7 +14,7 @@ public class DataBase {
      * @param pswrd contraseña del usuario
      * @throws SQLException posible excepción SQL
      */
-    DataBase(String user, String pswrd) throws SQLException {
+    ConexionBase(String user, String pswrd) throws SQLException {
         CNX = DriverManager.getConnection(url, user, pswrd);
     }
 
