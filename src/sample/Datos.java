@@ -121,7 +121,7 @@ public class Datos {
         ped_prod.append(" values (?, ?, ?)");
 
         StringBuilder idPedido = new StringBuilder("select auto_increment from information_schema.tables");
-        idPedido.append("where table_schema = 'wallbreaker' AND table_name = 'pedido'");
+        idPedido.append(" where table_schema = 'wallbreaker' AND table_name = 'pedido' ");
 
         StringBuilder updateProd = new StringBuilder("update producto set almacen = ");
 
@@ -142,7 +142,7 @@ public class Datos {
 
         // Informacion del pedido
         Random r = new Random();
-        double monto = Double.parseDouble(producto[3]) * cantidadProd;
+        double monto = Double.parseDouble(producto[2]) * cantidadProd;
         double descuento = (r.nextInt(21) / 100.0);
         double montoF = monto - (monto * descuento);
 
@@ -161,9 +161,13 @@ public class Datos {
         // Se obtiene el id_pedido generado
         st = conexion.createStatement();
         rs = st.executeQuery(new String(idPedido));
+        int id_ped = 0;
+        while (rs.next()) {
+            id_ped = Integer.parseInt(rs.getString("AUTO_INCREMENT"));
+        }
+
         rs.close();
         st.close();
-        int id_ped = rs.getInt(1) - 1;
 
         // Se prepara la relación pedido_producto
         ps = conexion.prepareStatement(new String(ped_prod)); // Conecta el objeto PreparedStatement
@@ -188,18 +192,21 @@ public class Datos {
      * Método que realiza la venta de un pedido previo
      * @param idPedido clave del pedido a ser vendido
      * @param efectivo cantidad con la que se paga el montoF
-     * @return Devuelve null si el pedido ya fue vendido antes o si el efectivo no cubre el montoF<p>Devuelve un double con el cambio</p>
+     * @return Devuelve null si el pedido ya fue vendido antes<p>Devuelve -1.0 si el efectivo no cubre el montoF</p><p>Devuelve un double con el cambio</p>
      * @throws SQLException posible excepción SQL
      */
     public Object generarVenta(int idPedido, double efectivo) throws SQLException {
+        PreparedStatement ps;
+        Statement st;
         StringBuilder s = new StringBuilder();
         String[] pedido;
-        StringBuilder x = new StringBuilder("select * from pedido where id_pedido = ").append(idPedido);
-        StringBuilder y = new StringBuilder("update pedido set status = 1 where id_pedido = ").append(idPedido);
         double cambio;
 
+        StringBuilder x = new StringBuilder("select * from pedido where id_pedido = ").append(idPedido);
+        StringBuilder y = new StringBuilder("update pedido set status = 1 where id_pedido = ").append(idPedido);
+
         // Se obtiene el pedido
-        Statement st = conexion.createStatement();
+        st = conexion.createStatement();
         ResultSet rs = st.executeQuery(new String(x));
 
         while (rs.next()) {
@@ -208,14 +215,14 @@ public class Datos {
         }
 
         rs.close();
+        st.close();
 
         pedido = new String(s).split(",");
         if (pedido[pedido.length-1].equals("1")) return null; // Venta ya realizada previamente
-        if (efectivo < Double.parseDouble(pedido[4])) return -1; // Efectivo no suficiente para cubrir montoF
+        if (efectivo < Double.parseDouble(pedido[4])) return -1.0; // Efectivo no suficiente para cubrir montoF
         cambio = efectivo - Double.parseDouble(pedido[4]);
 
         // Se prepara la venta
-        PreparedStatement ps;
         StringBuilder z = new StringBuilder("insert into venta (fecha_venta, montoF, efectivo, cambio, id_cliente, id_pedido)");
         z.append("values (?, ?, ?, ?, ?, ?)");
 
@@ -232,6 +239,7 @@ public class Datos {
         ps.close();
 
         // Actualiza estado del pedido
+        st = conexion.createStatement();
         st.executeUpdate(new String(y));
         st.close();
 
