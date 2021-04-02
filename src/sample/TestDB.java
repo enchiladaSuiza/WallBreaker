@@ -10,7 +10,27 @@ public class TestDB {
         System.out.print("-> ");
         Datos test = new Datos("root", new Scanner(System.in).nextLine());
 
-        /*
+        // PROBAR MÉTODO **addPedido**
+
+        test.end();
+    }
+
+    private static void show(Datos obj, String tabla) throws SQLException {
+        ArrayList<String> x = obj.verTodo(tabla);
+
+        System.out.println("\n" + tabla);
+        x.forEach(v -> {
+            String[] temp = v.split(",");
+            for (String i: temp) System.out.printf("%20s", i);
+            System.out.println();
+        });
+    }
+
+}
+
+
+
+        /* PRUEBA AGREGAR PRODUCTO
         show(test);
         test.addProduct("Tornillo", 1.5, 1000, 11);
         show(test);
@@ -19,18 +39,15 @@ public class TestDB {
         show(test);
         */
 
-        test.end();
-    }
+        /* PRUEBA REALIZAR VENTA (MARCAR PEDIDO.STATUS = 1, AGREGAR REGISTRO A VENTA)
+        show(test, "pedido");
+        show(test, "venta");
+        Object result = test.generarVenta(2, 200);
 
-    private static void show(Datos obj) throws SQLException {
-        ArrayList<String> x = obj.verTodo("producto");
+        if (result == null) System.out.println("\nPedido ya vendido, intente de nuevo\n");
+        else if ((double) result != -1) System.out.println("Venta realizada. Cambio " + ((double) result));
+        else System.out.println("\nEfectivo insuiciente\n");
 
-        System.out.println("\nProducto");
-        x.forEach(v -> {
-            String[] temp = v.split(",");
-            for (String i: temp) System.out.printf("%25s", i);
-            System.out.println();
-        });
-    }
-
-}
+        show(test, "pedido");
+        show(test, "venta");
+         */
