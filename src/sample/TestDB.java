@@ -10,6 +10,7 @@ public class TestDB {
         System.out.print("-> ");
         Datos test = new Datos("root", new Scanner(System.in).nextLine());
 
+        //PROBAR MÉTODO **addProveedor**
 
 
         test.end();

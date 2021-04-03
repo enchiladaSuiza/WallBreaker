@@ -65,9 +65,10 @@ public class Datos {
      * @param precio precio del producto a agregar
      * @param almacen cantidad almacenada del producto a agregar
      * @param categoria categoria del producto a agregar
-     * @throws SQLException posible excepción SQL
+     * @return Devuelve 0 si se agregó correctamente el producto
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de agregar producto</p>
      */
-    public void addProduct(String producto, double precio, int almacen, int categoria) throws SQLException {
+    public int addProduct(String producto, double precio, int almacen, int categoria) throws SQLException {
         PreparedStatement ps;
         StringBuilder x = new StringBuilder("insert into producto (nomProd, precio, almacen, id_categoria)");
         x.append(" values (?, ?, ?, ?)");
@@ -81,20 +82,23 @@ public class Datos {
 
         ps.execute();
         ps.close();
+        return 0;
     }
 
     /**
      * Método para eliminar un producto de la base de datos
      * @param idProducto clave del producto a ser eliminado
-     * @throws SQLException posible excepción SQL
+     * @return Devuelve 0 si el producto se eliminó correctamente
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de eliminar producto</p>
      */
-    public void deleteProduct(int idProducto) throws SQLException {
+    public int deleteProduct(int idProducto) throws SQLException {
         Statement st = conexion.createStatement();
         StringBuilder x = new StringBuilder("delete from producto");
         x.append(" where id_producto = ").append(idProducto);
 
         st.executeUpdate(new String(x));
         st.close();
+        return 0;
     }
 
     /**
@@ -103,7 +107,7 @@ public class Datos {
      * @param cantidadProd número de productos que se apartarán
      * @param idCliente cliente que realiza el pedido
      * @return Devuelve -1 si faltan artículos en almacén<p>Devuelve 0 si la transacción salio bien</p>
-     * @throws SQLException posible excepción SQL
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de agreagr pedido</p>
      */
     public int addPedido(int idProducto, int cantidadProd, int idCliente) throws SQLException {
         PreparedStatement ps;
@@ -193,7 +197,7 @@ public class Datos {
      * @param idPedido clave del pedido a ser vendido
      * @param efectivo cantidad con la que se paga el montoF
      * @return Devuelve null si el pedido ya fue vendido antes<p>Devuelve -1.0 si el efectivo no cubre el montoF</p><p>Devuelve un double con el cambio</p>
-     * @throws SQLException posible excepción SQL
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de realizar venta</p>
      */
     public Object generarVenta(int idPedido, double efectivo) throws SQLException {
         PreparedStatement ps;
@@ -246,6 +250,129 @@ public class Datos {
         return cambio;
     }
 
+    /**
+     * Método que obtiene información de todos los proveedores que proveen productos
+     * @return Un ArrayList cn la información solicitada
+     * @throws SQLException posible excepción SQL<p>Excepción al solicitar la información</p>
+     */
+    public ArrayList<String> proveedor() throws SQLException {
+        Statement st;
+        ResultSet rs;
+        StringBuilder reg;
+        ArrayList<String> resultados = new ArrayList<>();
+
+        StringBuilder queryProveedores = new StringBuilder();
+        queryProveedores.append("select nomProveedor, apelProveedor, telefonoProveedor, pag_web, nomProd, almacen");
+        queryProveedores.append(" from proveedor, producto where proveedor.id_producto = producto.id_producto");
+
+        // Obtener información de todos los proveedores que proveen productos
+        st = conexion.createStatement();
+        rs = st.executeQuery(new String(queryProveedores));
+
+        while (rs.next()) {
+            reg = new StringBuilder();
+
+            for (int p = 1; p <= 6; ++p) reg.append(rs.getString(p)).append(",");
+            reg.deleteCharAt(reg.lastIndexOf(","));
+
+            resultados.add(new String(reg));
+        }
+
+        rs.close();
+        st.close();
+        return resultados;
+    }
+
+    /**
+     * Método que obtiene información del proveedor que provee el producto especificado
+     * @param idProducto clave del producto para ver su proveedor
+     * @return Una cadena con la información solicitada
+     * @throws SQLException posible excepción SQL<p>Excepción al solicitar la información</p>
+     */
+    public String proveedor(int idProducto) throws SQLException {
+        Statement st;
+        ResultSet rs;
+        StringBuilder resultado = new StringBuilder();
+
+        StringBuilder query = new StringBuilder();
+        query.append("select nomProveedor, apelProveedor, telefonoProveedor, pag_web, nomProd, almacen");
+        query.append(" from proveedor, producto where proveedor.id_producto = producto.id_producto");
+        query.append(" AND producto.id_producto = ").append(idProducto);
+
+        // Obtener información de los proveedores que preveen los productos especificados
+        st = conexion.createStatement();
+        rs = st.executeQuery(new String(query));
+
+        while (rs.next()) {
+            for (int v = 1; v <= 6; ++v) resultado.append(rs.getString(v)).append(",");
+            resultado.deleteCharAt(resultado.lastIndexOf(","));
+        }
+
+        rs.close();
+        st.close();
+        return new String(resultado);
+    }
+
+    /**
+     * Método que agrega un proveedor a la base de datos<p>Si se pasa por parámetro una clave no existente en la BD
+     * en idProd, se agregará un valor nulo en su lugar</p><p>Se tendrá que modificar el registro de éste proveedor
+     * cuando el producto sea agregado a la BD</p>
+     * @param nomProv nombre del proveedor (Nullable en la BD)
+     * @param apelProv apellido del proveedor
+     * @param telProv telefono del proveedor (long)
+     * @param pagWeb página web del proveedor (Nullable en la BD)
+     * @param idProd clave del producto que se provee (Nullable en la BD)
+     * @param setNull booleano para indicar que el id_producto es null
+     * @return Devuelve 0 si salio bien la operación
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de agreagr un proveeedor</p>
+     */
+    public int addProveedor(String nomProv, String apelProv, long telProv, String pagWeb, int idProd, boolean setNull)
+            throws SQLException
+    {
+        Statement st;
+        ResultSet rs;
+        PreparedStatement ps;
+        ArrayList<Integer> products = new ArrayList<>();
+        boolean id_prod = false; // id_producto será una clave de producto existente
+
+        String queryProd = "select id_producto from producto";
+        StringBuilder p = new StringBuilder("insert into proveedor (nomProveedor, apelProveedor, telefonoProveedor");
+
+        // Se obtiene información de los productos existentes
+        st = conexion.createStatement();
+        rs = st.executeQuery(queryProd);
+
+        while (rs.next()) {
+            products.add(rs.getInt("id_producto"));
+        }
+
+        // Verifica si se agrega null al id_producto
+        if (setNull) id_prod = true; // id_producto será una clave de producto null
+
+        // Verifica que el producto que provee el proveedor existe en la base de datos
+        if (!products.contains(idProd)) id_prod = true; // No existe el producto que se provee por lo que se asignará null
+
+
+        // Se prepara el proveedor
+        p.append(", pag_web, id_producto)");
+        p.append(" values (?, ?, ?, ?, ?)");
+
+        ps = conexion.prepareStatement(new String(p));
+        ps.setString(1, nomProv); // nomProveedor
+        ps.setString(2, apelProv); // apelProveedor
+        ps.setString(3, String.valueOf(telProv)); // telefonoProveedor
+        ps.setString(4, pagWeb); // pag_web
+        if (id_prod) {
+            ps.setNull(5, Types.NULL); // id_producto
+        } else {
+            ps.setInt(5, idProd); // id_producto
+        }
+
+        // Se agrega el proveedor a la base de datos
+        ps.execute();
+        ps.close();
+        return 0; // Everithing OK
+    }
 
 
 
