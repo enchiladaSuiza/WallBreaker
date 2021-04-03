@@ -223,7 +223,7 @@ public class Datos {
 
         pedido = new String(s).split(",");
         if (pedido[pedido.length-1].equals("1")) return null; // Venta ya realizada previamente
-        if (efectivo < Double.parseDouble(pedido[4])) return -1.0; // Efectivo no suficiente para cubrir montoF
+        if (efectivo < Double.parseDouble(pedido[4])) return -1.0D; // Efectivo no suficiente para cubrir montoF
         cambio = efectivo - Double.parseDouble(pedido[4]);
 
         // Se prepara la venta
@@ -345,6 +345,9 @@ public class Datos {
         while (rs.next()) {
             products.add(rs.getInt("id_producto"));
         }
+
+        rs.close();
+        st.close();
 
         // Verifica si se agrega null al id_producto
         if (setNull) id_prod = true; // id_producto será una clave de producto null
