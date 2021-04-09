@@ -1,16 +1,30 @@
 .root {
-    -fx-background-color: #F68500;
+    -fx-background-color: white;
 }
 
 .button {
-    -fx-background-color:white;
-    -fx-border-color: #FFD27A;
-    -fx-border-width: 3px;
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-background-color: #864A3F;
+    -fx-border-width: 0px;
+
 }
 
 #principal{
     -fx-background-color: #FFE194;
     -fx-border-width: 3px;
     -fx-background-radius: 5px;
-    -fx-padding: 7px;
+    -fx-padding: 6px;
+}
+
+#barraDeMenu {
+    -fx-background-color: #B45F4A;
+}
+
+#busquedaAyuda {
+    -fx-border-color: #B45F4A;
+    -fx-border-width: 5px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
 }

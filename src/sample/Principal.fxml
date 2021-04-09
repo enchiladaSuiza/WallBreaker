@@ -11,9 +11,9 @@
    <top>
       <AnchorPane prefHeight="50.0" prefWidth="600.0" BorderPane.alignment="CENTER">
          <children>
-            <Label fx:id="principal" layoutX="10.0" layoutY="10.0" text="Wall Breaker" textAlignment="CENTER" AnchorPane.leftAnchor="15.0" />
-            <TextField alignment="CENTER_RIGHT" layoutX="437.0" layoutY="10.0" promptText="Ayuda" AnchorPane.rightAnchor="15.0" />
-            <FlowPane alignment="TOP_CENTER" columnHalignment="CENTER" hgap="30.0" layoutY="52.0" minHeight="-Infinity" prefHeight="26.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="50.0">
+            <Label fx:id="principal" layoutX="10.0" layoutY="10.0" text="Wall Breaker" textAlignment="CENTER" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="10.0" />
+            <TextField fx:id="busquedaAyuda" alignment="CENTER_RIGHT" layoutX="446.0" layoutY="6.0" promptText="Ayuda" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="10.0" />
+            <FlowPane fx:id="barraDeMenu" alignment="TOP_CENTER" columnHalignment="CENTER" hgap="30.0" layoutY="52.0" minHeight="-Infinity" prefHeight="26.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="50.0">
                <children>
                   <Button mnemonicParsing="false" text="Producto" />
                   <Button mnemonicParsing="false" text="Ventas" />
