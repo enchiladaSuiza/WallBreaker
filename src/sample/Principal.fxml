@@ -3,7 +3,6 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
@@ -18,12 +17,12 @@
             <TextField fx:id="busquedaAyuda" alignment="CENTER_RIGHT" layoutX="446.0" layoutY="6.0" promptText="Ayuda" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="10.0" />
             <FlowPane fx:id="barraDeMenu" alignment="TOP_CENTER" columnHalignment="CENTER" hgap="30.0" layoutY="49.0" minHeight="-Infinity" prefHeight="26.0" prefWidth="600.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
                <children>
-                  <Button fx:id="productosBtn" mnemonicParsing="false" onAction="#pantallaProductos" text="Productos" />
-                  <Button fx:id="ventasBtn" mnemonicParsing="false" text="Ventas" />
-                  <Button fx:id="proveedoresBtn" mnemonicParsing="false" text="Proveedores" />
+                  <Button fx:id="productosBtn" mnemonicParsing="false" onAction="#mostrarProductos" text="Productos" />
+                  <Button fx:id="ventasBtn" mnemonicParsing="false" onAction="#mostrarVentas" text="Ventas" />
+                  <Button fx:id="proveedoresBtn" mnemonicParsing="false" onAction="#mostrarProveedores" text="Proveedores" />
                   <Button fx:id="analisisBtn" mnemonicParsing="false" text="Análisis" />
-                  <Button fx:id="pedidosBtn" layoutX="209.0" layoutY="10.0" mnemonicParsing="false" text="Pedidos" />
-                  <Button fx:id="personalBtn" layoutX="265.0" layoutY="10.0" mnemonicParsing="false" text="Personal" />
+                  <Button fx:id="pedidosBtn" layoutX="209.0" layoutY="10.0" mnemonicParsing="false" onAction="#mostrarPedidos" text="Pedidos" />
+                  <Button fx:id="personalBtn" layoutX="265.0" layoutY="10.0" mnemonicParsing="false" onAction="#mostrarPersonal" text="Personal" />
                </children>
             </FlowPane>
          </children>
@@ -39,13 +38,6 @@
       </AnchorPane>
    </bottom>
    <center>
-      <AnchorPane fx:id="centro" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+      <ScrollPane fx:id="centro" fitToHeight="true" fitToWidth="true" prefHeight="283.0" prefWidth="210.0" BorderPane.alignment="CENTER" />
    </center>
-   <left>
-      <ScrollPane fx:id="izquierda" fitToHeight="true" fitToWidth="true" prefHeight="283.0" prefWidth="210.0" BorderPane.alignment="CENTER">
-         <content>
-            <TextArea fx:id="select" editable="false" prefHeight="281.0" prefWidth="207.0" />
-         </content>
-      </ScrollPane>
-   </left>
 </BorderPane>

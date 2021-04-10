@@ -1,8 +1,12 @@
 package sample;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Random;
 
 public class Datos {
@@ -39,24 +43,37 @@ public class Datos {
      * @return Devuelve un ArrayList con los registros. Campos separados por comas. Lineas terminadas por saltos.
      * @throws SQLException posible excepción SQL
      */
-    public ArrayList<String> verTodo(String tabla) throws SQLException {
-        ArrayList<String> resutados = new ArrayList<>();
+    public ObservableList<ObservableList<String>> verTodo(String tabla) throws SQLException {
+        ObservableList<ObservableList<String>> resultados = FXCollections.observableArrayList();
         String instruccion = "select * from " + tabla;
-        StringBuilder s;
+        // StringBuilder s;
 
         Statement st = conexion.createStatement();
         ResultSet rs = st.executeQuery(instruccion);
+        ResultSetMetaData md = rs.getMetaData();
+        int cols = md.getColumnCount();
 
+        resultados.add(FXCollections.observableArrayList()); // La primera fila serán los nombres de las columnas
+        for (int i = 1; i <= cols; i++) {
+            resultados.get(0).add(md.getColumnLabel(i));
+        }
+
+        int indiceFila = 0;
         while (rs.next()) {
-            s = new StringBuilder();
-            for (int v = 1; v <= numcols.get(tabla.toLowerCase()); ++v) s.append(rs.getString(v)).append(",");
-            s.deleteCharAt(s.lastIndexOf(","));
-            resutados.add(new String(s));
+            // s = new StringBuilder();
+            resultados.add(FXCollections.observableArrayList()); // Añade una tupla
+            indiceFila++;
+            for (int v = 1; v <= cols; ++v) {
+                // s.append(rs.getString(v)).append(",");
+                resultados.get(indiceFila).add(rs.getString(v)); // Añade un registro
+            }
+            // s.deleteCharAt(s.lastIndexOf(","));
+           // resultados.add(new String(s));
         }
 
         rs.close();
         st.close();
-        return resutados;
+        return resultados;
     }
 
     /**

@@ -16,7 +16,7 @@ public class TestDB {
         test.end();
     }
 
-    private static void show(Datos obj, String tabla) throws SQLException {
+    /*private static void show(Datos obj, String tabla) throws SQLException {
         ArrayList<String> x = obj.verTodo(tabla);
 
         System.out.println("\n" + tabla);
@@ -25,7 +25,7 @@ public class TestDB {
             for (String i: temp) System.out.printf("%23s", i);
             System.out.println();
         });
-    }
+    }*/
 
 }
 
