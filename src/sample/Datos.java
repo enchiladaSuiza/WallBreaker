@@ -40,7 +40,8 @@ public class Datos {
     /**
      * Método que regresa los registros completos de determinada tabla
      * @param tabla nombre de la tabla que se desea consultar
-     * @return Devuelve un ArrayList con los registros. Campos separados por comas. Lineas terminadas por saltos.
+     * @return Devuelve un ObservableList de ObservableList de Strings, cada ObservableList es una fila, cada String es
+     * un registro. La priemra fila contiene los nombres de las columnas.
      * @throws SQLException posible excepción SQL
      */
     public ObservableList<ObservableList<String>> verTodo(String tabla) throws SQLException {
@@ -60,15 +61,11 @@ public class Datos {
 
         int indiceFila = 0;
         while (rs.next()) {
-            // s = new StringBuilder();
             resultados.add(FXCollections.observableArrayList()); // Añade una tupla
             indiceFila++;
             for (int v = 1; v <= cols; ++v) {
-                // s.append(rs.getString(v)).append(",");
                 resultados.get(indiceFila).add(rs.getString(v)); // Añade un registro
             }
-            // s.deleteCharAt(s.lastIndexOf(","));
-           // resultados.add(new String(s));
         }
 
         rs.close();
