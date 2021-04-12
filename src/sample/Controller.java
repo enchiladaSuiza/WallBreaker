@@ -10,6 +10,7 @@ import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.URL;
 import java.sql.SQLException;
@@ -25,9 +26,10 @@ public class Controller implements Initializable {
 
     private Datos datos;
     private TableView<ObservableList<StringProperty>> tabla;
+    private Alert error, informacion, confirmacion;
 
-    private TextField textoProducto, precioProducto, almacenProducto, categoriaProducto;
-    private Button agregarProducto;
+    private TextField textoProducto, precioProducto, almacenProducto, categoriaProducto, idProducto;
+    private Button agregarProducto, eliminarProducto;
 
 
     @Override
@@ -35,20 +37,40 @@ public class Controller implements Initializable {
         datos = Main.conseguirDatos(); // Puede no ser el mejor acercamiento
         tabla = new TableView<>();
 
+        error = new Alert(Alert.AlertType.ERROR);
+        error.setTitle("Wall Breaker");
+        error.setHeaderText("Error");
+
+        informacion = new Alert(Alert.AlertType.INFORMATION);
+        informacion.setTitle("Wall Breaker");
+        informacion.setHeaderText("Éxito");
+
+        confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmacion.setTitle("Wall Breaker");
+        confirmacion.setHeaderText("Confirmación");
+
         textoProducto = new TextField();
-        textoProducto.setPromptText("Producto");
+        prepararTextField(textoProducto, "Producto", false);
         precioProducto = new TextField();
-        precioProducto.setPromptText("Precio");
+        prepararTextField(precioProducto, "Precio", true);
         almacenProducto = new TextField();
-        almacenProducto.setPromptText("Cantidad");
+        prepararTextField(almacenProducto, "Cantidad", true);
         categoriaProducto = new TextField();
-        categoriaProducto.setPromptText("Categoria (ID)");
+        prepararTextField(categoriaProducto, "Categoria (ID)", true);
         agregarProducto = new Button("Agregar producto");
-        // VBox.setMargin(agregarProducto, new Insets(0, 0, 0, 15));
+        VBox.setMargin(agregarProducto, new Insets(0, 0, 10, 0));
+        agregarProducto.setOnAction(actionEvent -> nuevoProducto());
+
+        idProducto = new TextField();
+        prepararTextField(idProducto, "Producto (ID)", true);
+        eliminarProducto = new Button("Eliminar producto");
+        eliminarProducto.setOnAction(actionEvent -> borrarProducto());
     }
 
-    public void mostrarConsulta(ActionEvent event, String nombreTabla) {
-        titulo.setText(((Button)event.getSource()).getText());
+    public void mostrarConsulta(@Nullable Button boton, String nombreTabla) {
+        if (boton != null) {
+            titulo.setText(boton.getText());
+        }
         if (centro.getContent() == null) {
             centro.setContent(tabla);
         }
@@ -81,13 +103,73 @@ public class Controller implements Initializable {
     }
 
     public void mostrarProductos(ActionEvent event) {
-        mostrarConsulta(event, "producto");
+        mostrarConsulta(((Button)event.getSource()), "producto");
         vBox.getChildren().clear();
-        vBox.getChildren().addAll(textoProducto, precioProducto, almacenProducto, categoriaProducto, agregarProducto);
+        vBox.getChildren().addAll(textoProducto, precioProducto, almacenProducto, categoriaProducto,
+                agregarProducto, idProducto, eliminarProducto);
 
     }
-    public void mostrarVentas(ActionEvent event) { mostrarConsulta(event, "venta"); }
-    public void mostrarProveedores(ActionEvent event) { mostrarConsulta(event, "proveedor"); }
-    public void mostrarPedidos(ActionEvent event) { mostrarConsulta(event, "pedido"); }
-    public void mostrarPersonal(ActionEvent event) { mostrarConsulta(event, "personal"); }
+    public void mostrarVentas(ActionEvent event) { mostrarConsulta((Button)event.getSource(), "venta"); }
+    public void mostrarProveedores(ActionEvent event) { mostrarConsulta((Button)event.getSource(), "proveedor"); }
+    public void mostrarPedidos(ActionEvent event) { mostrarConsulta((Button)event.getSource(), "pedido"); }
+    public void mostrarPersonal(ActionEvent event) { mostrarConsulta((Button)event.getSource(), "personal"); }
+
+    public void prepararTextField(TextField tf, String prompt, boolean numero) {
+        tf.setPromptText(prompt);
+        if (numero) {
+            tf.textProperty().addListener((observableValue, s, t1) -> {
+                if (!t1.matches("\\d*(\\.\\d*)?")) { // No tengo la menor idea
+                    tf.setText(s);
+                }
+            });
+        }
+    }
+
+    public void nuevoProducto() {
+        String nombre = textoProducto.getText();
+        String precio = precioProducto.getText();
+        String cantidad = almacenProducto.getText();
+        String categoria = categoriaProducto.getText();
+
+        if (nombre.isBlank() || precio.isBlank() || cantidad.isBlank() || categoria.isBlank()) {
+            error.setContentText("Porfavor ingrese valores para todos los campos.");
+            error.showAndWait();
+            return;
+        }
+
+        try {
+            datos.addProduct(nombre, Double.parseDouble(precioProducto.getText()),
+                    Integer.parseInt(almacenProducto.getText()), Integer.parseInt(categoriaProducto.getText()));
+            informacion.setContentText("El producto fue añadido.");
+            informacion.showAndWait();
+            mostrarConsulta(null, "producto");
+        } catch (Exception e) {
+            error.setContentText("Se produjo un error al añadir el producto. El mensaje de error es: " + e.getMessage());
+            error.showAndWait();
+        }
+    }
+    public void borrarProducto() {
+        confirmacion.setContentText("¿Desea eliminar el producto?");
+        confirmacion.showAndWait();
+        if (confirmacion.getResult() != ButtonType.OK) {
+            return;
+        }
+
+        String id = idProducto.getText();
+        if (id.isBlank()) {
+            error.setContentText("Porfavor ingrese el ID del producto que desea eliminar");
+            error.showAndWait();
+            return;
+        }
+
+        try {
+            datos.deleteProduct(Integer.parseInt(id));
+            informacion.setContentText("El producto fue eliminado.");
+            informacion.showAndWait();
+            mostrarConsulta(null, "producto");
+        } catch (Exception e) {
+            error.setContentText("Se produjo un error al eliminar el producto. El mensaje de error es: " + e.getMessage());
+            error.showAndWait();
+        }
+    }
 }

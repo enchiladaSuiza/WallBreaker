@@ -45,7 +45,7 @@ public class Main extends Application {
                 return null;
             }
         });
-
+        passwordField.requestFocus();
         Optional<String> password = inputPassword.showAndWait();
 
         if (password.isPresent() && usuario.isPresent()) {
