@@ -15,6 +15,7 @@ import java.util.Optional;
 
 public class Main extends Application {
     private static Datos datos;
+    private static Controller controller;
 
     @Override
     public void start(Stage primaryStage) throws Exception{
@@ -32,6 +33,7 @@ public class Main extends Application {
         inputPassword.setGraphic(inputUsuario.getGraphic());
         inputPassword.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
         PasswordField passwordField = new PasswordField();
+        passwordField.setText("owoeweuwu");
         HBox passwordLayout = new HBox();
         passwordLayout.setAlignment(Pos.CENTER_LEFT);
         passwordLayout.setSpacing(10);
@@ -64,6 +66,7 @@ public class Main extends Application {
             return;
         }
 
+        controller = new Controller();
         Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("Principal.fxml")));
         primaryStage.setTitle("Wall Breaker");
         Scene scene = new Scene(root);
@@ -80,4 +83,5 @@ public class Main extends Application {
     public static Datos conseguirDatos() {
         return datos;
     }
+    public static Controller conseguirContorller() { return controller; }
 }
