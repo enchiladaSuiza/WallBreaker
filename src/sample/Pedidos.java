@@ -17,7 +17,6 @@ public class Pedidos extends ContenidoUI {
     private Label total;
     private Button agregar, quitar, generar;
     private int posicionParaAgregarProducto;
-    private LinkedHashMap<Node, Boolean> nodosYSpansDespuesDeAgregar;
     private LinkedHashMap<TextField, TextField> productos;
 
     Pedidos(Controller controller) {

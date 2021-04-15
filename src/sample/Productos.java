@@ -51,7 +51,7 @@ public class Productos extends ContenidoUI {
             Main.conseguirDatos().addProduct(nombre, Double.parseDouble(this.precio.getText()),
                     Integer.parseInt(almacen.getText()), Integer.parseInt(this.categoria.getText()));
             Controller.mostrarInfo("El producto fue añadido.");
-            controller.consulta("producto");
+            controller.consultaTabla("producto");
         } catch (Exception e) {
             Controller.mostrarError("Se produjo un error al añadir el producto. El mensaje de error es: " + e.getMessage());
         }
@@ -73,7 +73,7 @@ public class Productos extends ContenidoUI {
         try {
             Main.conseguirDatos().deleteProduct(Integer.parseInt(id));
             Controller.mostrarInfo("El producto fue eliminado.");
-            controller.consulta("producto");
+            controller.consultaTabla("producto");
         } catch (Exception e) {
             Controller.mostrarError("Se produjo un error al eliminar el producto. El mensaje de error es: " + e.getMessage());
         }

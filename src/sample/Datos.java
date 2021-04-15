@@ -268,11 +268,11 @@ public class Datos {
      * @return Un ArrayList cn la información solicitada
      * @throws SQLException posible excepción SQL<p>Excepción al solicitar la información</p>
      */
-    public ArrayList<String> proveedor() throws SQLException {
+    public ObservableList<ObservableList<String>> proveedor() throws SQLException {
         Statement st;
         ResultSet rs;
-        StringBuilder reg;
-        ArrayList<String> resultados = new ArrayList<>();
+        ResultSetMetaData md;
+        ObservableList<ObservableList<String>> resultados = FXCollections.observableArrayList();
 
         StringBuilder queryProveedores = new StringBuilder();
         queryProveedores.append("select nomProveedor, apelProveedor, telefonoProveedor, pag_web, nomProd, almacen");
@@ -281,14 +281,22 @@ public class Datos {
         // Obtener información de todos los proveedores que proveen productos
         st = conexion.createStatement();
         rs = st.executeQuery(new String(queryProveedores));
+        md = rs.getMetaData();
+        int columnas = md.getColumnCount();
+        resultados.add(FXCollections.observableArrayList()); // Nombres de columnas
+        for (int i = 1; i <= columnas; i++) {
+            resultados.get(0).add(md.getColumnLabel(i));
+        }
 
+        int indiceFila = 0;
         while (rs.next()) {
-            reg = new StringBuilder();
-
-            for (int p = 1; p <= 6; ++p) reg.append(rs.getString(p)).append(",");
-            reg.deleteCharAt(reg.lastIndexOf(","));
-
-            resultados.add(new String(reg));
+            resultados.add(FXCollections.observableArrayList());
+            indiceFila++;
+            for (int p = 1; p <= 6; ++p) {
+                resultados.get(indiceFila).add(rs.getString(p));
+            }
+            // reg.deleteCharAt(reg.lastIndexOf(","));
+            // resultados.add(new String(reg));
         }
 
         rs.close();
@@ -302,10 +310,11 @@ public class Datos {
      * @return Una cadena con la información solicitada
      * @throws SQLException posible excepción SQL<p>Excepción al solicitar la información</p>
      */
-    public String proveedor(int idProducto) throws SQLException {
+    public ObservableList<ObservableList<String>> proveedor(int idProducto) throws SQLException {
         Statement st;
         ResultSet rs;
-        StringBuilder resultado = new StringBuilder();
+        ResultSetMetaData md;
+        ObservableList<ObservableList<String>> resultados = FXCollections.observableArrayList();
 
         StringBuilder query = new StringBuilder();
         query.append("select nomProveedor, apelProveedor, telefonoProveedor, pag_web, nomProd, almacen");
@@ -315,15 +324,26 @@ public class Datos {
         // Obtener información de los proveedores que preveen los productos especificados
         st = conexion.createStatement();
         rs = st.executeQuery(new String(query));
+        md = rs.getMetaData();
+        int columnas = md.getColumnCount();
+        resultados.add(FXCollections.observableArrayList()); // Nombres de columnas
+        for (int i = 1; i <= columnas; i++) {
+            resultados.get(0).add(md.getColumnLabel(i));
+        }
 
+        int indiceFila = 0;
         while (rs.next()) {
-            for (int v = 1; v <= 6; ++v) resultado.append(rs.getString(v)).append(",");
-            resultado.deleteCharAt(resultado.lastIndexOf(","));
+            resultados.add(FXCollections.observableArrayList());
+            indiceFila++;
+            for (int v = 1; v <= 6; ++v) {
+                resultados.get(indiceFila).add(rs.getString(v));
+            }
+            // resultado.deleteCharAt(resultado.lastIndexOf(","));
         }
 
         rs.close();
         st.close();
-        return new String(resultado);
+        return resultados;
     }
 
     /**

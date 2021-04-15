@@ -36,16 +36,11 @@ public class Controller implements Initializable {
 
     private TableView<ObservableList<StringProperty>> tabla;
     private static Alert error, informacion, confirmacion;
-    private Productos productos;
-    private Ventas ventas;
-    private Pedidos pedidos;
+    private ContenidoUI productos, ventas, pedidos, proveedores;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         tabla = new TableView<>();
-        /*productos = new Productos(this);
-        ventas = new Ventas(this);
-        pedidos = new Pedidos(this);*/
 
         // Ventanas
         error = new Alert(Alert.AlertType.ERROR);
@@ -68,56 +63,90 @@ public class Controller implements Initializable {
             if (productos == null) {
                 productos = new Productos(this);
             }
-            consulta("producto");
+            consultaTabla("producto");
             limpiarYAgregarNodosAGrid(productos.conseguirNodos());
-        } else if (boton.equals(ventasBtn)) {
+        }
+        else if (boton.equals(ventasBtn)) {
             if (ventas == null) {
                 ventas = new Ventas(this);
             }
-            consulta("venta");
+            consultaTabla("venta");
             limpiarYAgregarNodosAGrid(ventas.conseguirNodos());
-        } else if (boton.equals(pedidosBtn)) {
+        }
+        else if (boton.equals(proveedoresBtn)) {
+            if (proveedores == null) {
+                proveedores = new Proveedores(this);
+            }
+            consultaProveedores();
+            limpiarYAgregarNodosAGrid(proveedores.conseguirNodos());
+        }
+        else if (boton.equals(pedidosBtn)) {
             if (pedidos == null) {
                 pedidos = new Pedidos(this);
             }
-            consulta("pedido");
+            consultaTabla("pedido");
             limpiarYAgregarNodosAGrid(pedidos.conseguirNodos());
-        } else if (boton.equals(personalBtn)) {
-            consulta("personal");
+        }
+        else if (boton.equals(personalBtn)) {
+            consultaTabla("personal");
         }
     }
-    public void consulta(String nombreTabla) {
+
+    private void consulta(ObservableList<ObservableList<String>> consulta) {
         if (centro.getContent() == null) {
             centro.setContent(tabla);
         }
+
         tabla.getItems().clear();
         tabla.getColumns().clear();
-        try {
-            ObservableList<ObservableList<String>> consulta = Main.conseguirDatos().verTodo(nombreTabla);
-            ObservableList<String> nombreColumnas = consulta.remove(0);
-            for (int i = 0; i < nombreColumnas.size(); i++) { // Crear y añadir columnas a la tabla
-                int indice = i;
-                TableColumn<ObservableList<StringProperty>, String> columna =
-                        new TableColumn<>(nombreColumnas.get(indice));
-                columna.setCellValueFactory(observableListStringCellDataFeatures ->
-                        observableListStringCellDataFeatures.getValue().get(indice));
-                tabla.getColumns().add(columna);
-            }
+        ObservableList<String> nombreColumnas = consulta.remove(0);
+        for (int i = 0; i < nombreColumnas.size(); i++) { // Crear y añadir columnas a la tabla
+            int indice = i;
+            TableColumn<ObservableList<StringProperty>, String> columna =
+                    new TableColumn<>(nombreColumnas.get(indice));
+            columna.setCellValueFactory(observableListStringCellDataFeatures ->
+                    observableListStringCellDataFeatures.getValue().get(indice));
+            tabla.getColumns().add(columna);
+        }
 
-            // Añadir los datos a la tabla
-            for (ObservableList<String> fila : consulta) {
-                ObservableList<StringProperty> tuplas = FXCollections.observableArrayList();
-                for (String registro : fila) {
-                    tuplas.add(new SimpleStringProperty(registro));
-                }
-                tabla.getItems().add(tuplas);
+        // Añadir los datos a la tabla
+        for (ObservableList<String> fila : consulta) {
+            ObservableList<StringProperty> tuplas = FXCollections.observableArrayList();
+            for (String registro : fila) {
+                tuplas.add(new SimpleStringProperty(registro));
             }
-
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
+            tabla.getItems().add(tuplas);
         }
     }
 
+    public void consultaTabla(String nombreTabla) {
+        try {
+            ObservableList<ObservableList<String>> consulta = Main.conseguirDatos().verTodo(nombreTabla);
+            consulta(consulta);
+        } catch (SQLException e) {
+            mostrarError("No fue posible realizar la consulta. Error: " + e.getMessage());
+        }
+    }
+
+    public void consultaProveedores() {
+        try {
+            ObservableList<ObservableList<String>> consulta = Main.conseguirDatos().proveedor();
+            consulta(consulta);
+        } catch (SQLException throwables) {
+            mostrarError("No fue posible realizar la consulta. Error: " + throwables.getMessage());
+        }
+    }
+
+    public void consultaProveedorPorProducto(int idProducto) {
+        try {
+            ObservableList<ObservableList<String>> consulta = Main.conseguirDatos().proveedor(idProducto);
+            consulta(consulta);
+        } catch (SQLException throwables) {
+            mostrarError("No fue posible realizar la consulta. Error: " + throwables.getMessage());
+        }
+    }
+
+    // Gird stuff
     public void limpiarYAgregarNodosAGrid(ArrayList<Pair<Node, Boolean>> nodos) {
         grid.getChildren().clear();
         for (Pair<Node, Boolean> nodo : nodos) {
@@ -130,19 +159,6 @@ public class Controller implements Initializable {
     public void quitarNodoDeGrid(Node nodo) {
         grid.getChildren().remove(nodo);
     }
-
-    // Funciones de ayuda
-    public static void prepararTextField(TextField tf, String prompt, boolean numero) {
-        tf.setPromptText(prompt);
-        if (numero) {
-            tf.textProperty().addListener((observableValue, s, t1) -> {
-                if (!t1.matches("\\d*(\\.\\d*)?")) { // No tengo la menor idea
-                    tf.setText(s);
-                }
-            });
-        }
-    }
-
     public static void actualizarPosicionesEnGrid(ArrayList<Pair<Node, Boolean>> nodos) {
         int offset = 0;
         for (int i = 0; i < nodos.size(); i++) {
@@ -161,6 +177,18 @@ public class Controller implements Initializable {
 
         }
     }
+
+    // Funciones de ayuda
+    public static void prepararTextField(TextField tf, String prompt, boolean numero) {
+        tf.setPromptText(prompt);
+        if (numero) {
+            tf.textProperty().addListener((observableValue, s, t1) -> {
+                if (!t1.matches("\\d*(\\.\\d*)?")) { // No tengo la menor idea
+                    tf.setText(s);
+                }
+            });
+        }
+    }
     public static Pane nuevoEspacio(Region referencia) {
         Pane espacio = new Pane();
         espacio.minHeightProperty().bind(referencia.heightProperty());
@@ -173,6 +201,7 @@ public class Controller implements Initializable {
     public static ButtonType mostrarConfirmacion(String contenido) { return mostrarVentana(confirmacion, contenido); }
     private static ButtonType mostrarVentana(Alert ventana, String contenido) {
         ventana.setContentText(contenido);
+        error.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
         ventana.showAndWait();
         return ventana.getResult();
     }
