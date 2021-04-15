@@ -7,6 +7,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.HPos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
@@ -16,9 +17,11 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
+import javafx.util.Pair;
 
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
@@ -35,12 +38,14 @@ public class Controller implements Initializable {
     private static Alert error, informacion, confirmacion;
     private Productos productos;
     private Ventas ventas;
+    private Pedidos pedidos;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         tabla = new TableView<>();
-        productos = new Productos();
-        ventas = new Ventas();
+        /*productos = new Productos(this);
+        ventas = new Ventas(this);
+        pedidos = new Pedidos(this);*/
 
         // Ventanas
         error = new Alert(Alert.AlertType.ERROR);
@@ -60,13 +65,23 @@ public class Controller implements Initializable {
         Button boton = (Button)event.getSource();
         titulo.setText(boton.getText());
         if (boton.equals(productosBtn)) {
+            if (productos == null) {
+                productos = new Productos(this);
+            }
             consulta("producto");
-            grid.getChildren().addAll(productos.conseguirNodos());
+            limpiarYAgregarNodosAGrid(productos.conseguirNodos());
         } else if (boton.equals(ventasBtn)) {
+            if (ventas == null) {
+                ventas = new Ventas(this);
+            }
             consulta("venta");
-            grid.getChildren().addAll(ventas.conseguirNodos());
+            limpiarYAgregarNodosAGrid(ventas.conseguirNodos());
         } else if (boton.equals(pedidosBtn)) {
+            if (pedidos == null) {
+                pedidos = new Pedidos(this);
+            }
             consulta("pedido");
+            limpiarYAgregarNodosAGrid(pedidos.conseguirNodos());
         } else if (boton.equals(personalBtn)) {
             consulta("personal");
         }
@@ -103,6 +118,19 @@ public class Controller implements Initializable {
         }
     }
 
+    public void limpiarYAgregarNodosAGrid(ArrayList<Pair<Node, Boolean>> nodos) {
+        grid.getChildren().clear();
+        for (Pair<Node, Boolean> nodo : nodos) {
+            grid.getChildren().addAll(nodo.getKey());
+        }
+    }
+    public void agregarNodoAGrid(Node nodo) {
+        grid.getChildren().add(nodo);
+    }
+    public void quitarNodoDeGrid(Node nodo) {
+        grid.getChildren().remove(nodo);
+    }
+
     // Funciones de ayuda
     public static void prepararTextField(TextField tf, String prompt, boolean numero) {
         tf.setPromptText(prompt);
@@ -114,9 +142,24 @@ public class Controller implements Initializable {
             });
         }
     }
-    public static void posicionEnGrid(Node nodo, int columna, int fila, int span) {
-        GridPane.setConstraints(nodo, columna, fila);
-        GridPane.setColumnSpan(nodo, span);
+
+    public static void actualizarPosicionesEnGrid(ArrayList<Pair<Node, Boolean>> nodos) {
+        int offset = 0;
+        for (int i = 0; i < nodos.size(); i++) {
+            int fila = (i + offset) / 2;
+            int columna = (i + offset) % 2 == 0 ? 0 : 1;
+            Pair<Node, Boolean> par = nodos.get(i);
+            GridPane.setConstraints(par.getKey(), columna, fila);
+            GridPane.setHalignment(par.getKey(), HPos.CENTER);
+            if (par.getValue()) {
+                GridPane.setColumnSpan(par.getKey(), 2);
+                offset++;
+            }
+            else {
+                GridPane.setColumnSpan(par.getKey(), 1);
+            }
+
+        }
     }
     public static Pane nuevoEspacio(Region referencia) {
         Pane espacio = new Pane();

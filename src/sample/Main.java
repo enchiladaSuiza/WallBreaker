@@ -18,15 +18,17 @@ public class Main extends Application {
     private static Controller controller;
 
     @Override
-    public void start(Stage primaryStage) throws Exception{
+    public void start(Stage primaryStage) throws Exception {
+        // Ventana para conseguir el nombre de usuario
         TextInputDialog inputUsuario = new TextInputDialog("root");
         inputUsuario.setContentText("Nombre de usuario de MySQL para acceder a la base de datos");
         inputUsuario.setTitle("Wall Breaker");
         inputUsuario.setHeaderText("Usuario de MySQL");
         Button cancelar = (Button)inputUsuario.getDialogPane().lookupButton(ButtonType.CANCEL);
-        cancelar.addEventFilter(ActionEvent.ACTION, actionEvent -> {System.exit(0);});
+        cancelar.addEventFilter(ActionEvent.ACTION, actionEvent -> System.exit(0));
         Optional<String> usuario = inputUsuario.showAndWait();
 
+        // Ventana para conseguir la contraseña
         Dialog<String> inputPassword = new Dialog<>();
         inputPassword.setTitle("Wall Breaker");
         inputPassword.setHeaderText("Contraseña de usuario");
@@ -66,8 +68,9 @@ public class Main extends Application {
             return;
         }
 
-        controller = new Controller();
-        Parent root = FXMLLoader.load(Objects.requireNonNull(getClass().getResource("Principal.fxml")));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("Principal.fxml"));
+        controller = loader.getController();
+        Parent root = loader.load();
         primaryStage.setTitle("Wall Breaker");
         Scene scene = new Scene(root);
         String css = Objects.requireNonNull(getClass().getResource("style.css")).toExternalForm();
@@ -83,5 +86,5 @@ public class Main extends Application {
     public static Datos conseguirDatos() {
         return datos;
     }
-    public static Controller conseguirContorller() { return controller; }
+    public static Controller conseguirController() { return controller; }
 }
