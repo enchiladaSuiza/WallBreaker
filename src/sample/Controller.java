@@ -12,7 +12,6 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
@@ -26,21 +25,20 @@ import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
     @FXML
-    private ScrollPane centro;
-    @FXML
     private GridPane grid;
     @FXML
     private Label titulo;
     @FXML
-    private Button productosBtn, ventasBtn, proveedoresBtn, analisisBtn, pedidosBtn, personalBtn;
-
+    private Button productosBtn, ventasBtn, proveedoresBtn, pedidosBtn, personalBtn;
+    @FXML
     private TableView<ObservableList<StringProperty>> tabla;
+
     private static Alert error, informacion, confirmacion;
     private ContenidoUI productos, ventas, pedidos, proveedores;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        tabla = new TableView<>();
+        tabla.setPlaceholder(new Label());
 
         // Ventanas
         error = new Alert(Alert.AlertType.ERROR);
@@ -93,10 +91,6 @@ public class Controller implements Initializable {
     }
 
     private void consulta(ObservableList<ObservableList<String>> consulta) {
-        if (centro.getContent() == null) {
-            centro.setContent(tabla);
-        }
-
         tabla.getItems().clear();
         tabla.getColumns().clear();
         ObservableList<String> nombreColumnas = consulta.remove(0);

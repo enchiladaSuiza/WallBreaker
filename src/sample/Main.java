@@ -7,6 +7,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
@@ -15,7 +16,6 @@ import java.util.Optional;
 
 public class Main extends Application {
     private static Datos datos;
-    private static Controller controller;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -69,9 +69,12 @@ public class Main extends Application {
         }
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("Principal.fxml"));
-        controller = loader.getController();
+        loader.getController();
         Parent root = loader.load();
         primaryStage.setTitle("Wall Breaker");
+        primaryStage.getIcons().add(new Image(Objects.requireNonNull(getClass().getResourceAsStream("images/Icono.png"))));
+        primaryStage.setMinWidth(600);
+        primaryStage.setMinHeight(300);
         Scene scene = new Scene(root);
         String css = Objects.requireNonNull(getClass().getResource("style.css")).toExternalForm();
         scene.getStylesheets().add(css);
@@ -86,5 +89,4 @@ public class Main extends Application {
     public static Datos conseguirDatos() {
         return datos;
     }
-    public static Controller conseguirController() { return controller; }
 }

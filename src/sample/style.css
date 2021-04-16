@@ -6,16 +6,15 @@
     -fx-text-fill: white;
     -fx-font-size: 12px;
     -fx-font-weight: bold;
-    -fx-background-color: #864A3F;
+    -fx-background-color: #6F3E35;
     -fx-border-width: 0px;
 
 }
 
-#principal{
-    -fx-background-color: #FFE194;
-    -fx-border-width: 3px;
-    -fx-background-radius: 5px;
-    -fx-padding: 6px;
+#titulo {
+    -fx-text-fill: black;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
 }
 
 #barraDeMenu {
@@ -27,4 +26,39 @@
     -fx-border-width: 5px;
     -fx-border-radius: 5px;
     -fx-background-radius: 5px;
+    -fx-text-box-border: #B45F4A;
+    -fx-focus-color: #B45F4A;
+}
+
+.table-view {
+    -fx-border-color: #B45F4A;
+}
+
+.table-view .column-header-background .filler {
+    -fx-background-color: transparent;
+}
+
+.table-view .corner {
+    -fx-background-color: transparent;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #B45F4A;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: white;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-border-color: #6F3E35;
+}
+
+.table-view .table-cell {
+    -fx-padding: 3px;
+}
+
+.table-row-cell {
+    -fx-padding: 0.0em;
 }
