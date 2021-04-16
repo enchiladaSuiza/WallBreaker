@@ -2,6 +2,7 @@ package sample;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.util.Pair;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -98,6 +99,11 @@ public class Datos {
         return 0;
     }
 
+    public int editProduct(int idProd, String nomProd, double precio, int almac, int idCateg) {
+        // TODO completar método
+        return 0;
+    }
+
     /**
      * Método para eliminar un producto de la base de datos
      * @param idProducto clave del producto a ser eliminado
@@ -115,14 +121,85 @@ public class Datos {
     }
 
     /**
+     * Método que realiza la venta de un pedido previo
+     * @param idPedido clave del pedido a ser vendido
+     * @param efectivo cantidad con la que se paga el montoF
+     * @return Devuelve null si el pedido ya fue vendido antes<p>Devuelve -1.0 si el efectivo no cubre el montoF</p><p>Devuelve un double con el cambio</p>
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de realizar venta</p>
+     */
+    public Object generarVenta(int idPedido, double efectivo) throws SQLException {
+        PreparedStatement ps;
+        Statement st;
+        StringBuilder s = new StringBuilder();
+        String[] pedido;
+        double cambio;
+
+        StringBuilder x = new StringBuilder("select * from pedido where id_pedido = ").append(idPedido);
+        StringBuilder y = new StringBuilder("update pedido set status = 1 where id_pedido = ").append(idPedido);
+
+        // Se obtiene el pedido
+        st = conexion.createStatement();
+        ResultSet rs = st.executeQuery(new String(x));
+
+        while (rs.next()) {
+            for (int i = 1; i <= numcols.get("pedido"); ++i) s.append(rs.getString(i)).append(",");
+            s.deleteCharAt(s.lastIndexOf(","));
+        }
+
+        rs.close();
+        st.close();
+
+        pedido = new String(s).split(",");
+        if (pedido[pedido.length-1].equals("1")) return null; // Venta ya realizada previamente
+        if (efectivo < Double.parseDouble(pedido[4])) return -1.0D; // Efectivo no suficiente para cubrir montoF
+        cambio = efectivo - Double.parseDouble(pedido[4]);
+
+        // Se prepara la venta
+        StringBuilder z = new StringBuilder("insert into venta (fecha_venta, montoF, efectivo, cambio, id_cliente, id_pedido)");
+        z.append("values (?, ?, ?, ?, ?, ?)");
+
+        ps = conexion.prepareStatement(new String(z));
+        ps.setDate(1, new java.sql.Date(System.currentTimeMillis())); // fecha_venta
+        ps.setString(2, pedido[4]); // montoF
+        ps.setString(3, String.format("%.1f", efectivo)); // efectivo
+        ps.setString(4, String.format("%.1f", cambio)); // cambio
+        ps.setString(5, pedido[5]);// id_cliente
+        ps.setString(6, pedido[0]);// id_pedido
+
+        // Se realiza la venta
+        ps.execute();
+        ps.close();
+
+        // Actualiza estado del pedido
+        st = conexion.createStatement();
+        st.executeUpdate(new String(y));
+        st.close();
+
+        return cambio;
+    }
+
+    public Object generarVenta(int idClien, ArrayList<Pair<Integer, Integer>> prods_cant, double efectivo) {
+        // TODO completar método
+
+        // return new Pair<>(cambio, null); // Efectivo insuficiente
+        return new Pair<>(/*Total*/0.0D, /*Cambio*/0.0D); // Everithing right
+    }
+
+    public int editVenta(int idVenta, double efectivo, int idCliente, int idPedido) {
+        // TODO completar método
+
+        return 0;
+    }
+
+    /**
      * Método que agrega un pedido a la base de datos
      * @param idProducto producto que se aparta para vender
      * @param cantidadProd número de productos que se apartarán
      * @param idCliente cliente que realiza el pedido
      * @return Devuelve -1 si faltan artículos en almacén<p>Devuelve 0 si la transacción salio bien</p>
      * @throws SQLException posible excepción SQL<p>Excepción al tratar de agreagr pedido</p>
-     */
-    public int addPedido(int idProducto, int cantidadProd, int idCliente) throws SQLException {
+     */ // TODO actualizar método para recibir varios productos en un solo pedido
+    public int addPedido(/*ArrayList<Pair<int, int>> prods_cant*/int idProducto, int cantidadProd, int idCliente) throws SQLException {
         PreparedStatement ps;
         Statement st;
         ResultSet rs;
@@ -205,69 +282,17 @@ public class Datos {
         return 0; // Everything OK
     }
 
-    /**
-     * Método que realiza la venta de un pedido previo
-     * @param idPedido clave del pedido a ser vendido
-     * @param efectivo cantidad con la que se paga el montoF
-     * @return Devuelve null si el pedido ya fue vendido antes<p>Devuelve -1.0 si el efectivo no cubre el montoF</p><p>Devuelve un double con el cambio</p>
-     * @throws SQLException posible excepción SQL<p>Excepción al tratar de realizar venta</p>
-     */
-    public Object generarVenta(int idPedido, double efectivo) throws SQLException {
-        PreparedStatement ps;
-        Statement st;
-        StringBuilder s = new StringBuilder();
-        String[] pedido;
-        double cambio;
+    public int editPedido(int idClien, int idPed, ArrayList<Pair<Integer, Integer>> prods_cant) {
+        // TODO completar método
 
-        StringBuilder x = new StringBuilder("select * from pedido where id_pedido = ").append(idPedido);
-        StringBuilder y = new StringBuilder("update pedido set status = 1 where id_pedido = ").append(idPedido);
-
-        // Se obtiene el pedido
-        st = conexion.createStatement();
-        ResultSet rs = st.executeQuery(new String(x));
-
-        while (rs.next()) {
-            for (int i = 1; i <= numcols.get("pedido"); ++i) s.append(rs.getString(i)).append(",");
-            s.deleteCharAt(s.lastIndexOf(","));
-        }
-
-        rs.close();
-        st.close();
-
-        pedido = new String(s).split(",");
-        if (pedido[pedido.length-1].equals("1")) return null; // Venta ya realizada previamente
-        if (efectivo < Double.parseDouble(pedido[4])) return -1.0D; // Efectivo no suficiente para cubrir montoF
-        cambio = efectivo - Double.parseDouble(pedido[4]);
-
-        // Se prepara la venta
-        StringBuilder z = new StringBuilder("insert into venta (fecha_venta, montoF, efectivo, cambio, id_cliente, id_pedido)");
-        z.append("values (?, ?, ?, ?, ?, ?)");
-
-        ps = conexion.prepareStatement(new String(z));
-        ps.setDate(1, new java.sql.Date(System.currentTimeMillis())); // fecha_venta
-        ps.setString(2, pedido[4]); // montoF
-        ps.setString(3, String.format("%.1f", efectivo)); // efectivo
-        ps.setString(4, String.format("%.1f", cambio)); // cambio
-        ps.setString(5, pedido[5]);// id_cliente
-        ps.setString(6, pedido[0]);// id_pedido
-
-        // Se realiza la venta
-        ps.execute();
-        ps.close();
-
-        // Actualiza estado del pedido
-        st = conexion.createStatement();
-        st.executeUpdate(new String(y));
-        st.close();
-
-        return cambio;
+        return 0;
     }
 
     /**
      * Método que obtiene información de todos los proveedores que proveen productos
      * @return Un ArrayList cn la información solicitada
      * @throws SQLException posible excepción SQL<p>Excepción al solicitar la información</p>
-     */
+     */ // TODO Actualizar querys con la tabla proveedor_producto
     public ObservableList<ObservableList<String>> proveedor() throws SQLException {
         Statement st;
         ResultSet rs;
@@ -309,7 +334,7 @@ public class Datos {
      * @param idProducto clave del producto para ver su proveedor
      * @return Una cadena con la información solicitada
      * @throws SQLException posible excepción SQL<p>Excepción al solicitar la información</p>
-     */
+     */ // TODO Actualizar querys con la tabla proveedor_producto
     public ObservableList<ObservableList<String>> proveedor(int idProducto) throws SQLException {
         Statement st;
         ResultSet rs;
@@ -358,7 +383,7 @@ public class Datos {
      * @param setNull booleano para indicar que el id_producto es null
      * @return Devuelve 0 si salio bien la operación
      * @throws SQLException posible excepción SQL<p>Excepción al tratar de agreagr un proveeedor</p>
-     */
+     */ // TODO Actualizar querys con la tabla proveedor_producto
     public int addProveedor(String nomProv, String apelProv, long telProv, String pagWeb, int idProd, boolean setNull)
             throws SQLException
     {
@@ -410,7 +435,35 @@ public class Datos {
         return 0; // Everithing OK
     }
 
+    public int editProveedor(int idProv, String nom, String ape, long tel, String pw, ArrayList<Integer> prods) {
+        // TODO completar método
 
+        return 0;
+    }
+
+    public int deleteProveedor(int idProveedor) {
+        // TODO completar método
+
+        return 0;
+    }
+
+    public int addPersonal(String nom, String apel, String ocup, long tel, double sal) {
+        // TODO completar método
+
+        return 0;
+    }
+
+    public int editPersonal(int idPersnl, String nom, String apel, String ocup, long tel, double sal) {
+        // TODO completar método
+
+        return 0;
+    }
+
+    public int deletePersonal(int idPersnl) {
+        // TODO completar método
+
+        return 0;
+    }
 
     /**
      * Cierra la conexión con el servidor de MySQL
