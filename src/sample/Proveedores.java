@@ -4,7 +4,6 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class Proveedores extends ContenidoUI {
@@ -41,6 +40,7 @@ public class Proveedores extends ContenidoUI {
         agregar.setOnAction(e -> agregarProductoAProveedor());
         quitar.setOnAction(e -> quitarProductoDeProveedor());
         agregarProveedorBtn.setOnAction(e -> agregarProveedor());
+        eliminarProveedorBtn.setOnAction(e -> eliminarProveedor());
         quitar.setDisable(true);
 
         Node[] nodosArray = {idProductoConsulta, consultar, Controller.nuevoEspacio(consultar), verProductosBtn,
@@ -64,7 +64,7 @@ public class Proveedores extends ContenidoUI {
             Controller.mostrarError("Por favor coloque el ID del producto cuyo proveedor desea consultar.");
             return;
         }
-        int id = 0;
+        int id;
         try {
             id = Integer.parseInt(idString);
         } catch (Exception e) {
@@ -135,5 +135,9 @@ public class Proveedores extends ContenidoUI {
         } catch (Exception e) {
             Controller.mostrarError("Se produjo un error al añadir al proveedor. El mensaje de error es: " + e.getMessage());
         }
+    }
+
+    private void eliminarProveedor() {
+        System.out.println("You messed up the linguine");
     }
 }

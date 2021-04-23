@@ -35,7 +35,7 @@ public class Controller implements Initializable {
     private TableView<ObservableList<StringProperty>> tabla;
 
     private static Alert error, informacion, confirmacion;
-    private ContenidoUI productos, ventas, pedidos, proveedores;
+    private ContenidoUI productos, ventas, pedidos, proveedores, personal;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -91,7 +91,11 @@ public class Controller implements Initializable {
             limpiarYAgregarNodosAGrid(pedidos.conseguirNodos());
         }
         else if (boton.equals(personalBtn)) {
+            if (personal == null) {
+                personal = new Personal(this);
+            }
             consultaTabla("personal");
+            limpiarYAgregarNodosAGrid(personal.conseguirNodos());
         }
     }
 
@@ -117,6 +121,7 @@ public class Controller implements Initializable {
             }
             tabla.getItems().add(tuplas);
         }
+        tabla.refresh();
     }
 
     public void consultaTabla(String nombreTabla) {
