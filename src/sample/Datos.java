@@ -32,7 +32,8 @@ public class Datos {
             numcols.put("pedido_producto", 4);
             numcols.put("personal", 6);
             numcols.put("producto", 5);
-            numcols.put("proveedor", 6);
+            numcols.put("proveedor", 5);
+            numcols.put("proveedor_producto", 3);
             numcols.put("venta", 7);
         }
     }
@@ -99,8 +100,40 @@ public class Datos {
         return 0;
     }
 
-    public int editProduct(int idProd, String nomProd, double precio, int almac, int idCateg) {
-        // TODO completar método
+    /**
+     * Método que edita el nombre, precio, almacen y categoria de un producto específico
+     * @param idProd Llave primaria del producto a ser modificado
+     * @param nomProd String con el nuevo nombre del producto
+     * @param precio Double con el nuevo precio del producto
+     * @param almac Entero con el nuevo valor de la cantidad del producto
+     * @param idCateg Entero que representa la categoría del producto
+     * @param toModify Arreglo de enteros con el número de la(s) columnas a modificar (máximo 4)
+     *                 <li>1 = nomProd</li>
+     *                 <li>2 = precio</li>
+     *                 <li>3 = almacen</li>
+     *                 <li>4 = id_categoria</li>
+     * @return Devuelve 0 si la operación se realizó exitosamente
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de editar un producto</p>
+     */
+    public int editProduct(int idProd, String nomProd, double precio, int almac, int idCateg, int[] toModify) throws SQLException {
+        Statement st;
+        StringBuilder updNom = new StringBuilder("update producto");
+        StringBuilder updPre = new StringBuilder("update producto");
+        StringBuilder updAlm = new StringBuilder("update producto");
+        StringBuilder updCat = new StringBuilder("update producto");
+
+        updNom.append(" set nomProd = '").append(nomProd).append("' where id_producto = ").append(idProd);
+        updPre.append(" set precio = ").append(String.format("%.1f", precio)).append(" where id_producto = ").append(idProd);
+        updAlm.append(" set almacen = ").append(almac).append(" where id_producto = ").append(idProd);
+        updCat.append(" set id_categoria = ").append(idCateg).append(" where id_producto = ").append(idProd);
+
+        StringBuilder[] toM = new StringBuilder[] {updNom, updPre, updAlm, updCat};
+
+        st = conexion.createStatement();
+        for (int i : toModify) {
+            st.executeUpdate(new String(toM[(i - 1)]));
+        }
+        st.close();
         return 0;
     }
 
@@ -122,9 +155,15 @@ public class Datos {
 
     /**
      * Método que realiza la venta de un pedido previo
+     * <p>Este método se puede llamar para pagar un pedido realizado anteriormente enviando como parámetros el (id_pedido)
+     * y el <b>efectivo suficiente ó</b> justo despues de llamar el método generarTotalVenta() el cual devuelve ya el
+     * (id_pedido) que se debe enviar por párametro, más el <b>efectivo suficente</b></p>
      * @param idPedido clave del pedido a ser vendido
      * @param efectivo cantidad con la que se paga el montoF
-     * @return Devuelve null si el pedido ya fue vendido antes<p>Devuelve -1.0 si el efectivo no cubre el montoF</p><p>Devuelve un double con el cambio</p>
+     * @return Devuelve null si el pedido ya fue vendido antes<p>Devuelve -1.0 si el efectivo no cubre el montoF</p>
+     * <p>Devuelve un double con el cambio</p><p><b>NOTA: </b>Sí se devuelve -1.0D significa que el efectivo enviado por
+     * parámetro no cubre el monto del pedido; por consiguiente se necesita llamar de nuevo éste método para completar
+     * la venta</p>
      * @throws SQLException posible excepción SQL<p>Excepción al tratar de realizar venta</p>
      */
     public Object generarVenta(int idPedido, double efectivo) throws SQLException {
@@ -152,7 +191,7 @@ public class Datos {
         pedido = new String(s).split(",");
         if (pedido[pedido.length-1].equals("1")) return null; // Venta ya realizada previamente
         if (efectivo < Double.parseDouble(pedido[4])) return -1.0D; // Efectivo no suficiente para cubrir montoF
-        cambio = efectivo - Double.parseDouble(pedido[4]);
+        cambio = efectivo - Double.parseDouble(pedido[4]); // Cambio cliente
 
         // Se prepara la venta
         StringBuilder z = new StringBuilder("insert into venta (fecha_venta, montoF, efectivo, cambio, id_cliente, id_pedido)");
@@ -178,11 +217,59 @@ public class Datos {
         return cambio;
     }
 
-    public Object generarVenta(int idClien, ArrayList<Pair<Integer, Integer>> prods_cant, double efectivo) {
-        // TODO completar método
+    /**
+     * Método que se llama cuando en la pestaña venta se seleccionan los diferentes productos (id_producto) y
+     * sus cantidades para ser vendidos en ese mismo momento y se requiere el total a pagar (montoF).
+     * <p>Este método se llama <b>antes</b> del método generarVenta() ya que se necesita el (id_pedido) como parámetro
+     * que devuelve este método</p>
+     * @param idClien Entero que representa el id_cliente
+     * @param prods_cant ArrayList de objtos Pair que contienen la relación de los productos y la cantidad que se piden<p>
+     *                   Pair<id_producto, cantidad>
+     *  </p>
+     * @return Un objeto Pair que contiene el (id_pedido, generado por los prods que solicita en el momento y que se
+     * necesitará para realizar la venta) y un double que representa el total a pagar por el cliente
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de generar el total de una venta</p>
+     */
+    public Pair<Integer, Double> generarTotalVenta(int idClien, ArrayList<Pair<Integer, Integer>> prods_cant) throws SQLException {
+        Statement st;
+        ResultSet rs;
+        int id_ped = 0;
+        double tot = 0;
 
-        // return new Pair<>(cambio, null); // Efectivo insuficiente
-        return new Pair<>(/*Total*/0.0D, /*Cambio*/0.0D); // Everithing right
+        // AGREGA UN PEDIDO CON LA INFORMACIÓN ENTRANTE
+        addPedido(prods_cant, idClien);
+
+
+        // SELECT ÚLTIMO id_pedido
+        StringBuilder idPedido = new StringBuilder("select auto_increment from information_schema.tables");
+        idPedido.append(" where table_schema = 'wallbreaker' AND table_name = 'pedido' ");
+
+        // SELECT montoF DEL ÚLTIMO PEDIDO
+        StringBuilder montoF = new StringBuilder("select montoF from pedido");
+        montoF.append(" where id_pedido = ");
+
+
+        // SE OBTIENE EL id_pedido GENERADO
+        st = conexion.createStatement();
+        rs = st.executeQuery(new String(idPedido));
+        while (rs.next()) {
+            id_ped = Integer.parseInt(rs.getString("AUTO_INCREMENT"));
+        }
+        montoF.append(id_ped);
+        rs.close();
+        st.close();
+
+
+        // OBTIENE montoF DEL PEDIDO REALIZADO
+        st = conexion.createStatement();
+        rs = st.executeQuery(new String(montoF));
+        while (rs.next()) {
+            tot = Double.parseDouble(rs.getString("AUTO_INCREMENT"));
+        }
+        rs.close();
+        st.close();
+
+        return new Pair<>(id_ped, tot);
     }
 
     public int editVenta(int idVenta, double efectivo, int idCliente, int idPedido) {
@@ -192,55 +279,107 @@ public class Datos {
     }
 
     /**
+     * Método que obtine la información de los productos que conformarán el pedido
+     * @param prods_cant ArrayList de objtos Pair que contienen la relación de los productos y la cantidad que se piden<p>
+     *                   Pair<\id_producto, cantidad>
+     * </p>
+     * @return Devuelve un ArrayList de arrgelos de String donde cada arreglo contiene la información de las
+     *         columnas de cada producto del pedido
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de obtener info de productos</p>
+     */
+    private ArrayList<String[]> infoProds(ArrayList<Pair<Integer, Integer>> prods_cant) throws SQLException {
+        Statement st;
+        ResultSet rs;
+        ArrayList<String[]> infoProds = new ArrayList<>();
+        StringBuilder queryProd = new StringBuilder("select * from producto where id_producto = ");
+        StringBuilder registro;
+
+        st = conexion.createStatement();
+        for (Pair<Integer, Integer> p : prods_cant) {
+            queryProd.append(p.getKey());
+            rs = st.executeQuery(new String(queryProd));
+
+            while (rs.next()) {
+                registro = new StringBuilder();
+                for (int i = 1; i <= numcols.get("producto"); ++i) registro.append(rs.getString(i)).append(",");
+                registro.deleteCharAt(registro.lastIndexOf(","));
+                infoProds.add(new String(registro).split(","));
+            }
+        }
+        st.close();
+
+        return infoProds;
+    }
+
+    /**
      * Método que agrega un pedido a la base de datos
-     * @param idProducto producto que se aparta para vender
-     * @param cantidadProd número de productos que se apartarán
-     * @param idCliente cliente que realiza el pedido
-     * @return Devuelve -1 si faltan artículos en almacén<p>Devuelve 0 si la transacción salio bien</p>
+     * @param prods_cant ArrayList de objtos Pair que contienen la relación de los productos y la cantidad que se piden<p>
+     *                   Pair<id_producto, cantidad>
+     * </p>
+     * @param idCliente Entero con el ID de cliente que realiza el pedido
+     * @return Devuelve 0 si la transacción salio bien<p>Si la cantidad de productos en almacen no es suficinte para
+     *         realizar el pedido se asignara 0</p>
      * @throws SQLException posible excepción SQL<p>Excepción al tratar de agreagr pedido</p>
-     */ // TODO actualizar método para recibir varios productos en un solo pedido
-    public int addPedido(/*ArrayList<Pair<int, int>> prods_cant*/int idProducto, int cantidadProd, int idCliente) throws SQLException {
+     */
+    public int addPedido(ArrayList<Pair<Integer, Integer>> prods_cant, int idCliente) throws SQLException {
         PreparedStatement ps;
         Statement st;
         ResultSet rs;
+        ArrayList<Boolean> outOfStock = new ArrayList<>(); // Banderas que indican si hay suficiente de un producto para un pedido
 
-        StringBuilder queryProd = new StringBuilder("select * from producto where id_producto = ").append(idProducto);
-        StringBuilder requestProd = new StringBuilder();
-        String[] producto;
-
+        // INSERT INTO PEDIDO
         StringBuilder pedido = new StringBuilder("insert into pedido (fecha_pedido, monto, descuento, montoF, id_cliente, status)");
         pedido.append(" values (?, ?, ?, ?, ?, ?)");
 
+        // INSERT INTO PEDIDO_PRODUCTO
         StringBuilder ped_prod = new StringBuilder("insert into pedido_producto (id_pedido, id_producto, cantidad)");
         ped_prod.append(" values (?, ?, ?)");
 
+        // SELECT ÚLTIMO id_pedido
         StringBuilder idPedido = new StringBuilder("select auto_increment from information_schema.tables");
         idPedido.append(" where table_schema = 'wallbreaker' AND table_name = 'pedido' ");
 
+        // UPDATE almacen EN PRODUCTO
         StringBuilder updateProd = new StringBuilder("update producto set almacen = ");
 
-        // Se obtiene información del producto
-        st = conexion.createStatement();
-        rs = st.executeQuery(new String(queryProd));
 
-        while (rs.next()) {
-            for (int i = 1; i <= numcols.get("producto"); ++i) requestProd.append(rs.getString(i)).append(",");
-            requestProd.deleteCharAt(requestProd.lastIndexOf(","));
-        }
-        producto = new String(requestProd).split(",");
-        rs.close();
-        st.close();
 
-        // Falta de productos para el pedido
-        if (Integer.parseInt(producto[3]) < cantidadProd) return -1; // Faltan productos en almacén
+        // INFO DE LOS PRODUCTOS PARA EL PEDIDO
+        ArrayList<String[]> infoProds = infoProds(prods_cant);
 
-        // Informacion del pedido
+
+
+        // INFORMACIÓN DEL PEDIDO
         Random r = new Random();
-        double monto = Double.parseDouble(producto[2]) * cantidadProd;
+        ArrayList<Integer> cantPerProd = new ArrayList<>(); // Cantidad pedida de cada producto
+        double monto = 0;
         double descuento = (r.nextInt(21) / 100.0);
-        double montoF = monto - (monto * descuento);
+        double montoF;
+        int i = 0, j = 0; // Indice cantPerProd
 
-        // Se prepara el pedido
+        for (Pair<Integer, Integer> p : prods_cant) {
+            cantPerProd.add(p.getValue()); // Cantidades de cada producto pedido
+        }
+
+        for (String[] b : infoProds) {
+            outOfStock.add(cantPerProd.get(j) <= Integer.parseInt(b[3])); // Evalua si hay suficiente stock para el pedido
+            ++j;
+        }
+
+        for (String[] p : infoProds) {
+            if (outOfStock.get(i)) { // Alcanzan los productos en almacen
+                monto += Double.parseDouble(p[2]) * cantPerProd.get(i); // monto por todos los productos pedidos
+            } else { // NO alcanzan los productos en almacen
+                monto += Double.parseDouble(p[2]) * Integer.parseInt(p[3]); // monto el máx de prods en almacen
+                cantPerProd.set(i, Integer.parseInt(p[3])); // Actualiza la cant de prods por el que se le cobra
+            }
+            ++i;
+        }
+        montoF = monto - (monto * descuento); // monto final del pedido
+
+
+
+        // PREPARACIÓN DEL PEDIDO
         ps = conexion.prepareStatement(new String(pedido)); // Conecta el objeto PreparedStatement
         ps.setDate(1, new java.sql.Date(System.currentTimeMillis())); // fecha_pedido
         ps.setString(2, String.format("%.1f", monto)); // monto
@@ -252,32 +391,48 @@ public class Datos {
         ps.execute(); // Guarda el pedido en la BASE DE DATOS
         ps.close(); // Cierra el objeto PreparedStatement
 
-        // Se obtiene el id_pedido generado
+
+
+        // SE OBTIENE EL id_pedido GENERADO
         st = conexion.createStatement();
         rs = st.executeQuery(new String(idPedido));
         int id_ped = 0;
         while (rs.next()) {
             id_ped = Integer.parseInt(rs.getString("AUTO_INCREMENT"));
         }
-
         rs.close();
         st.close();
 
-        // Se prepara la relación pedido_producto
-        ps = conexion.prepareStatement(new String(ped_prod)); // Conecta el objeto PreparedStatement
-        ps.setInt(1, id_ped); // id_pedido recien gusrdado en la BASE DE DATOS
-        ps.setInt(2, idProducto); // id_producto
-        ps.setInt(3, cantidadProd); // cantidad
 
-        ps.execute(); // Guarda la relación pedido_producto en la BASE DE DATOS
-        ps.close(); // Cierra el objeto PreparedStatement
 
-        // Actualizar almacén el tabla producto
-        st = conexion.createStatement();
-        int newAlmacen = Integer.parseInt(producto[3]) - cantidadProd;
-        updateProd.append(newAlmacen).append(" where id_producto = ").append(producto[0]);
-        st.executeUpdate(new String(updateProd)); // Nuevo número de productos almacenados tras el pedido
-        st.close();
+        // SE PREPARA LA RELACIÓN pedido_producto
+        for (int v = 0; v < infoProds.size(); ++v) {
+            ps = conexion.prepareStatement(new String(ped_prod)); // Conecta el objeto PreparedStatement
+
+            // infoProds, cantPerProd
+            int id_producto = Integer.parseInt(infoProds.get(v)[0]);
+            int cant = cantPerProd.get(v);
+
+            ps.setInt(1, id_ped); // id_pedido recien guardado en la BASE DE DATOS
+            ps.setInt(2, id_producto); // id_producto
+            ps.setInt(3, cant); // cantidad
+
+            ps.execute(); // Guarda la relación pedido_producto en la BASE DE DATOS
+            ps.close(); // Cierra el objeto PreparedStatement
+        }
+
+
+
+        // ACTUALIZAR almacen EN TABLA producto
+        for (int w = 0; w < infoProds.size(); ++w) {
+            st = conexion.createStatement();
+
+            int newAlmacen = Integer.parseInt(infoProds.get(w)[3]) - cantPerProd.get(w);
+
+            updateProd.append(newAlmacen).append(" where id_producto = ").append(infoProds.get(w)[0]);
+            st.executeUpdate(new String(updateProd)); // Nuevo número de productos almacenados tras el pedido
+            st.close();
+        }
 
         return 0; // Everything OK
     }
