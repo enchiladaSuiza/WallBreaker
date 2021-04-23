@@ -16,6 +16,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
+import javafx.stage.Stage;
 import javafx.util.Pair;
 
 import java.net.URL;
@@ -34,21 +35,25 @@ public class Controller implements Initializable {
     private TableView<ObservableList<StringProperty>> tabla;
 
     private static Alert error, informacion, confirmacion;
-    private ContenidoUI productos, ventas, pedidos, proveedores;
+    private ContenidoUI productos, ventas, pedidos, proveedores, personal;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         tabla.setPlaceholder(new Label());
-
         // Ventanas
         error = new Alert(Alert.AlertType.ERROR);
-        error.setTitle("Wall Breaker");
-        error.setHeaderText("Error");
         informacion = new Alert(Alert.AlertType.INFORMATION);
-        informacion.setTitle("Wall Breaker");
-        informacion.setHeaderText("Éxito");
         confirmacion = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmacion.setTitle("Wall Breaker");
+
+        Alert[] alertas = {error, informacion, confirmacion};
+        for (Alert alerta : alertas) {
+            alerta.setTitle("Wall Breaker");
+            Stage temp = (Stage)alerta.getDialogPane().getScene().getWindow();
+            temp.getIcons().add(Main.conseguirIcono());
+        }
+
+        error.setHeaderText("Error");
+        informacion.setHeaderText("Éxito");
         confirmacion.setHeaderText("Confirmación");
     }
 
@@ -86,13 +91,18 @@ public class Controller implements Initializable {
             limpiarYAgregarNodosAGrid(pedidos.conseguirNodos());
         }
         else if (boton.equals(personalBtn)) {
+            if (personal == null) {
+                personal = new Personal(this);
+            }
             consultaTabla("personal");
+            limpiarYAgregarNodosAGrid(personal.conseguirNodos());
         }
     }
 
     private void consulta(ObservableList<ObservableList<String>> consulta) {
         tabla.getItems().clear();
         tabla.getColumns().clear();
+        tabla.refresh();
         ObservableList<String> nombreColumnas = consulta.remove(0);
         for (int i = 0; i < nombreColumnas.size(); i++) { // Crear y añadir columnas a la tabla
             int indice = i;
@@ -111,6 +121,7 @@ public class Controller implements Initializable {
             }
             tabla.getItems().add(tuplas);
         }
+        tabla.refresh();
     }
 
     public void consultaTabla(String nombreTabla) {
