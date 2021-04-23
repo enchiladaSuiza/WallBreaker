@@ -566,7 +566,7 @@ public class Datos {
      * @return Devuelve 0 si salio bien la operación
      * @throws SQLException posible excepción SQL<p>Excepción al tratar de agreagr un proveeedor</p>
      */ // TODO Actualizar querys con la tabla proveedor_producto
-    public int addProveedor(String nomProv, String apelProv, long telProv, String pagWeb, int idProd, boolean setNull)
+    public int addProveedor(String nomProv, String apelProv, long telProv, String pagWeb, /*int[] idProds*/int idProd, boolean setNull)
             throws SQLException
     {
         Statement st;
