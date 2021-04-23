@@ -6,6 +6,7 @@ import javafx.util.Pair;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
@@ -447,16 +448,29 @@ public class Datos {
      * Método que obtiene información de todos los proveedores que proveen productos
      * @return Un ArrayList cn la información solicitada
      * @throws SQLException posible excepción SQL<p>Excepción al solicitar la información</p>
-     */ // TODO Actualizar querys con la tabla proveedor_producto
+     */
     public ObservableList<ObservableList<String>> proveedor() throws SQLException {
         Statement st;
         ResultSet rs;
         ResultSetMetaData md;
         ObservableList<ObservableList<String>> resultados = FXCollections.observableArrayList();
+        ArrayList<String> nomCols = new ArrayList<>(Arrays.asList(
+                "Proveedor",
+                "Nombre",
+                "Apellido",
+                "Producto",
+                "ID Producto",
+                "En Almacén",
+                "Teléfono",
+                "Web Page"
+        ));
 
         StringBuilder queryProveedores = new StringBuilder();
-        queryProveedores.append("select nomProveedor, apelProveedor, telefonoProveedor, pag_web, nomProd, almacen");
-        queryProveedores.append(" from proveedor, producto where proveedor.id_producto = producto.id_producto");
+        queryProveedores.append("select proveedor.id_proveedor, nomProveedor, apelProveedor, nomProd,");
+        queryProveedores.append(" producto.id_producto, almacen, telefonoProveedor, pag_web from proveedor, producto,");
+        queryProveedores.append(" proveedor_producto");
+        queryProveedores.append(" where proveedor.id_proveedor = proveedor_producto.id_proveedor");
+        queryProveedores.append(" AND producto.id_producto = proveedor_producto.id_producto");
 
         // Obtener información de todos los proveedores que proveen productos
         st = conexion.createStatement();
@@ -464,15 +478,16 @@ public class Datos {
         md = rs.getMetaData();
         int columnas = md.getColumnCount();
         resultados.add(FXCollections.observableArrayList()); // Nombres de columnas
+
         for (int i = 1; i <= columnas; i++) {
-            resultados.get(0).add(md.getColumnLabel(i));
+            resultados.get(0).add(nomCols.get(i-1)); // SANTI: AQUI CAMBIARE EL NOMBRE DE LAS COLUMNAS
         }
 
         int indiceFila = 0;
         while (rs.next()) {
             resultados.add(FXCollections.observableArrayList());
             indiceFila++;
-            for (int p = 1; p <= 6; ++p) {
+            for (int p = 1; p <= 8; ++p) {
                 resultados.get(indiceFila).add(rs.getString(p));
             }
             // reg.deleteCharAt(reg.lastIndexOf(","));
@@ -489,16 +504,28 @@ public class Datos {
      * @param idProducto clave del producto para ver su proveedor
      * @return Una cadena con la información solicitada
      * @throws SQLException posible excepción SQL<p>Excepción al solicitar la información</p>
-     */ // TODO Actualizar querys con la tabla proveedor_producto
+     */
     public ObservableList<ObservableList<String>> proveedor(int idProducto) throws SQLException {
         Statement st;
         ResultSet rs;
         ResultSetMetaData md;
         ObservableList<ObservableList<String>> resultados = FXCollections.observableArrayList();
+        ArrayList<String> nomCols = new ArrayList<>(Arrays.asList(
+                "Proveedor",
+                "Nombre",
+                "Apellido",
+                "Producto",
+                "ID Producto",
+                "En Almacén",
+                "Teléfono",
+                "Web Page"
+        ));
 
         StringBuilder query = new StringBuilder();
-        query.append("select nomProveedor, apelProveedor, telefonoProveedor, pag_web, nomProd, almacen");
-        query.append(" from proveedor, producto where proveedor.id_producto = producto.id_producto");
+        query.append("select proveedor.id_proveedor, nomProveedor, apelProveedor, nomProd, producto.id_producto,");
+        query.append(" almacen, telefonoProveedor, pag_web from proveedor, producto, proveedor_producto");
+        query.append(" where proveedor.id_proveedor = proveedor_producto.id_proveedor");
+        query.append(" AND producto.id_producto = proveedor_producto.id_producto");
         query.append(" AND producto.id_producto = ").append(idProducto);
 
         // Obtener información de los proveedores que preveen los productos especificados
@@ -508,14 +535,14 @@ public class Datos {
         int columnas = md.getColumnCount();
         resultados.add(FXCollections.observableArrayList()); // Nombres de columnas
         for (int i = 1; i <= columnas; i++) {
-            resultados.get(0).add(md.getColumnLabel(i));
+            resultados.get(0).add(nomCols.get(i-1)); // SANTI: AQUI CAMBIARE EL NOMBRE DE LAS COLUMNAS
         }
 
         int indiceFila = 0;
         while (rs.next()) {
             resultados.add(FXCollections.observableArrayList());
             indiceFila++;
-            for (int v = 1; v <= 6; ++v) {
+            for (int v = 1; v <= 8; ++v) {
                 resultados.get(indiceFila).add(rs.getString(v));
             }
             // resultado.deleteCharAt(resultado.lastIndexOf(","));
