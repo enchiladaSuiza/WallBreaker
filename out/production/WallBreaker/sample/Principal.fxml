@@ -46,11 +46,7 @@
       </AnchorPane>
    </bottom>
    <center>
-      <TableView fx:id="tabla" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
-         <columnResizePolicy>
-            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-         </columnResizePolicy>
-      </TableView>
+      <TableView fx:id="tabla" cacheShape="false" fixedCellSize="24.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" />
    </center>
    <right>
       <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="271.0" prefWidth="230.0" BorderPane.alignment="CENTER">
