@@ -265,7 +265,7 @@ public class Datos {
         st = conexion.createStatement();
         rs = st.executeQuery(new String(montoF));
         while (rs.next()) {
-            tot = Double.parseDouble(rs.getString("AUTO_INCREMENT"));
+            tot = Double.parseDouble(rs.getString("montoF"));
         }
         rs.close();
         st.close();
