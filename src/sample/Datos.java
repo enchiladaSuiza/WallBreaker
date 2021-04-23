@@ -596,27 +596,109 @@ public class Datos {
         return 0;
     }
 
-    public int deleteProveedor(int idProveedor) {
-        // TODO completar método
+    /**
+     * Método para eliminar un proveedor de la base de datos
+     * @param idProveedor Llave primaria que representa el (id_proveedor) a ser eliminado
+     * @return Devuelve 0 si no hubo errores
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de eliminar un proveedor</p>
+     */
+    public int deleteProveedor(int idProveedor) throws SQLException {
+        Statement st = conexion.createStatement();
+        StringBuilder x = new StringBuilder("delete from proveedor");
+        x.append(" where id_proveedor = ").append(idProveedor);
+
+        st.executeUpdate(new String(x));
+        st.close();
+        return 0;
+    }
+
+    /**
+     * Método que agrega personal a la base de datos
+     * @param nom String con el nombre del personal
+     * @param apel String con el apellido del personal
+     * @param ocup String con la ocupación del personal
+     * @param tel Long con el teléfono del personal
+     * @param sal Double con el salario del personal
+     * @return Devuelve 0 si la operación se realizó exitosamente
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de agregar algún personal</p>
+     */
+    public int addPersonal(String nom, String apel, String ocup, long tel, double sal) throws SQLException {
+        PreparedStatement ps;
+
+        // INSERT INTO PERSONAL
+        StringBuilder personal = new StringBuilder("insert into personal");
+        personal.append(" (nomPersonal, apelPersonal, ocupacion, telefonoPersonal, salario)");
+        personal.append(" values (?, ?, ?, ?, ?)");
+
+        // SE PREPARA EL PERSONAL
+        ps = conexion.prepareStatement(new String(personal));
+        ps.setString(1, nom); // nomPersonal
+        ps.setString(2, apel); // apelPersonal
+        ps.setString(3, ocup); // ocupacion
+        ps.setLong(4, tel); // telefonoPersonal
+        ps.setDouble(5, sal); // salario
+
+        // GUARDA LA INFO EN LA BASE DE DATOS
+        ps.execute();
+        ps.close();
 
         return 0;
     }
 
-    public int addPersonal(String nom, String apel, String ocup, long tel, double sal) {
-        // TODO completar método
+    /**
+     * Método que edita el nombre, apellido, ocupación, teléfono y salario de algún persolan específico
+     * @param idPersnl Llave primaria que identifica el personal a ser modificado
+     * @param nom String con el nuevo nombre
+     * @param apel String con el nuevo apellido
+     * @param ocup Strimg con la nueva ocupación
+     * @param tel Long con el nuevo teléfono
+     * @param sal Double con el nuevo salario
+     * @param toModify Arreglo de enteros con el número de la(s) columnas a modificar (máximo 5)
+     *                  <li>1 = nomPersonal</li>
+     *                  <li>2 = apelPersonal</li>
+     *                  <li>3 = ocupacion</li>
+     *                  <li>4 = telefonoPersonal</li>
+     *                  <li>5 = salario</li>
+     * @return Develve 0 si la operación salió con éxito
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de editar algún personal</p>
+     */
+    public int editPersonal(int idPersnl, String nom, String apel, String ocup, long tel, double sal, int[] toModify) throws SQLException {
+        Statement st;
+        StringBuilder updNom = new StringBuilder("update personal");
+        StringBuilder updApe = new StringBuilder("update personal");
+        StringBuilder updOcu = new StringBuilder("update personal");
+        StringBuilder updTel = new StringBuilder("update personal");
+        StringBuilder updSal = new StringBuilder("update personal");
 
+        updNom.append(" set nomPersonal = '").append(nom).append("' where id_personal = ").append(idPersnl);
+        updApe.append(" set apelPersonal = ").append(apel).append(" where id_personal = ").append(idPersnl);
+        updOcu.append(" set ocupacion = ").append(ocup).append(" where id_personal = ").append(idPersnl);
+        updTel.append(" set telefonoPersonal = ").append(tel).append(" where id_personal = ").append(idPersnl);
+        updSal.append(" set salario = ").append(String.format("%.1f", sal)).append(" where id_personal = ").append(idPersnl);
+
+        StringBuilder[] toM = new StringBuilder[] {updNom, updApe, updOcu, updTel, updSal};
+
+        st = conexion.createStatement();
+        for (int i : toModify) {
+            st.executeUpdate(new String(toM[(i - 1)]));
+        }
+        st.close();
         return 0;
     }
 
-    public int editPersonal(int idPersnl, String nom, String apel, String ocup, long tel, double sal) {
-        // TODO completar método
+    /**
+     * Método para eliminar algún personal de la base de datos
+     * @param idPersonal Llave primaria que representa el (id_personal) a ser eliminado
+     * @return Devuelve 0 si no hubo errores
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de eliminar algún personal</p>
+     */
+    public int deletePersonal(int idPersonal) throws SQLException {
+        Statement st = conexion.createStatement();
+        StringBuilder x = new StringBuilder("delete from personal");
+        x.append(" where id_personal = ").append(idPersonal);
 
-        return 0;
-    }
-
-    public int deletePersonal(int idPersnl) {
-        // TODO completar método
-
+        st.executeUpdate(new String(x));
+        st.close();
         return 0;
     }
 
