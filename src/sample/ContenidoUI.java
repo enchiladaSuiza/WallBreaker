@@ -10,6 +10,7 @@ import static sample.Controller.actualizarPosicionesEnGrid;
 public class ContenidoUI {
     protected ArrayList<Pair<Node, Boolean>> nodos;
     protected Controller controller;
+    protected String nombreDeLaTabla;
 
     public ArrayList<Pair<Node, Boolean>> conseguirNodos() { return nodos; }
 
@@ -56,4 +57,6 @@ public class ContenidoUI {
         }
         return -1;
     }
+
+    public String conseguirNombreDeLaTabla() { return nombreDeLaTabla; }
 }

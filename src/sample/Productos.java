@@ -14,6 +14,7 @@ public class Productos extends ContenidoUI {
 
     Productos(Controller controller) {
         super(controller);
+        nombreDeLaTabla = "producto";
         nombre = new TextField();
         precio = new TextField();
         almacen = new TextField();

@@ -12,6 +12,7 @@ public class Personal extends ContenidoUI {
 
     public Personal(Controller controller) {
         super(controller);
+        nombreDeLaTabla = "personal";
         nombre = new TextField();
         apellido = new TextField();
         ocupacion = new TextField();

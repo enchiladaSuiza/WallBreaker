@@ -21,6 +21,7 @@ public class Pedidos extends ContenidoUI {
 
     Pedidos(Controller controller) {
         super(controller);
+        nombreDeLaTabla = "pedido";
         fecha = new DatePicker();
         fecha.setPromptText("Fecha");
         fecha.setValue(LocalDate.now());

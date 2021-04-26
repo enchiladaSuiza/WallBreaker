@@ -13,6 +13,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
@@ -36,10 +37,27 @@ public class Controller implements Initializable {
 
     private static Alert error, informacion, confirmacion;
     private ContenidoUI productos, ventas, pedidos, proveedores, personal;
+    private ArrayList<Pair<Button, ContenidoUI>> botonesUi;
+    private String tablaActual;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        // Tabla
         tabla.setPlaceholder(new Label());
+        tabla.setEditable(true);
+
+        // Contenidos
+        productos = new Productos(this);
+        ventas = new Ventas(this);
+        pedidos = new Pedidos(this);
+        proveedores = new Proveedores(this);
+        personal = new Personal(this);
+        botonesUi = new ArrayList<>();
+        botonesUi.add(new Pair<>(productosBtn, productos));
+        botonesUi.add(new Pair<>(ventasBtn, ventas));
+        botonesUi.add(new Pair<>(proveedoresBtn, proveedores));
+        botonesUi.add(new Pair<>(pedidosBtn, pedidos));
+        botonesUi.add(new Pair<>(personalBtn, personal));
         // Ventanas
         error = new Alert(Alert.AlertType.ERROR);
         informacion = new Alert(Alert.AlertType.INFORMATION);
@@ -62,43 +80,20 @@ public class Controller implements Initializable {
     private void eventoConsultar(ActionEvent event) {
         Button boton = (Button)event.getSource();
         titulo.setText(boton.getText());
-        if (boton.equals(productosBtn)) {
-            if (productos == null) {
-                productos = new Productos(this);
-            }
-            consultaTabla("producto");
-            limpiarYAgregarNodosAGrid(productos.conseguirNodos());
-        }
-        else if (boton.equals(ventasBtn)) {
-            if (ventas == null) {
-                ventas = new Ventas(this);
-            }
-            consultaTabla("venta");
-            limpiarYAgregarNodosAGrid(ventas.conseguirNodos());
-        }
-        else if (boton.equals(proveedoresBtn)) {
-            if (proveedores == null) {
-                proveedores = new Proveedores(this);
-            }
+        if (boton.equals(proveedoresBtn)) {
+            tablaActual = proveedores.conseguirNombreDeLaTabla();
             consultaProveedores();
             limpiarYAgregarNodosAGrid(proveedores.conseguirNodos());
+            return;
         }
-        else if (boton.equals(pedidosBtn)) {
-            if (pedidos == null) {
-                pedidos = new Pedidos(this);
+        for (Pair<Button, ContenidoUI> botonUi : botonesUi) {
+            if (boton.equals(botonUi.getKey())) {
+                tablaActual = botonUi.getValue().conseguirNombreDeLaTabla();
+                consultaTabla(tablaActual);
+                limpiarYAgregarNodosAGrid(botonUi.getValue().conseguirNodos());
             }
-            consultaTabla("pedido");
-            limpiarYAgregarNodosAGrid(pedidos.conseguirNodos());
-        }
-        else if (boton.equals(personalBtn)) {
-            if (personal == null) {
-                personal = new Personal(this);
-            }
-            consultaTabla("personal");
-            limpiarYAgregarNodosAGrid(personal.conseguirNodos());
         }
     }
-
     private void consulta(ObservableList<ObservableList<String>> consulta) {
         tabla.getItems().clear();
         tabla.getColumns().clear();
@@ -108,8 +103,9 @@ public class Controller implements Initializable {
             int indice = i;
             TableColumn<ObservableList<StringProperty>, String> columna =
                     new TableColumn<>(nombreColumnas.get(indice));
-            columna.setCellValueFactory(observableListStringCellDataFeatures ->
-                    observableListStringCellDataFeatures.getValue().get(indice));
+            columna.setCellValueFactory(celda -> celda.getValue().get(indice));
+            columna.setCellFactory(TextFieldTableCell.forTableColumn());
+            columna.setOnEditCommit(celda -> editarCelda(celda.getTablePosition(), celda.getNewValue()));
             tabla.getColumns().add(columna);
         }
 
@@ -121,9 +117,7 @@ public class Controller implements Initializable {
             }
             tabla.getItems().add(tuplas);
         }
-        tabla.refresh();
     }
-
     public void consultaTabla(String nombreTabla) {
         try {
             ObservableList<ObservableList<String>> consulta = Main.conseguirDatos().verTodo(nombreTabla);
@@ -132,7 +126,6 @@ public class Controller implements Initializable {
             mostrarError("No fue posible realizar la consulta. Error: " + e.getMessage());
         }
     }
-
     public void consultaProveedores() {
         try {
             ObservableList<ObservableList<String>> consulta = Main.conseguirDatos().proveedor();
@@ -141,13 +134,37 @@ public class Controller implements Initializable {
             mostrarError("No fue posible realizar la consulta. Error: " + throwables.getMessage());
         }
     }
-
     public void consultaProveedorPorProducto(int idProducto) {
         try {
             ObservableList<ObservableList<String>> consulta = Main.conseguirDatos().proveedor(idProducto);
             consulta(consulta);
         } catch (SQLException throwables) {
             mostrarError("No fue posible realizar la consulta. Error: " + throwables.getMessage());
+        }
+    }
+
+    public void editarCelda(TablePosition<ObservableList<StringProperty>, String> posicion, String valor) {
+        if (tablaActual.equals(productos.conseguirNombreDeLaTabla())) {
+            ObservableList<StringProperty> fila = posicion .getTableView().getItems().get(posicion.getRow());
+            int columna = posicion.getColumn();
+            ArrayList<String> propiedades = new ArrayList<>();
+            for (int i = 0; i < fila.size(); i++) {
+                if (i == columna) {
+                    propiedades.add(valor);
+                }
+                else {
+                    propiedades.add(fila.get(i).getValue());
+                }
+            }
+            try {
+                Main.conseguirDatos().editProduct(Integer.parseInt(propiedades.get(0)),
+                        propiedades.get(1), Double.parseDouble(propiedades.get(2)),
+                        Integer.parseInt(propiedades.get(3)), Integer.parseInt(propiedades.get(4)),
+                        new int[]{columna});
+            } catch (Exception e) {
+                mostrarError("Algo salió mal al editar el producto. Mensaje: " + e.getLocalizedMessage());
+                tabla.refresh();
+            }
         }
     }
 

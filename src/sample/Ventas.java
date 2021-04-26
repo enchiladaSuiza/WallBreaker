@@ -19,6 +19,7 @@ public class Ventas extends ContenidoUI {
 
     public Ventas(Controller controller) {
         super(controller);
+        nombreDeLaTabla = "venta";
         fecha = new DatePicker();
         fecha.setPromptText("Fecha");
         fecha.setValue(LocalDate.now());

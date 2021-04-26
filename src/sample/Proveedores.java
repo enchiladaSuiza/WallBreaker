@@ -14,6 +14,7 @@ public class Proveedores extends ContenidoUI {
 
     public Proveedores(Controller controller) {
         super(controller);
+        nombreDeLaTabla = "proveedor";
         idProductoConsulta = new TextField();
         nombre = new TextField();
         apellido = new TextField();
