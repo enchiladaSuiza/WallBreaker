@@ -139,6 +139,13 @@ public class Proveedores extends ContenidoUI {
     }
 
     private void eliminarProveedor() {
-        System.out.println("You messed up the linguine");
+        String idProveedor = this.idProveedor.getText();
+        try {
+            Main.conseguirDatos().deleteProveedor(Integer.parseInt(idProveedor));
+            Controller.mostrarInfo("Proveedor eliminado correctamente");
+            controller.consultaTabla(nombreDeLaTabla);
+        } catch (Exception e) {
+            Controller.mostrarError("Error al eliminar el proveedor.\n" + e.getMessage());
+        }
     }
 }

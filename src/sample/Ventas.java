@@ -7,8 +7,6 @@ import javafx.util.Pair;
 import java.time.LocalDate;
 import java.util.*;
 
-import static sample.Controller.*;
-
 public class Ventas extends ContenidoUI {
     private DatePicker fecha;
     private TextField idProducto, cantidad, efectivo, idCliente, idPedido;
@@ -29,11 +27,11 @@ public class Ventas extends ContenidoUI {
         efectivo = new TextField();
         idCliente = new TextField();
         idPedido = new TextField();
-        prepararTextField(idProducto, "Producto (ID)", true);
-        prepararTextField(cantidad, "Cantidad", true);
-        prepararTextField(efectivo, "Efectivo", true);
-        prepararTextField(idCliente, "Cliente (ID)", true);
-        prepararTextField(idPedido, "Pedido (ID)", true);
+        Controller.prepararTextField(idProducto, "Producto (ID)", true);
+        Controller.prepararTextField(cantidad, "Cantidad", true);
+        Controller.prepararTextField(efectivo, "Efectivo", true);
+        Controller.prepararTextField(idCliente, "Cliente (ID)", true);
+        Controller.prepararTextField(idPedido, "Pedido (ID)", true);
         total = new Label("Total");
         cambio = new Label("Cambio");
 
@@ -61,8 +59,8 @@ public class Ventas extends ContenidoUI {
     public void agregarProductoAVenta() {
         TextField producto = new TextField();
         TextField cantidad = new TextField();
-        prepararTextField(producto, "Producto (ID)", true);
-        prepararTextField(cantidad, "Cantidad", true);
+        Controller.prepararTextField(producto, "Producto (ID)", true);
+        Controller.prepararTextField(cantidad, "Cantidad", true);
         productos.add(new Pair<>(producto, cantidad));
         insertarAGrid(producto, false, posicionParaAgregarProducto);
         insertarAGrid(cantidad, false, posicionParaAgregarProducto + 1);
@@ -103,19 +101,20 @@ public class Ventas extends ContenidoUI {
 
             Double cambio = (Double)Main.conseguirDatos().generarVenta(pedidoConMonto.getKey(), efectivo);
             if (cambio == null) {
-                mostrarError("El pedido ya fue vendido antes.");
+                Controller.mostrarError("El pedido ya fue vendido antes.");
                 return;
             }
             else if (cambio == -1.0) {
-                mostrarError("El cambio no cumple en monto");
+                Controller.mostrarError("El cambio no cumple en monto");
                 return;
             }
 
             this.cambio.setText(String.valueOf(cambio));
-            mostrarInfo("El pedido y la venta fueron generados con éxito.");
+            Controller.mostrarInfo("El pedido y la venta fueron generados con éxito.");
 
         } catch (Exception e) {
-            mostrarError("Algo salió mal al generar la venta. El error es: " + e.getLocalizedMessage());
+            Controller.mostrarError("Algo salió mal al generar la venta. El error es: "
+                    + e.getLocalizedMessage());
         }
     }
 }

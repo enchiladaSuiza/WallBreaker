@@ -30,7 +30,7 @@ public class Main extends Application {
         temp.getIcons().add(icono);
         TextField usuarioField = new TextField("root");
         PasswordField passwordField = new PasswordField();
-        passwordField.setText("owoeweuwu");
+        passwordField.setText("owoeweuwu"); // Mi contraseña
         GridPane dialogoLayout = new GridPane();
         dialogoLayout.setHgap(10.0);
         dialogoLayout.setVgap(5.0);
@@ -56,7 +56,7 @@ public class Main extends Application {
         } else {
             return;
         }
-        if (!usuario.isBlank() && !password.isBlank()) {
+        if (!(usuario.isBlank() && password.isBlank())) {
             try {
                 datos = new Datos(usuario, password);
             } catch (Exception e) {

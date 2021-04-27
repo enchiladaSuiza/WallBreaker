@@ -10,8 +10,6 @@ import javafx.util.Pair;
 import java.time.LocalDate;
 import java.util.*;
 
-import static sample.Controller.*;
-
 public class Pedidos extends ContenidoUI {
     private DatePicker fecha;
     private TextField idProducto, cantidad, idCliente;
@@ -29,9 +27,9 @@ public class Pedidos extends ContenidoUI {
         idProducto = new TextField();
         cantidad = new TextField();
         idCliente = new TextField();
-        prepararTextField(idProducto, "Producto (ID)", true);
-        prepararTextField(cantidad, "Cantidad", true);
-        prepararTextField(idCliente, "Cliente (ID)", true);
+        Controller.prepararTextField(idProducto, "Producto (ID)", true);
+        Controller.prepararTextField(cantidad, "Cantidad", true);
+        Controller.prepararTextField(idCliente, "Cliente (ID)", true);
         total = new Label("Total");
 
         agregar = new Button("Agregar");
@@ -56,8 +54,8 @@ public class Pedidos extends ContenidoUI {
     public void agregarProductoAPedido() {
         TextField producto = new TextField();
         TextField cantidad = new TextField();
-        prepararTextField(producto, "Producto (ID)", true);
-        prepararTextField(cantidad, "Cantidad", true);
+        Controller.prepararTextField(producto, "Producto (ID)", true);
+        Controller.prepararTextField(cantidad, "Cantidad", true);
         productos.add(new Pair<>(producto, cantidad));
         insertarAGrid(producto, false, posicionParaAgregarProducto);
         insertarAGrid(cantidad, false, posicionParaAgregarProducto + 1);
@@ -88,10 +86,10 @@ public class Pedidos extends ContenidoUI {
             }
             String idCliente = this.idCliente.getText();
             Main.conseguirDatos().addPedido(productosConCantidad, Integer.parseInt(idCliente));
-            mostrarInfo("El pedido fue generado con éxito.");
+            Controller.mostrarInfo("El pedido fue generado con éxito.");
             controller.consultaTabla(nombreDeLaTabla);
         } catch (Exception e) {
-            mostrarError("Error al generar el pedido. Mensaje:\n" + e.getMessage());
+            Controller.mostrarError("Error al generar el pedido. Mensaje:\n" + e.getMessage());
         }
     }
 }

@@ -58,6 +58,7 @@ public class Controller implements Initializable {
         botonesUi.add(new Pair<>(proveedoresBtn, proveedores));
         botonesUi.add(new Pair<>(pedidosBtn, pedidos));
         botonesUi.add(new Pair<>(personalBtn, personal));
+
         // Ventanas
         error = new Alert(Alert.AlertType.ERROR);
         informacion = new Alert(Alert.AlertType.INFORMATION);
@@ -80,12 +81,12 @@ public class Controller implements Initializable {
     private void eventoConsultar(ActionEvent event) {
         Button boton = (Button)event.getSource();
         titulo.setText(boton.getText());
-        /*if (boton.equals(proveedoresBtn)) {
+        /* if (boton.equals(proveedoresBtn)) {
             tablaActual = proveedores.conseguirNombreDeLaTabla();
             consultaProveedores();
             limpiarYAgregarNodosAGrid(proveedores.conseguirNodos());
             return;
-        }*/
+        } */
         for (Pair<Button, ContenidoUI> botonUi : botonesUi) {
             if (boton.equals(botonUi.getKey())) {
                 tablaActual = botonUi.getValue().conseguirNombreDeLaTabla();
@@ -144,18 +145,19 @@ public class Controller implements Initializable {
     }
 
     public void editarCelda(TablePosition<ObservableList<StringProperty>, String> posicion, String valor) {
-        if (tablaActual.equals(productos.conseguirNombreDeLaTabla())) {
-            ObservableList<StringProperty> fila = posicion .getTableView().getItems().get(posicion.getRow());
-            int columna = posicion.getColumn();
-            ArrayList<String> propiedades = new ArrayList<>();
-            for (int i = 0; i < fila.size(); i++) {
-                if (i == columna) {
-                    propiedades.add(valor);
-                }
-                else {
-                    propiedades.add(fila.get(i).getValue());
-                }
+        // No estoy enteramente seguro si este método es el mejor en enfoque
+        ObservableList<StringProperty> fila = posicion .getTableView().getItems().get(posicion.getRow());
+        int columna = posicion.getColumn();
+        ArrayList<String> propiedades = new ArrayList<>();
+        for (int i = 0; i < fila.size(); i++) {
+            if (i == columna) {
+                propiedades.add(valor);
             }
+            else {
+                propiedades.add(fila.get(i).getValue());
+            }
+        }
+        if (tablaActual.equals(productos.conseguirNombreDeLaTabla())) {
             try {
                 Main.conseguirDatos().editProduct(Integer.parseInt(propiedades.get(0)),
                         propiedades.get(1), Double.parseDouble(propiedades.get(2)),

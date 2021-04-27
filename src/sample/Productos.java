@@ -7,8 +7,6 @@ import javafx.scene.control.TextField;
 
 import java.util.ArrayList;
 
-import static sample.Controller.*;
-
 public class Productos extends ContenidoUI {
     private TextField nombre, precio, almacen, categoria, idProducto;
 
@@ -20,11 +18,11 @@ public class Productos extends ContenidoUI {
         almacen = new TextField();
         categoria = new TextField();
         idProducto = new TextField();
-        prepararTextField(nombre, "Producto", false);
-        prepararTextField(precio, "Precio", true);
-        prepararTextField(almacen, "Cantidad", true);
-        prepararTextField(categoria, "Categoria (ID)", true);
-        prepararTextField(idProducto, "Producto (ID)", true);
+        Controller.prepararTextField(nombre, "Producto", false);
+        Controller.prepararTextField(precio, "Precio", true);
+        Controller.prepararTextField(almacen, "Cantidad", true);
+        Controller.prepararTextField(categoria, "Categoria (ID)", true);
+        Controller.prepararTextField(idProducto, "Producto (ID)", true);
 
         Button agregarProductoBtn = new Button("Agregar producto");
         Button eliminarProductoBtn = new Button("Eliminar producto");
@@ -32,7 +30,7 @@ public class Productos extends ContenidoUI {
         eliminarProductoBtn.setOnAction(actionEvent -> borrarProducto());
 
         Node[] nodosArray = {nombre, precio, almacen, categoria, agregarProductoBtn,
-                nuevoEspacio(agregarProductoBtn), idProducto, eliminarProductoBtn};
+                Controller.nuevoEspacio(agregarProductoBtn), idProducto, eliminarProductoBtn};
         nodos = new ArrayList<>();
         for (Node nodo : nodosArray) { sumarAGrid(nodo, true); }
     }
@@ -52,7 +50,7 @@ public class Productos extends ContenidoUI {
             Main.conseguirDatos().addProduct(nombre, Double.parseDouble(this.precio.getText()),
                     Integer.parseInt(almacen.getText()), Integer.parseInt(this.categoria.getText()));
             Controller.mostrarInfo("El producto fue añadido.");
-            controller.consultaTabla("producto");
+            controller.consultaTabla(nombreDeLaTabla);
         } catch (Exception e) {
             Controller.mostrarError("Se produjo un error al añadir el producto. El mensaje de error es: " + e.getMessage());
         }
@@ -74,7 +72,7 @@ public class Productos extends ContenidoUI {
         try {
             Main.conseguirDatos().deleteProduct(Integer.parseInt(id));
             Controller.mostrarInfo("El producto fue eliminado.");
-            controller.consultaTabla("producto");
+            controller.consultaTabla(nombreDeLaTabla);
         } catch (Exception e) {
             Controller.mostrarError("Se produjo un error al eliminar el producto. El mensaje de error es: " + e.getMessage());
         }

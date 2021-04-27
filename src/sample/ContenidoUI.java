@@ -18,6 +18,14 @@ public class ContenidoUI {
         this.controller = controller;
     }
 
+    /* ContenidoUI se refiere a la parte derecha de la ventana, donde están los botones, campos, etc. (nodos).
+    * Todos estos componentes se acomodan en una Grid, que está en Controller, pero aquí se configura la posición que
+    * tendrán. La Grid es de 2 columnas por las filas que sean necesarias. El ArrayList nodos tiene pares con todos
+    * los nodos de la pestaña, más un valor booleano para cada uno que indica si ocupa dos espacios o no. He aquí lo
+    * interesante. El método actualizarPosicionesEnGrid de Controller va poniendo los nodos de acuerdo a su posición
+    * en el arraylist: la posición 0 está en la primera fila y en la primera columna , la 1 está en la primera fila
+    * segunda columna, la 2 en la segunda fila primera columna y así. Si hay un nodo que ocupa dos posiciones se
+    * incrementa una variable offset para saltarse un espacio. */
     protected void sumarAGrid(Node nodo, boolean dosEspacios) {
         nodos.add(new Pair<>(nodo, dosEspacios));
         controller.agregarNodoAGrid(nodo);
