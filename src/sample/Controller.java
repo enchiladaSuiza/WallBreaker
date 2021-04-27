@@ -58,6 +58,7 @@ public class Controller implements Initializable {
         botonesUi.add(new Pair<>(proveedoresBtn, proveedores));
         botonesUi.add(new Pair<>(pedidosBtn, pedidos));
         botonesUi.add(new Pair<>(personalBtn, personal));
+        grid.getChildren().clear();
 
         // Ventanas
         error = new Alert(Alert.AlertType.ERROR);
@@ -157,6 +158,7 @@ public class Controller implements Initializable {
                 propiedades.add(fila.get(i).getValue());
             }
         }
+
         if (tablaActual.equals(productos.conseguirNombreDeLaTabla())) {
             try {
                 Main.conseguirDatos().editProduct(Integer.parseInt(propiedades.get(0)),
@@ -164,9 +166,19 @@ public class Controller implements Initializable {
                         Integer.parseInt(propiedades.get(3)), Integer.parseInt(propiedades.get(4)),
                         new int[]{columna});
             } catch (Exception e) {
-                mostrarError("Algo salió mal al editar el producto. Mensaje: " + e.getLocalizedMessage());
+                mostrarError("Algo salió mal al editar el producto.\n" + e.getMessage());
+                tabla.refresh();
             }
-            tabla.refresh();
+        }
+        else if (tablaActual.equals(personal.conseguirNombreDeLaTabla())) {
+            try {
+                Main.conseguirDatos().editPersonal(Integer.parseInt(propiedades.get(0)), propiedades.get(1),
+                        propiedades.get(2), propiedades.get(3), Long.parseLong(propiedades.get(4)),
+                        Double.parseDouble(propiedades.get(5)), new int[]{columna});
+            } catch (Exception e) {
+                mostrarError("Algo salió mal al editar al personal.\n" + e.getMessage());
+                tabla.refresh();
+            }
         }
     }
 

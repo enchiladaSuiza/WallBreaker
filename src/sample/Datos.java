@@ -673,7 +673,7 @@ public class Datos {
     }
 
     /**
-     * Método que edita el nombre, apellido, ocupación, teléfono y salario de algún persolan específico
+     * Método que edita el nombre, apellido, ocupación, teléfono y salario de algún personal específico
      * @param idPersnl Llave primaria que identifica el personal a ser modificado
      * @param nom String con el nuevo nombre
      * @param apel String con el nuevo apellido
@@ -698,8 +698,8 @@ public class Datos {
         StringBuilder updSal = new StringBuilder("update personal");
 
         updNom.append(" set nomPersonal = '").append(nom).append("' where id_personal = ").append(idPersnl);
-        updApe.append(" set apelPersonal = ").append(apel).append(" where id_personal = ").append(idPersnl);
-        updOcu.append(" set ocupacion = ").append(ocup).append(" where id_personal = ").append(idPersnl);
+        updApe.append(" set apelPersonal = '").append(apel).append("' where id_personal = ").append(idPersnl);
+        updOcu.append(" set ocupacion = '").append(ocup).append("' where id_personal = ").append(idPersnl);
         updTel.append(" set telefonoPersonal = ").append(tel).append(" where id_personal = ").append(idPersnl);
         updSal.append(" set salario = ").append(String.format("%.1f", sal)).append(" where id_personal = ").append(idPersnl);
 

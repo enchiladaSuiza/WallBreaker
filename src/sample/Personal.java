@@ -2,6 +2,7 @@ package sample;
 
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextField;
 
 import java.util.ArrayList;
@@ -40,10 +41,38 @@ public class Personal extends ContenidoUI {
     }
 
     private void agregarPersonal() {
-        System.out.println("Le funny string has not arrived");
+        String nombre = this.nombre.getText();
+        String apellido = this.apellido.getText();
+        String ocupacion = this.ocupacion.getText();
+        String telefono = this.telefono.getText();
+        String salario = this.salario.getText();
+        if (nombre.isBlank() || apellido.isBlank() || ocupacion.isBlank() || telefono.isBlank() || salario.isBlank()) {
+            Controller.mostrarError("Como mínimo se requieren valores para Apellido, Ocupación y Salario");
+            return;
+        }
+        try {
+            Main.conseguirDatos().addPersonal(nombre, apellido, ocupacion, Long.parseLong(telefono),
+                    Double.parseDouble(salario));
+            Controller.mostrarInfo("Personal añadido correctamente.");
+            controller.consultaTabla(nombreDeLaTabla);
+        } catch (Exception e) {
+            Controller.mostrarError("Hubo un problema al añadir al personal.\n" + e.getMessage());
+        }
     }
 
     private void eliminarPersonal() {
-        System.out.println("Nunca impriman a consola en producción muchcachos");
+        String idPersonalCadena = this.idPersonal.getText();
+        try {
+            int idPersonalInt = Integer.parseInt(idPersonalCadena);
+            ButtonType resultado = Controller.mostrarConfirmacion("¿Desea elminar a este personal?");
+            if (resultado != ButtonType.OK) {
+                return;
+            }
+            Main.conseguirDatos().deletePersonal(idPersonalInt);
+            Controller.mostrarInfo("Personal eliminado exitosamente");
+            controller.consultaTabla(nombreDeLaTabla);
+        } catch (Exception e) {
+            Controller.mostrarError("No fue posible eliminar al personal.\n" + e.getMessage());
+        }
     }
 }
