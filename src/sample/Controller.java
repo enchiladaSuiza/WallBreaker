@@ -80,12 +80,12 @@ public class Controller implements Initializable {
     private void eventoConsultar(ActionEvent event) {
         Button boton = (Button)event.getSource();
         titulo.setText(boton.getText());
-        if (boton.equals(proveedoresBtn)) {
+        /*if (boton.equals(proveedoresBtn)) {
             tablaActual = proveedores.conseguirNombreDeLaTabla();
             consultaProveedores();
             limpiarYAgregarNodosAGrid(proveedores.conseguirNodos());
             return;
-        }
+        }*/
         for (Pair<Button, ContenidoUI> botonUi : botonesUi) {
             if (boton.equals(botonUi.getKey())) {
                 tablaActual = botonUi.getValue().conseguirNombreDeLaTabla();
@@ -163,8 +163,8 @@ public class Controller implements Initializable {
                         new int[]{columna});
             } catch (Exception e) {
                 mostrarError("Algo salió mal al editar el producto. Mensaje: " + e.getLocalizedMessage());
-                tabla.refresh();
             }
+            tabla.refresh();
         }
     }
 

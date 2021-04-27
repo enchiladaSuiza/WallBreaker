@@ -64,7 +64,7 @@ public class Main extends Application {
                 error.setTitle("Wall Breaker");
                 error.setHeaderText("Error conectando a la base de datos");
                 error.setContentText("Puede que el usuario y/o contraseña sean incorrectos, o que el servidor no esté " +
-                        "corriendo. Mensaje de error: " + e.getMessage());
+                        "corriendo. Mensaje de error:\n" + e.getMessage());
                 error.showAndWait();
                 return;
             }

@@ -5,11 +5,12 @@ import javafx.scene.control.Button;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.util.Pair;
 
 import java.time.LocalDate;
 import java.util.*;
 
-import static sample.Controller.prepararTextField;
+import static sample.Controller.*;
 
 public class Pedidos extends ContenidoUI {
     private DatePicker fecha;
@@ -17,7 +18,7 @@ public class Pedidos extends ContenidoUI {
     private Label total;
     private Button agregar, quitar, generar;
     private int posicionParaAgregarProducto;
-    private LinkedHashMap<TextField, TextField> productos;
+    private ArrayList<Pair<TextField, TextField>> productos;
 
     Pedidos(Controller controller) {
         super(controller);
@@ -48,8 +49,8 @@ public class Pedidos extends ContenidoUI {
         reemplazarNodosDeGrid(nodosArray, espacios);
         posicionParaAgregarProducto = conseguirIndice(total);
 
-        productos = new LinkedHashMap<>();
-        productos.put(idProducto, cantidad);
+        productos = new ArrayList<>();
+        productos.add(new Pair<>(idProducto, cantidad));
     }
 
     public void agregarProductoAPedido() {
@@ -57,7 +58,7 @@ public class Pedidos extends ContenidoUI {
         TextField cantidad = new TextField();
         prepararTextField(producto, "Producto (ID)", true);
         prepararTextField(cantidad, "Cantidad", true);
-        productos.put(producto, cantidad);
+        productos.add(new Pair<>(producto, cantidad));
         insertarAGrid(producto, false, posicionParaAgregarProducto);
         insertarAGrid(cantidad, false, posicionParaAgregarProducto + 1);
         posicionParaAgregarProducto += 2;
@@ -67,19 +68,30 @@ public class Pedidos extends ContenidoUI {
     }
 
     public void quitarProductoDePedido() {
-        List<TextField> textFieldsProductos = new ArrayList<>(productos.keySet());
-        int magnitud = textFieldsProductos.size();
-        TextField producto = textFieldsProductos.get(magnitud - 1);
-        TextField cantidad = productos.remove(producto);
-        quitarDeGrid(producto);
-        quitarDeGrid(cantidad);
+        Pair<TextField, TextField> par = productos.remove(productos.size() - 1);
+        quitarDeGrid(par.getKey());
+        quitarDeGrid(par.getValue());
         posicionParaAgregarProducto -= 2;
-        if (productos.keySet().size() <= 1) {
+        if (productos.size() <= 1) {
             quitar.setDisable(true);
         }
     }
 
     public void generarPedido() {
-        System.out.println("When the low heavy sky weighs like a lid on the spirit, aching for the light");
+        ArrayList<Pair<Integer, Integer>> productosConCantidad = new ArrayList<>();
+        try {
+            for (Pair<TextField, TextField> producto : productos) {
+                Pair<Integer, Integer> par =
+                        new Pair<>(Integer.parseInt(producto.getKey().getText()),
+                                Integer.parseInt(producto.getValue().getText()));
+                productosConCantidad.add(par);
+            }
+            String idCliente = this.idCliente.getText();
+            Main.conseguirDatos().addPedido(productosConCantidad, Integer.parseInt(idCliente));
+            mostrarInfo("El pedido fue generado con éxito.");
+            controller.consultaTabla(nombreDeLaTabla);
+        } catch (Exception e) {
+            mostrarError("Error al generar el pedido. Mensaje:\n" + e.getMessage());
+        }
     }
 }
