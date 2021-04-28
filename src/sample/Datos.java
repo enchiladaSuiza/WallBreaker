@@ -714,8 +714,8 @@ public class Datos {
 
             st = conexion.createStatement();
             st.executeUpdate(new String(updProds));
+            st.close();
         }
-        st.close();
         return 0;
     }
 
