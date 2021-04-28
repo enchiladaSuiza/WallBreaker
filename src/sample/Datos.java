@@ -554,72 +554,168 @@ public class Datos {
     }
 
     /**
-     * Método que agrega un proveedor a la base de datos<p>Si se pasa por parámetro una clave no existente en la BD
-     * en idProd, se agregará un valor nulo en su lugar</p><p>Se tendrá que modificar el registro de éste proveedor
-     * cuando el producto sea agregado a la BD</p>
-     * @param nomProv nombre del proveedor (Nullable en la BD)
-     * @param apelProv apellido del proveedor
-     * @param telProv telefono del proveedor (long)
-     * @param pagWeb página web del proveedor (Nullable en la BD)
-     * @param idProd clave del producto que se provee (Nullable en la BD)
-     * @param setNull booleano para indicar que el id_producto es null
-     * @return Devuelve 0 si salio bien la operación
+     * Método que agrega un proveedor a la base de datos en la tabla (proveedor) y relaciona los productos que este
+     * provee en la tabla (proveedor_producto)<p>Parámetros: Nombre, Apellido, Teléfono, Pag. Web del proveedor y un
+     * ArrayList de enteros con los ID de productos que el proveedor provee</p><p><b>Nota:</b> Se espera que los ID en
+     * el ArrayList pertenezcan a <b>productos ya exitentes</b></p>
+     * @param nom String con el nombre del proveedor (nulleable en la BD)
+     * @param apel String con el apellido del proveedor (NOT NULL en la BD)
+     * @param tel Long con el teléfono del proveedor (NOT NULL en la BD)
+     * @param pWeb String con la página web del proveedor (nulleable en la BD)
+     * @param idProds ArrayList de enteros con las llaves primarias de los productos que provee este proveedor
+     * @return Devuelve 0 si la operación se realizó con éxito
      * @throws SQLException posible excepción SQL<p>Excepción al tratar de agreagr un proveeedor</p>
-     */ // TODO Actualizar querys con la tabla proveedor_producto
-    public int addProveedor(String nomProv, String apelProv, long telProv, String pagWeb, /*int[] idProds*/int idProd, boolean setNull)
-            throws SQLException
-    {
+     */
+    public int addProveedor(String nom, String apel, long tel, String pWeb, ArrayList<Integer> idProds) throws SQLException {
         Statement st;
         ResultSet rs;
         PreparedStatement ps;
-        ArrayList<Integer> products = new ArrayList<>();
-        boolean id_prod = false; // id_producto será una clave de producto existente
+        int id_proveed = 0;
 
-        String queryProd = "select id_producto from producto";
-        StringBuilder p = new StringBuilder("insert into proveedor (nomProveedor, apelProveedor, telefonoProveedor");
+        // INSERT INTO proveedor
+        StringBuilder intoProve = new StringBuilder("insert into proveedor (nomProveedor, apelProveedor,");
+        intoProve.append(" telefonoProveedor, pag_web)").append(" values (?, ?, ?, ?)");
 
-        // Se obtiene información de los productos existentes
+        // SELECT ÚLTIMO id_proveedor
+        StringBuilder idProveedor = new StringBuilder("select auto_increment from information_schema.tables");
+        idProveedor.append(" where table_schema = 'wallbreaker' AND table_name = 'proveedor' ");
+
+        // INSERT INTO proveedor_producto
+        StringBuilder propro = new StringBuilder("insert into proveedor_producto (id_proveedor, id_producto)");
+        propro.append(" values (?, ?)");
+
+
+        // SE PREPARA EL proveedor
+        ps = conexion.prepareStatement(new String(intoProve));
+        ps.setString(1, nom); // nomProveedor
+        ps.setString(2, apel); // apelProveedor
+        ps.setString(3, String.valueOf(tel)); // telefonoProveedor
+        ps.setString(4, pWeb); // pag_web
+
+        // SE AGREGA EL PROVEEDOR A LA BASE DE DATOS
+        ps.execute();
+        ps.close();
+
+
+        // SE OBTIENE EL ÚLTIMO id_proveedor AGREGADO
         st = conexion.createStatement();
-        rs = st.executeQuery(queryProd);
-
+        rs = st.executeQuery(new String(idProveedor));
         while (rs.next()) {
-            products.add(rs.getInt("id_producto"));
+            id_proveed = Integer.parseInt(rs.getString("AUTO_INCREMENT"));
         }
-
         rs.close();
         st.close();
 
-        // Verifica si se agrega null al id_producto
-        if (setNull) id_prod = true; // id_producto será una clave de producto null
 
-        // Verifica que el producto que provee el proveedor existe en la base de datos
-        if (!products.contains(idProd)) id_prod = true; // No existe el producto que se provee por lo que se asignará null
+        // SE PREPARA LA RELACIÓN proveedor_producto
+        for (int p : idProds) {
+            ps = conexion.prepareStatement(new String(propro));
+            ps.setInt(1, id_proveed); // id_proveedor
+            ps.setInt(2, p); // id_producto
 
-
-        // Se prepara el proveedor
-        p.append(", pag_web, id_producto)");
-        p.append(" values (?, ?, ?, ?, ?)");
-
-        ps = conexion.prepareStatement(new String(p));
-        ps.setString(1, nomProv); // nomProveedor
-        ps.setString(2, apelProv); // apelProveedor
-        ps.setString(3, String.valueOf(telProv)); // telefonoProveedor
-        ps.setString(4, pagWeb); // pag_web
-        if (id_prod) {
-            ps.setNull(5, Types.NULL); // id_producto
-        } else {
-            ps.setInt(5, idProd); // id_producto
+            // GUARDA EL REGISTRO EN LA BASE DE DATOS
+            ps.execute();
+            ps.close();
         }
 
-        // Se agrega el proveedor a la base de datos
-        ps.execute();
-        ps.close();
         return 0; // Everithing OK
     }
 
-    public int editProveedor(int idProv, String nom, String ape, long tel, String pw, ArrayList<Integer> prods) {
-        // TODO completar método
+    /**
+     * Método que edita la información propia del proveedor, es decir, solo Nombre, Apellido, Teléfono y Pág. Web de él
+     * <p><b>Nota:</b> Para editar que productos provee que proveedor utilizar el método editProdsProv()</p>
+     * @param id Entero que representa la llave primaria que identifica al proveedor que será editado
+     * @param nom String con el nuevo nombre del proveedor
+     * @param ape String con el apellido nombre del proveedor
+     * @param tel Long con el nuevo teléfono del proveedor
+     * @param pW String con la nueva página web del proveedor
+     * @param toModify Arreglo de enteros con el número de la(s) columnas a modificar (máximo 4)
+     *                  <li>1 = nomProveedor</li>
+     *                  <li>2 = apelProveedor</li>
+     *                  <li>3 = telefonoProveedor</li>
+     *                  <li>4 = pag_web</li>
+     * @return Devuelve 0 si la operación salió con éxito
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de editar un proveeedor</p>
+     */
+    public int editProveedor(int id, String nom, String ape, long tel, String pW, int[] toModify) throws SQLException {
+        Statement st;
 
+        // UPDATE proveedor
+        StringBuilder updNom = new StringBuilder("update proveedor");
+        StringBuilder updApe = new StringBuilder("update proveedor");
+        StringBuilder updTel = new StringBuilder("update proveedor");
+        StringBuilder updPW = new StringBuilder("update proveedor");
+
+        updNom.append(" set nomProveedor = '").append(nom).append("' where id_proveedor = ").append(id);
+        updApe.append(" set apelProveedor = '").append(ape).append("' where id_proveedor = ").append(id);
+        updTel.append(" set telefonoProveedor = ").append(tel).append(" where id_proveedor = ").append(id);
+        updPW.append(" set pag_web = '").append(pW).append("' where id_proveedor = ").append(id);
+
+        // CAMPOS A MODIFICAR
+        StringBuilder[] toM = new StringBuilder[] {updNom, updApe, updTel, updPW};
+
+        for (int i : toModify) {
+            st = conexion.createStatement();
+            st.executeUpdate(new String(toM[(i - 1)]));
+            st.close();
+        }
+        return 0;
+    }
+
+    /**
+     * Método que edita los productos que provee determinado proveedor
+     * @param idProveedor Entero que representa la llave primaria que identifica el proveedor del que se editarán
+     *                    sus productos
+     * @param oldIDProds ArrayList de enteros que almacena los (id_producto) del proveedor (idProveedor) que
+     *                   serán modificados
+     * @param newIDProds ArrayList de enteros que almacena los nuevos (id_producto) que reemplazarán los del ArrayList
+     *                   de (oldIDProds)
+     * @return devuelve 0 si la operación salió exitosamente
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de editar los productos de un proveeedor</p>
+     */
+    public int editProdsProv(int idProveedor, ArrayList<Integer> oldIDProds, ArrayList<Integer> newIDProds) throws SQLException {
+        Statement st;
+        ResultSet rs;
+        ArrayList<String[]> prov_prod = new ArrayList<>(); // Registros de tabla proveedor_producto del proveedor dado
+        ArrayList<Integer> IDsProvProd = new ArrayList<>(); // IDs de tabla proveedor_producto a modificar
+
+        // SELECT ROWS WITH id_proveedor LIKE @param idProveedor FROM proveedor_producto
+        StringBuilder queryProPro = new StringBuilder("select * from proveedor_producto");
+        queryProPro.append(" where id_proveedor = ").append(idProveedor);
+
+
+        // OBTENER INFO DE QUE PRODS PROVEE EL PROVEEDOR ESPECIFICADO
+        st = conexion.createStatement();
+        rs = st.executeQuery(new String(queryProPro));
+        while (rs.next()) {
+            StringBuilder s = new StringBuilder();
+            for (int i = 1; i <= numcols.get("proveedor_producto"); ++i) s.append(rs.getString(i)).append(",");
+            s.deleteCharAt(s.lastIndexOf(","));
+            prov_prod.add(new String(s).split(","));
+        }
+        rs.close();
+        st.close();
+
+
+        // DEFINIR QUE id_propro(s) SERÁN MODIFICADOS
+        for (String[] x : prov_prod) { // Registros de tabla proveedor_producto del proveedor dado
+            for (int y : oldIDProds) { // IDs de los productos a ser cambiados
+                if (Integer.parseInt(x[2]) == y) IDsProvProd.add(Integer.parseInt(x[0]));
+            }
+        }
+
+        // MODIFICAR REGISTRO
+        int i = 0;
+        for (int p : newIDProds) {
+            // UPDATE id_producto EN proveedor_producto
+            StringBuilder updProds = new StringBuilder("update proveedor_producto");
+            updProds.append(" set id_producto = ").append(p).append(" where id_propro = ").append(IDsProvProd.get(i));
+            ++i;
+
+            st = conexion.createStatement();
+            st.executeUpdate(new String(updProds));
+        }
+        st.close();
         return 0;
     }
 

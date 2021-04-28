@@ -1,6 +1,8 @@
 package sample;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class TestDB {
@@ -10,7 +12,6 @@ public class TestDB {
         Datos test = new Datos("root", new Scanner(System.in).nextLine());
 
         //PROBAR MÉTODO **addProveedor**
-
 
         test.end();
     }
