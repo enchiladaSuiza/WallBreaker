@@ -2,6 +2,8 @@ package sample;
 
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
 import javafx.util.Pair;
 
 import java.time.LocalDate;
@@ -20,6 +22,7 @@ public class Ventas extends ContenidoUI {
         super(controller);
         nombreDeLaTabla = "venta";
         fecha = new DatePicker();
+        fecha.setPrefWidth(300);
         fecha.setPromptText("Fecha");
         fecha.setValue(LocalDate.now());
         idProducto = new TextField();
@@ -34,6 +37,8 @@ public class Ventas extends ContenidoUI {
         Controller.prepararTextField(idPedido, "Pedido (ID)", true);
         total = new Label("Total");
         cambio = new Label("Cambio");
+        total.setTextFill(Color.WHITE);
+        cambio.setTextFill(Color.WHITE);
 
         agregar = new Button("Agregar");
         quitar = new Button("Quitar");

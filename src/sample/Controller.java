@@ -44,7 +44,6 @@ public class Controller implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         // Tabla
         tabla.setPlaceholder(new Label());
-        tabla.setEditable(true);
 
         // Contenidos
         productos = new Productos(this);
@@ -100,6 +99,7 @@ public class Controller implements Initializable {
         tabla.getItems().clear();
         tabla.getColumns().clear();
         tabla.refresh();
+        tabla.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
         ObservableList<String> nombreColumnas = consulta.remove(0);
         for (int i = 0; i < nombreColumnas.size(); i++) { // Crear y añadir columnas a la tabla
             int indice = i;
@@ -119,6 +119,7 @@ public class Controller implements Initializable {
             }
             tabla.getItems().add(tuplas);
         }
+        tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
     public void consultaTabla(String nombreTabla) {
         try {
@@ -240,5 +241,9 @@ public class Controller implements Initializable {
         error.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
         ventana.showAndWait();
         return ventana.getResult();
+    }
+
+    public void cambiarTema() {
+        System.out.println("It's more likely than you think");
     }
 }

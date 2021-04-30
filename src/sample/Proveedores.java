@@ -129,8 +129,8 @@ public class Proveedores extends ContenidoUI {
             return;
         }
         try {
-            Main.conseguirDatos().addProveedor(nombre, apellido, Long.parseLong(telefono), paginaWeb,
-                    idProducto, this.idProductoProveedor.getText().isBlank());
+            /*Main.conseguirDatos().addProveedor(nombre, apellido, Long.parseLong(telefono), paginaWeb,
+                    idProducto, this.idProductoProveedor.getText().isBlank());*/
             Controller.mostrarInfo("El proveedor fue añadido.");
             controller.consultaTabla("proveedor");
         } catch (Exception e) {

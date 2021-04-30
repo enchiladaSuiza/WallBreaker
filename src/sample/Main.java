@@ -7,6 +7,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javafx.util.Pair;
@@ -21,6 +22,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         icono = new Image(Objects.requireNonNull(getClass().getResourceAsStream("images/Icono.png")));
+
         // Ventana para conseguir los datos
         Dialog<Pair<String, String>> dialogo = new Dialog<>();
         dialogo.setTitle("Wall Breaker");
@@ -64,7 +66,7 @@ public class Main extends Application {
                 error.setTitle("Wall Breaker");
                 error.setHeaderText("Error conectando a la base de datos");
                 error.setContentText("Puede que el usuario y/o contraseña sean incorrectos, o que el servidor no esté " +
-                        "corriendo. Mensaje de error:\n" + e.getMessage());
+                        "corriendo.\n" + e.getMessage());
                 error.showAndWait();
                 return;
             }
@@ -80,7 +82,7 @@ public class Main extends Application {
         primaryStage.setMinWidth(600);
         primaryStage.setMinHeight(300);
         Scene scene = new Scene(root);
-        String css = Objects.requireNonNull(getClass().getResource("style.css")).toExternalForm();
+        String css = Objects.requireNonNull(getClass().getResource("Styles.css")).toExternalForm();
         scene.getStylesheets().add(css);
         primaryStage.setScene(scene);
         primaryStage.show();
