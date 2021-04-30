@@ -7,7 +7,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 import javafx.util.Pair;
@@ -18,6 +17,8 @@ import java.util.Optional;
 public class Main extends Application {
     private static Datos datos;
     private static Image icono;
+    private static String cssNormal, cssOscuro, cssActual;
+    private static Scene escena;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -81,15 +82,31 @@ public class Main extends Application {
         primaryStage.getIcons().add(icono);
         primaryStage.setMinWidth(600);
         primaryStage.setMinHeight(300);
-        Scene scene = new Scene(root);
-        String css = Objects.requireNonNull(getClass().getResource("Styles.css")).toExternalForm();
-        scene.getStylesheets().add(css);
-        primaryStage.setScene(scene);
+        escena = new Scene(root);
+        cssNormal = Objects.requireNonNull(getClass().getResource("Normal.css")).toExternalForm();
+        cssOscuro = Objects.requireNonNull(getClass().getResource("Oscuro.css")).toExternalForm();
+        cssActual = cssNormal;
+        escena.getStylesheets().add(cssActual);
+        primaryStage.setScene(escena);
         primaryStage.show();
     }
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+    public static boolean cambiarCss() {
+        escena.getStylesheets().clear();
+        if (cssActual.equals(cssNormal)) {
+            cssActual = cssOscuro;
+            escena.getStylesheets().add(cssActual);
+            return false;
+        }
+        else {
+            cssActual = cssNormal;
+            escena.getStylesheets().add(cssActual);
+            return true;
+        }
     }
 
     public static Datos conseguirDatos() {

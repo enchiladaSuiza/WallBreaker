@@ -29,7 +29,7 @@
                         <Button fx:id="personalBtn" layoutX="265.0" layoutY="10.0" mnemonicParsing="false" onAction="#eventoConsultar" text="Personal" />
                     </children>
                 </FlowPane>
-                <ImageView fitHeight="67.0" fitWidth="116.0" pickOnBounds="true" preserveRatio="true">
+                <ImageView fx:id="logoView" fitHeight="67.0" fitWidth="116.0" pickOnBounds="true" preserveRatio="true">
                     <image>
                         <Image url="@images/Logo.png" />
                     </image>

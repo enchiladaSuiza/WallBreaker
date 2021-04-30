@@ -1,0 +1,145 @@
+.root {
+    -fx-background-color: #191919;
+}
+
+*: selected, *: selected * {
+    -fx-border-color: #F7A519;
+    -fx-background-color: #FFCE00;
+    -fx-text-fill: black;
+}
+
+*: focused {
+    -fx-border-color: #F7A519;
+}
+
+.text-field: focused, .text-field: not(#busquedaAyuda: focused) {
+    -fx-effect: innershadow(gaussian, #F7A519, 10, 0.2, 0, 0);
+}
+
+.text-field {
+    -fx-highlight-fill: #F7A519;
+    -fx-background-color: #191919;
+    -fx-text-fill: white;
+}
+
+.button {
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-background-color: #6F3E35;
+    -fx-border-width: 0px;
+    -fx-background-radius: 20px;
+}
+
+.button: hover {
+    -fx-text-fill: white;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-background-color: #a87066;
+    -fx-border-width: 0px;
+    -fx-background-radius: 20px;
+}
+
+.date-picker * {
+    -fx-background-color: #191919;
+    -fx-border-color: #191919;
+    -fx-text-fill: white;
+}
+
+#titulo {
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+#barraDeMenu {
+    -fx-background-color: #B45F4A;
+}
+
+#busquedaAyuda {
+    -fx-border-color: #B45F4A;
+    -fx-border-width: 5px;
+    -fx-border-radius: 5px;
+    -fx-background-radius: 5px;
+    -fx-text-box-border: #B45F4A;
+    -fx-focus-color: #B45F4A;
+}
+
+#derecha {
+    -fx-background-color: #B45F4A;
+    -fx-border-color: #B45F4A;
+}
+
+#derecha: focused {
+    -fx-border-color: transparent;
+}
+
+#grid {
+    -fx-background-color: #B45F4A;
+}
+
+.table-view {
+    -fx-border-color: #B45F4A;
+    -fx-background-color: #191919;
+}
+
+.table-view .column-header-background .filler {
+    -fx-background-color: transparent;
+}
+
+.table-view .column-header-background .show-hide-columns-button {
+    -fx-background-color: #B45F4A;
+    -fx-border-color: #6F3E35;
+}
+
+.table-view .column-header-background .show-hide-columns-button .show-hide-column-image {
+    -fx-background-color: white;
+}
+
+.table-view .corner {
+    -fx-background-color: transparent;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #B45F4A;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: white;
+}
+
+.table-view .column-header {
+    -fx-background-color: transparent;
+    -fx-border-color: #6F3E35;
+}
+
+.scroll-bar: horizontal, .scroll-bar: vertical, .track {
+    -fx-background-color: #B45F4A;
+}
+
+.increment-button, .decrement-button, .track {
+    -fx-background-color: transparent;
+}
+
+.table-cell: odd {
+    -fx-background-color: #191919;
+    -fx-text-fill: white;
+}
+
+.table-cell: even {
+    -fx-background-color: #3b3b3b;
+    -fx-text-fill: white;
+}
+
+.thumb {
+    -fx-background-color: #6F3E35;
+}
+
+.label {
+    -fx-text-fill: white;
+}
+
+/*
+Oscuro: #191919
+Oscuro clarito xD: #3b3b3b;
+*/

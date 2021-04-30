@@ -14,6 +14,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
@@ -23,9 +25,12 @@ import javafx.util.Pair;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
+    @FXML
+    private ImageView logoView;
     @FXML
     private GridPane grid;
     @FXML
@@ -35,6 +40,7 @@ public class Controller implements Initializable {
     @FXML
     private TableView<ObservableList<StringProperty>> tabla;
 
+    private Image logoNormal, logoOscuro;
     private static Alert error, informacion, confirmacion;
     private ContenidoUI productos, ventas, pedidos, proveedores, personal;
     private ArrayList<Pair<Button, ContenidoUI>> botonesUi;
@@ -44,6 +50,8 @@ public class Controller implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         // Tabla
         tabla.setPlaceholder(new Label());
+        logoNormal = new Image(Objects.requireNonNull(getClass().getResourceAsStream("images/Logo.png")));
+        logoOscuro = new Image(Objects.requireNonNull(getClass().getResourceAsStream("images/LogoBlanco.png")));
 
         // Contenidos
         productos = new Productos(this);
@@ -244,6 +252,11 @@ public class Controller implements Initializable {
     }
 
     public void cambiarTema() {
-        System.out.println("It's more likely than you think");
+        if (Main.cambiarCss()) {
+            logoView.setImage(logoNormal);
+        }
+        else {
+            logoView.setImage(logoOscuro);
+        }
     }
 }
