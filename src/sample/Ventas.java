@@ -95,7 +95,6 @@ public class Ventas extends ContenidoUI {
                         new Pair<>(Integer.parseInt(producto.getKey().getText()),
                                 Integer.parseInt(producto.getValue().getText()));
                 productosConCantidad.add(par);
-                // System.out.println(par);
             }
             int idCliente = Integer.parseInt(this.idCliente.getText());
             Pair<Integer, Double> pedidoConMonto =

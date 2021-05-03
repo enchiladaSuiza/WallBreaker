@@ -7,7 +7,7 @@ import javafx.scene.control.TextField;
 import java.util.ArrayList;
 
 public class Proveedores extends ContenidoUI {
-    private Button consultar, verProductosBtn, agregar, quitar, agregarProveedorBtn, eliminarProveedorBtn;
+    private Button consultar, verRelacionBtn, agregar, quitar, agregarProveedorBtn, eliminarProveedorBtn;
     private TextField idProductoConsulta, nombre, apellido, telefono, paginaWeb, idProductoProveedor, idProveedor;
     private ArrayList<TextField> productos;
     private int posicionParaAgregarProducto;
@@ -31,12 +31,12 @@ public class Proveedores extends ContenidoUI {
         Controller.prepararTextField(idProveedor, "Proveedor (ID)", true);
 
         consultar = new Button("Consultar");
-        verProductosBtn = new Button("Ver productos");
+        verRelacionBtn = new Button("Ver relación");
         agregar = new Button("Agregar");
         quitar = new Button("Quitar");
         agregarProveedorBtn = new Button("Agregar proveedor");
         eliminarProveedorBtn = new Button("Eliminar proveedor");
-        verProductosBtn.setOnAction(e -> verProductos());
+        verRelacionBtn.setOnAction(e -> verRelacion());
         consultar.setOnAction(e -> consultarProveedorProducto());
         agregar.setOnAction(e -> agregarProductoAProveedor());
         quitar.setOnAction(e -> quitarProductoDeProveedor());
@@ -44,8 +44,8 @@ public class Proveedores extends ContenidoUI {
         eliminarProveedorBtn.setOnAction(e -> eliminarProveedor());
         quitar.setDisable(true);
 
-        Node[] nodosArray = {idProductoConsulta, consultar, Controller.nuevoEspacio(consultar), verProductosBtn,
-                Controller.nuevoEspacio(verProductosBtn), nombre, apellido, telefono, paginaWeb, idProductoProveedor,
+        Node[] nodosArray = {idProductoConsulta, consultar, Controller.nuevoEspacio(consultar), verRelacionBtn,
+                Controller.nuevoEspacio(verRelacionBtn), nombre, apellido, telefono, paginaWeb, idProductoProveedor,
                 agregar, quitar, agregarProveedorBtn, Controller.nuevoEspacio(agregarProveedorBtn), idProveedor,
                 eliminarProveedorBtn};
         boolean[] spans = {false, false, true, true, true, false, false, false, false, true, false, false, true, true,
@@ -85,7 +85,6 @@ public class Proveedores extends ContenidoUI {
             quitar.setDisable(false);
         }
     }
-
     private void quitarProductoDeProveedor() {
         TextField producto = productos.get(productos.size() - 1);
         productos.remove(producto);
@@ -96,45 +95,50 @@ public class Proveedores extends ContenidoUI {
         }
     }
 
-    private void verProductos() {
-        System.out.println("Aquí es donde mostraría mi relación proveedor_producto, si tuviera una");
-        verProductosBtn.setText("Ver proveedores");
-        verProductosBtn.setOnAction(e -> verProveedores());
+    private void verRelacion() {
+        controller.consultaProveedores();
+        verRelacionBtn.setText("Ver solo proveedores");
+        verRelacionBtn.setOnAction(e -> verSoloProveedores());
     }
-
-    private void verProveedores() {
-        System.out.println("I showed you my urgh please respond");
-        verProductosBtn.setText("Ver productos");
-        verProductosBtn.setOnAction(e -> verProductos());
+    private void verSoloProveedores() {
+        controller.consultaTabla(nombreDeLaTabla);
+        verRelacionBtn.setText("Ver relación");
+        verRelacionBtn.setOnAction(e -> verRelacion());
     }
 
     private void agregarProveedor() {
         String nombre = this.nombre.getText();
         String apellido = this.apellido.getText();
-        String telefono = this.telefono.getText();
+        String stringTelefono = this.telefono.getText();
         String paginaWeb = this.paginaWeb.getText();
-        int idProducto = 0;
-        if (!this.idProductoProveedor.getText().isBlank()) {
-            try {
-                idProducto = Integer.parseInt(this.idProductoProveedor.getText());
-            } catch (Exception e) {
-                Controller.mostrarError("Porfavor ingrese un ID válido, o deje el campo en blanco para no relacionar " +
-                        "un procuto con el proveedor.");
+        ArrayList<Integer> idProductos = new ArrayList<>();
+        try {
+            for (TextField producto: productos) {
+                idProductos.add(Integer.parseInt(producto.getText()));
             }
+        } catch (NumberFormatException e) {
+            Controller.mostrarError("Por favor coloque IDs válidos.");
         }
 
         // Aún así se recomienda que llenen todos :)
-        if (apellido.isBlank() || telefono.isBlank()) {
+        if (apellido.isBlank() || stringTelefono.isBlank()) {
             Controller.mostrarError("Se requiere como mínimo los campos Apellido y Teléfono");
             return;
         }
+
+        long telefono = 0;
         try {
-            /*Main.conseguirDatos().addProveedor(nombre, apellido, Long.parseLong(telefono), paginaWeb,
-                    idProducto, this.idProductoProveedor.getText().isBlank());*/
+            telefono = Long.parseLong(stringTelefono);
+        } catch (NumberFormatException e) {
+            Controller.mostrarError("Por favor coloque un número de teléfono válido");
+        }
+
+        try {
+            Main.conseguirDatos().addProveedor(nombre, apellido, telefono, paginaWeb, idProductos);
             Controller.mostrarInfo("El proveedor fue añadido.");
             controller.consultaTabla("proveedor");
         } catch (Exception e) {
-            Controller.mostrarError("Se produjo un error al añadir al proveedor. El mensaje de error es: " + e.getMessage());
+            Controller.mostrarError("Se produjo un error al añadir al proveedor.\n" + e.getMessage());
         }
     }
 

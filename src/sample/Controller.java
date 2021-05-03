@@ -89,12 +89,6 @@ public class Controller implements Initializable {
     private void eventoConsultar(ActionEvent event) {
         Button boton = (Button)event.getSource();
         titulo.setText(boton.getText());
-        /* if (boton.equals(proveedoresBtn)) {
-            tablaActual = proveedores.conseguirNombreDeLaTabla();
-            consultaProveedores();
-            limpiarYAgregarNodosAGrid(proveedores.conseguirNodos());
-            return;
-        } */
         for (Pair<Button, ContenidoUI> botonUi : botonesUi) {
             if (boton.equals(botonUi.getKey())) {
                 tablaActual = botonUi.getValue().conseguirNombreDeLaTabla();
@@ -179,6 +173,7 @@ public class Controller implements Initializable {
                 tabla.refresh();
             }
         }
+
         else if (tablaActual.equals(personal.conseguirNombreDeLaTabla())) {
             try {
                 Main.conseguirDatos().editPersonal(Integer.parseInt(propiedades.get(0)), propiedades.get(1),
@@ -186,6 +181,17 @@ public class Controller implements Initializable {
                         Double.parseDouble(propiedades.get(5)), new int[]{columna});
             } catch (Exception e) {
                 mostrarError("Algo salió mal al editar al personal.\n" + e.getMessage());
+                tabla.refresh();
+            }
+        }
+
+        else if (tablaActual.equals(proveedores.conseguirNombreDeLaTabla())) {
+            try {
+                Main.conseguirDatos().editProveedor(Integer.parseInt(propiedades.get(0)), propiedades.get(1),
+                        propiedades.get(2), Long.parseLong(propiedades.get(3)), propiedades.get(4), new int[]{columna});
+
+            } catch (Exception e) {
+                mostrarError("Algo salió mal al editar al proveedor.\n" + e.getMessage());
                 tabla.refresh();
             }
         }
