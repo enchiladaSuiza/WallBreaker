@@ -1,0 +1,51 @@
+.root {
+    -fx-background-color: #191919;
+}
+
+.label {
+    -fx-text-fill: white;
+}
+
+.text-field {
+    -fx-highlight-fill: #F7A519;
+    -fx-background-color: #191919;
+    -fx-text-fill: white;
+}
+
+.date-picker {
+    -fx-background-color: #191919;
+    -fx-border-color: #191919;
+    -fx-text-fill: white;
+}
+
+.combo-box {
+    -fx-background-color: #191919;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: white;
+    -fx-background-color: #191919
+}
+
+#titulo {
+    -fx-text-fill: white;
+}
+
+.table-view {
+    -fx-background-color: #191919;
+}
+
+.table-cell: odd {
+    -fx-background-color: #191919;
+    -fx-text-fill: white;
+}
+
+.table-cell: even {
+    -fx-background-color: #3b3b3b;
+    -fx-text-fill: white;
+}
+
+/*
+Oscuro: #191919
+Oscuro clarito xD: #3b3b3b;
+*/

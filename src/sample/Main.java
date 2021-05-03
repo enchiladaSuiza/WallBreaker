@@ -1,6 +1,7 @@
 package sample;
 
 import javafx.application.Application;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
@@ -83,8 +84,10 @@ public class Main extends Application {
         primaryStage.setMinWidth(600);
         primaryStage.setMinHeight(300);
         escena = new Scene(root);
-        cssNormal = Objects.requireNonNull(getClass().getResource("Normal.css")).toExternalForm();
-        cssOscuro = Objects.requireNonNull(getClass().getResource("Oscuro.css")).toExternalForm();
+        String estilosRoot = Objects.requireNonNull(getClass().getResource("css/Styles.css")).toExternalForm();
+        escena.getStylesheets().add(estilosRoot);
+        cssNormal = Objects.requireNonNull(getClass().getResource("css/Normal.css")).toExternalForm();
+        cssOscuro = Objects.requireNonNull(getClass().getResource("css/Oscuro.css")).toExternalForm();
         cssActual = cssNormal;
         escena.getStylesheets().add(cssActual);
         primaryStage.setScene(escena);
@@ -96,7 +99,8 @@ public class Main extends Application {
     }
 
     public static boolean cambiarCss() {
-        escena.getStylesheets().clear();
+        ObservableList<String> stylesheets = escena.getStylesheets();
+        stylesheets.remove(stylesheets.size() - 1);
         if (cssActual.equals(cssNormal)) {
             cssActual = cssOscuro;
             escena.getStylesheets().add(cssActual);

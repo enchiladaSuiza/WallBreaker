@@ -1,14 +1,15 @@
-.root {
-    -fx-background-color: #191919;
+*: selected, not(.combo-box: selected) {
+    -fx-border-color: #F7A519 !important;
+    -fx-background-color: #FFCE00 !important;
+    -fx-text-fill: black !important;
 }
 
-*: selected, *: selected * {
-    -fx-border-color: #F7A519;
-    -fx-background-color: #FFCE00;
-    -fx-text-fill: black;
+*: selected *, not(.combo-box: selected *) {
+    -fx-background-color: #FFCE00 !important;
+    -fx-text-fill: black !important;
 }
 
-*: focused {
+*: focused, not(.combo-box: focused) {
     -fx-border-color: #F7A519;
 }
 
@@ -18,8 +19,6 @@
 
 .text-field {
     -fx-highlight-fill: #F7A519;
-    -fx-background-color: #191919;
-    -fx-text-fill: white;
 }
 
 .button {
@@ -40,14 +39,7 @@
     -fx-background-radius: 20px;
 }
 
-.date-picker * {
-    -fx-background-color: #191919;
-    -fx-border-color: #191919;
-    -fx-text-fill: white;
-}
-
 #titulo {
-    -fx-text-fill: white;
     -fx-font-size: 14px;
     -fx-font-weight: bold;
 }
@@ -79,8 +71,8 @@
 }
 
 .table-view {
-    -fx-border-color: #B45F4A;
-    -fx-background-color: #191919;
+    -fx-border-color: transparent;
+    -fx-background-color: transparent;
 }
 
 .table-view .column-header-background .filler {
@@ -97,7 +89,7 @@
 }
 
 .table-view .corner {
-    -fx-background-color: transparent;
+    -fx-background-color: #B45F4A;
 }
 
 .table-view .column-header-background {
@@ -121,25 +113,15 @@
     -fx-background-color: transparent;
 }
 
-.table-cell: odd {
-    -fx-background-color: #191919;
-    -fx-text-fill: white;
-}
-
-.table-cell: even {
-    -fx-background-color: #3b3b3b;
-    -fx-text-fill: white;
-}
-
 .thumb {
     -fx-background-color: #6F3E35;
 }
 
-.label {
-    -fx-text-fill: white;
-}
-
 /*
-Oscuro: #191919
-Oscuro clarito xD: #3b3b3b;
+Colores
+Gris: #efefef
+Marrón clarito (para fondos): #B45F4A
+Marrón oscuro (para botones): #6F3E35
+Amarillo clarito: #FFCE00
+Amarillo oscuro: #F7A519
 */

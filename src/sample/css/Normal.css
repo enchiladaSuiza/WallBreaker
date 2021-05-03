@@ -1,0 +1,20 @@
+.root {
+    -fx-background-color: #efefef;
+}
+
+.combo-box {
+    -fx-background-color: white;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: black;
+}
+
+/*
+Colores
+Gris: #efefef
+Marrón clarito (para fondos): #B45F4A
+Marrón oscuro (para botones): #6F3E35
+Amarillo clarito: #FFCE00
+Amarillo oscuro: #F7A519
+*/

@@ -14,6 +14,7 @@ public class Datos {
     private final HashMap<String, Integer> numcols;
     private final ConexionBase obj;
     private final Connection conexion;
+    private ArrayList<Pair<String, Integer>> categorias;
 
     /**
      * Crea objeto para interactuar con la base de datos
@@ -37,6 +38,8 @@ public class Datos {
             numcols.put("proveedor_producto", 3);
             numcols.put("venta", 7);
         }
+
+        categorias = consultarCategorias();
     }
 
     /**
@@ -824,6 +827,40 @@ public class Datos {
         st.close();
         return 0;
     }
+
+    /** Método para obtener el nombre e ID de las categorías
+     * @return Una lista observables de listas observables con el nombre e ID
+     * @throws SQLException Si algo sale mal en la BD
+    * */
+
+    public ArrayList<Pair<String, Integer>> consultarCategorias() throws SQLException {
+        ObservableList<ObservableList<String>> resultados = FXCollections.observableArrayList();
+        String instruccion = "select nomCategoria, id_categoria from categoria";
+
+        Statement st = conexion.createStatement();
+        ResultSet rs = st.executeQuery(instruccion);
+        int cols = rs.getMetaData().getColumnCount();
+
+        int indiceFila = -1;
+        while (rs.next()) {
+            resultados.add(FXCollections.observableArrayList()); // Añade una tupla
+            indiceFila++;
+            for (int v = 1; v <= cols; ++v) {
+                resultados.get(indiceFila).add(rs.getString(v)); // Añade un registro
+            }
+        }
+
+        rs.close();
+        st.close();
+
+        ArrayList<Pair<String, Integer>> categorias = new ArrayList<>();
+        for (ObservableList<String> tupla : resultados) {
+            categorias.add(new Pair<>(tupla.get(0), Integer.parseInt(tupla.get(1))));
+        }
+        return categorias;
+    }
+
+    public ArrayList<Pair<String, Integer>> conseguirCategorias() { return categorias; }
 
     /**
      * Cierra la conexión con el servidor de MySQL

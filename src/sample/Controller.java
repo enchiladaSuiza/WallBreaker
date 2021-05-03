@@ -243,8 +243,8 @@ public class Controller implements Initializable {
         return ventana.getResult();
     }
 
+    // Misc
     public void refrescarTabla() { tabla.refresh(); }
-
     public void cambiarTema() {
         if (Main.cambiarCss()) {
             logoView.setImage(logoNormal);
