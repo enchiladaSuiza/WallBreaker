@@ -66,5 +66,7 @@ public class ContenidoUI {
         return -1;
     }
 
+    public void editar(ArrayList<String> propiedaes, int columna) { }
+
     public String conseguirNombreDeLaTabla() { return nombreDeLaTabla; }
 }

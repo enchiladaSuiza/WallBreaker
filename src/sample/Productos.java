@@ -77,4 +77,43 @@ public class Productos extends ContenidoUI {
             Controller.mostrarError("Se produjo un error al eliminar el producto. El mensaje de error es: " + e.getMessage());
         }
     }
+
+    public void editar(ArrayList<String> propiedades, int columna) {
+        int id = Integer.parseInt(propiedades.get(0));
+        double precio = 0;
+        int almacen = 0, idCategoria = 0;
+        String nombre = propiedades.get(1);
+
+        try {
+            precio = Double.parseDouble(propiedades.get(2));
+        } catch (NumberFormatException e) {
+            Controller.mostrarError("Por favor ingrese un precio válido.");
+            controller.refrescarTabla();
+            return;
+        }
+
+        try {
+            almacen = Integer.parseInt(propiedades.get(3));
+        } catch (NumberFormatException e) {
+            Controller.mostrarError("Por favor ingrese una cantidad válida.");
+            controller.refrescarTabla();
+            return;
+        }
+
+        try {
+            idCategoria = Integer.parseInt(propiedades.get(4));
+        } catch (NumberFormatException e) {
+            Controller.mostrarError("Por favor ingrese una categoría válida");
+            controller.refrescarTabla();
+            return;
+        }
+
+        try {
+            Main.conseguirDatos().editProduct(id, nombre, precio, almacen, idCategoria, new int[]{columna});
+        } catch (Exception e) {
+            Controller.mostrarError("Algo salió mal al editar el producto.\n" + e.getMessage());
+            controller.refrescarTabla();
+            return;
+        }
+    }
 }

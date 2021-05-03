@@ -4,6 +4,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class Proveedores extends ContenidoUI {
@@ -141,7 +142,6 @@ public class Proveedores extends ContenidoUI {
             Controller.mostrarError("Se produjo un error al añadir al proveedor.\n" + e.getMessage());
         }
     }
-
     private void eliminarProveedor() {
         String idProveedor = this.idProveedor.getText();
         try {
@@ -150,6 +150,30 @@ public class Proveedores extends ContenidoUI {
             controller.consultaTabla(nombreDeLaTabla);
         } catch (Exception e) {
             Controller.mostrarError("Error al eliminar el proveedor.\n" + e.getMessage());
+        }
+    }
+
+    public void editar(ArrayList<String> propiedades, int columna) {
+        int id = Integer.parseInt(propiedades.get(0));
+        String nombre = propiedades.get(1);
+        String apellido = propiedades.get(2);
+        String paginaWeb = propiedades.get(4);
+        long telefono = 0;
+
+        try {
+            telefono = Long.parseLong(propiedades.get(3));
+        } catch (NumberFormatException e) {
+            Controller.mostrarError("Por favor ingrese un teléfono válido.");
+            controller.refrescarTabla();
+            return;
+        }
+
+        try {
+            Main.conseguirDatos().editProveedor(id, nombre, apellido, telefono, paginaWeb, new int[]{columna});
+        } catch (SQLException e) {
+            Controller.mostrarError("Algo salió mal al editar al proveedor.\n" + e.getMessage());
+            controller.refrescarTabla();
+            return;
         }
     }
 }

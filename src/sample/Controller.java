@@ -91,8 +91,8 @@ public class Controller implements Initializable {
         titulo.setText(boton.getText());
         for (Pair<Button, ContenidoUI> botonUi : botonesUi) {
             if (boton.equals(botonUi.getKey())) {
-                tablaActual = botonUi.getValue().conseguirNombreDeLaTabla();
-                consultaTabla(tablaActual);
+                String tabla = botonUi.getValue().conseguirNombreDeLaTabla();
+                consultaTabla(tabla);
                 limpiarYAgregarNodosAGrid(botonUi.getValue().conseguirNodos());
             }
         }
@@ -124,8 +124,12 @@ public class Controller implements Initializable {
         tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
     public void consultaTabla(String nombreTabla) {
+        if (!tabla.isEditable()) {
+            tabla.setEditable(true);
+        }
         try {
             ObservableList<ObservableList<String>> consulta = Main.conseguirDatos().verTodo(nombreTabla);
+            tablaActual = nombreTabla;
             consulta(consulta);
         } catch (SQLException e) {
             mostrarError("No fue posible realizar la consulta. Error: " + e.getMessage());
@@ -135,6 +139,7 @@ public class Controller implements Initializable {
         try {
             ObservableList<ObservableList<String>> consulta = Main.conseguirDatos().proveedor();
             consulta(consulta);
+            tabla.setEditable(false);
         } catch (SQLException throwables) {
             mostrarError("No fue posible realizar la consulta. Error: " + throwables.getMessage());
         }
@@ -143,15 +148,20 @@ public class Controller implements Initializable {
         try {
             ObservableList<ObservableList<String>> consulta = Main.conseguirDatos().proveedor(idProducto);
             consulta(consulta);
+            tabla.setEditable(false);
         } catch (SQLException throwables) {
             mostrarError("No fue posible realizar la consulta. Error: " + throwables.getMessage());
         }
     }
 
     public void editarCelda(TablePosition<ObservableList<StringProperty>, String> posicion, String valor) {
-        // No estoy enteramente seguro si este método es el mejor en enfoque
         ObservableList<StringProperty> fila = posicion .getTableView().getItems().get(posicion.getRow());
         int columna = posicion.getColumn();
+        if (columna == 0) {
+            mostrarError("No es posible actualizar los IDs.");
+            tabla.refresh();
+            return;
+        }
         ArrayList<String> propiedades = new ArrayList<>();
         for (int i = 0; i < fila.size(); i++) {
             if (i == columna) {
@@ -163,37 +173,13 @@ public class Controller implements Initializable {
         }
 
         if (tablaActual.equals(productos.conseguirNombreDeLaTabla())) {
-            try {
-                Main.conseguirDatos().editProduct(Integer.parseInt(propiedades.get(0)),
-                        propiedades.get(1), Double.parseDouble(propiedades.get(2)),
-                        Integer.parseInt(propiedades.get(3)), Integer.parseInt(propiedades.get(4)),
-                        new int[]{columna});
-            } catch (Exception e) {
-                mostrarError("Algo salió mal al editar el producto.\n" + e.getMessage());
-                tabla.refresh();
-            }
+            productos.editar(propiedades, columna);
         }
-
         else if (tablaActual.equals(personal.conseguirNombreDeLaTabla())) {
-            try {
-                Main.conseguirDatos().editPersonal(Integer.parseInt(propiedades.get(0)), propiedades.get(1),
-                        propiedades.get(2), propiedades.get(3), Long.parseLong(propiedades.get(4)),
-                        Double.parseDouble(propiedades.get(5)), new int[]{columna});
-            } catch (Exception e) {
-                mostrarError("Algo salió mal al editar al personal.\n" + e.getMessage());
-                tabla.refresh();
-            }
+            personal.editar(propiedades, columna);
         }
-
         else if (tablaActual.equals(proveedores.conseguirNombreDeLaTabla())) {
-            try {
-                Main.conseguirDatos().editProveedor(Integer.parseInt(propiedades.get(0)), propiedades.get(1),
-                        propiedades.get(2), Long.parseLong(propiedades.get(3)), propiedades.get(4), new int[]{columna});
-
-            } catch (Exception e) {
-                mostrarError("Algo salió mal al editar al proveedor.\n" + e.getMessage());
-                tabla.refresh();
-            }
+            proveedores.editar(propiedades, columna);
         }
     }
 
@@ -256,6 +242,8 @@ public class Controller implements Initializable {
         ventana.showAndWait();
         return ventana.getResult();
     }
+
+    public void refrescarTabla() { tabla.refresh(); }
 
     public void cambiarTema() {
         if (Main.cambiarCss()) {
