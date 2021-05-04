@@ -9,34 +9,34 @@ import java.time.LocalDate;
 import java.util.*;
 
 public class Ventas extends ContenidoUI {
-    private DatePicker fecha;
-    private TextField idProducto, cantidad, efectivo, idCliente, idPedido;
+    // private DatePicker fecha;
+    private TextField idProducto, cantidad, efectivo, idCliente/*, idPedido*/;
     private Button agregar, quitar, generar;
-    private Label total, cambio;
+    // private Label total, cambio;
     private int posicionParaAgregarProducto;
     private ArrayList<Pair<TextField, TextField>> productos;
 
     public Ventas(Controller controller) {
         super(controller);
         nombreDeLaTabla = "venta";
-        fecha = new DatePicker();
+        /*fecha = new DatePicker();
         fecha.setPrefWidth(300);
         fecha.setPromptText("Fecha");
-        fecha.setValue(LocalDate.now());
+        fecha.setValue(LocalDate.now());*/
         idProducto = new TextField();
         cantidad = new TextField();
         efectivo = new TextField();
         idCliente = new TextField();
-        idPedido = new TextField();
+        /*idPedido = new TextField();*/
         Controller.prepararTextField(idProducto, "Producto (ID)", Controller.TEXTFIELD_CADENA);
         Controller.prepararTextField(cantidad, "Cantidad", Controller.TEXTFIELD_ENTERO);
         Controller.prepararTextField(efectivo, "Efectivo", Controller.TEXTFILED_FLOTANTE);
         Controller.prepararTextField(idCliente, "Cliente (ID)", Controller.TEXTFIELD_ENTERO);
-        Controller.prepararTextField(idPedido, "Pedido (ID)", Controller.TEXTFIELD_ENTERO);
-        total = new Label("Total");
+        /*Controller.prepararTextField(idPedido, "Pedido (ID)", Controller.TEXTFIELD_ENTERO);*/
+        /*total = new Label("Total");
         cambio = new Label("Cambio");
         total.setTextFill(Color.WHITE);
-        cambio.setTextFill(Color.WHITE);
+        cambio.setTextFill(Color.WHITE);*/
 
         agregar = new Button("Agregar");
         quitar = new Button("Quitar");
@@ -46,13 +46,14 @@ public class Ventas extends ContenidoUI {
         generar.setOnAction(e -> generarVenta());
         quitar.setDisable(true);
 
-        Node[] nodosArray = {fecha, idProducto, cantidad, total, agregar, quitar, efectivo, cambio, idCliente,
-                idPedido, generar};
-        boolean[] espacios = {true, false, false, true, false, false, false, false, false, false, true};
+        Node[] nodosArray = {/*fecha,*/ idProducto, cantidad, /*total,*/ agregar, quitar, efectivo, /*cambio,*/ idCliente,
+                /*idPedido,*/ generar};
+        boolean[] espacios = {/*true,*/ false, false, /*true,*/ false, false, false, /*false,*/
+                false, /*false,*/ true};
 
         nodos = new ArrayList<>();
         reemplazarNodosDeGrid(nodosArray, espacios);
-        posicionParaAgregarProducto = conseguirIndice(total);
+        posicionParaAgregarProducto = conseguirIndice(agregar);
 
         productos = new ArrayList<>();
         productos.add(new Pair<>(idProducto, cantidad));
@@ -95,28 +96,35 @@ public class Ventas extends ContenidoUI {
                 productosConCantidad.add(par);
             }
             int idCliente = Integer.parseInt(this.idCliente.getText());
+
             Pair<Integer, Double> pedidoConMonto =
                     Main.conseguirDatos().generarTotalVenta(idCliente, productosConCantidad);
-            double total = pedidoConMonto.getValue();
+            /*double total = pedidoConMonto.getValue();
+            this.total.setText(String.valueOf(total));*/
             double efectivo = Double.parseDouble(this.efectivo.getText());
-            this.total.setText(String.valueOf(total));
-
             Double cambio = (Double)Main.conseguirDatos().generarVenta(pedidoConMonto.getKey(), efectivo);
             if (cambio == null) {
                 Controller.mostrarError("El pedido ya fue vendido antes.");
                 return;
             }
             else if (cambio == -1.0) {
-                Controller.mostrarError("El cambio no cumple en monto");
+                Controller.mostrarError("El efectivo no cumple con el monto.");
                 return;
             }
 
-            this.cambio.setText(String.valueOf(cambio));
-            Controller.mostrarInfo("El pedido y la venta fueron generados con éxito.");
-
+            /*this.cambio.setText(String.valueOf(cambio));*/
+            Controller.mostrarInfo("La venta y el pedido fueron generados con éxito.");
+            controller.consultaTabla(nombreDeLaTabla);
         } catch (Exception e) {
-            Controller.mostrarError("Algo salió mal al generar la venta. El error es: "
-                    + e.getLocalizedMessage());
+            Controller.mostrarError("Algo salió mal al generar la venta.\n\n" + e.getLocalizedMessage());
         }
+
+        while (productos.size() > 1) {
+            quitarProductoDeVenta();
+        }
+        this.idProducto.clear();
+        this.cantidad.clear();
+        this.efectivo.clear();
+        this.idCliente.clear();
     }
 }

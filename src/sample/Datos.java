@@ -240,26 +240,25 @@ public class Datos {
         // AGREGA UN PEDIDO CON LA INFORMACIÓN ENTRANTE
         addPedido(prods_cant, idClien);
 
-
         // SELECT ÚLTIMO id_pedido
-        StringBuilder idPedido = new StringBuilder("select auto_increment from information_schema.tables");
-        idPedido.append(" where table_schema = 'wallbreaker' AND table_name = 'pedido' ");
+        /*StringBuilder idPedido = new StringBuilder("select auto_increment from information_schema.tables");
+        idPedido.append(" where table_schema = 'wallbreaker' AND table_name = 'pedido' ");*/
+
+        StringBuilder idPedido = new StringBuilder("SELECT MAX(id_pedido) FROM pedido");
 
         // SELECT montoF DEL ÚLTIMO PEDIDO
         StringBuilder montoF = new StringBuilder("select montoF from pedido");
         montoF.append(" where id_pedido = ");
 
-
         // SE OBTIENE EL id_pedido GENERADO
         st = conexion.createStatement();
         rs = st.executeQuery(new String(idPedido));
         while (rs.next()) {
-            id_ped = Integer.parseInt(rs.getString("AUTO_INCREMENT"));
+            id_ped = Integer.parseInt(rs.getString("MAX(id_pedido)"));
         }
         montoF.append(id_ped);
         rs.close();
         st.close();
-
 
         // OBTIENE montoF DEL PEDIDO REALIZADO
         st = conexion.createStatement();
@@ -292,14 +291,12 @@ public class Datos {
         Statement st;
         ResultSet rs;
         ArrayList<String[]> infoProds = new ArrayList<>();
-        StringBuilder queryProd = new StringBuilder("select * from producto where id_producto = ");
+        String queryProd = "select * from producto where id_producto = ";
         StringBuilder registro;
 
         st = conexion.createStatement();
         for (Pair<Integer, Integer> p : prods_cant) {
-            queryProd.append(p.getKey());
-            rs = st.executeQuery(new String(queryProd));
-
+            rs = st.executeQuery(queryProd + p.getKey().toString());
             while (rs.next()) {
                 registro = new StringBuilder();
                 for (int i = 1; i <= numcols.get("producto"); ++i) registro.append(rs.getString(i)).append(",");
@@ -337,18 +334,16 @@ public class Datos {
         ped_prod.append(" values (?, ?, ?)");
 
         // SELECT ÚLTIMO id_pedido
-        StringBuilder idPedido = new StringBuilder("select auto_increment from information_schema.tables");
-        idPedido.append(" where table_schema = 'wallbreaker' AND table_name = 'pedido' ");
+        /*StringBuilder idPedido = new StringBuilder("select auto_increment from information_schema.tables");
+        idPedido.append(" where table_schema = 'wallbreaker' AND table_name = 'pedido' ");*/
+
+        StringBuilder idPedido = new StringBuilder("SELECT MAX(id_pedido) FROM pedido");
 
         // UPDATE almacen EN PRODUCTO
-        StringBuilder updateProd = new StringBuilder("update producto set almacen = ");
-
-
+        String updateProd = "update producto set almacen = ";
 
         // INFO DE LOS PRODUCTOS PARA EL PEDIDO
         ArrayList<String[]> infoProds = infoProds(prods_cant);
-
-
 
         // INFORMACIÓN DEL PEDIDO
         Random r = new Random();
@@ -378,8 +373,6 @@ public class Datos {
         }
         montoF = monto - (monto * descuento); // monto final del pedido
 
-
-
         // PREPARACIÓN DEL PEDIDO
         ps = conexion.prepareStatement(new String(pedido)); // Conecta el objeto PreparedStatement
         ps.setDate(1, new java.sql.Date(System.currentTimeMillis())); // fecha_pedido
@@ -397,12 +390,10 @@ public class Datos {
         rs = st.executeQuery(new String(idPedido));
         int id_ped = 0;
         while (rs.next()) {
-            id_ped = Integer.parseInt(rs.getString("AUTO_INCREMENT"));
+            id_ped = Integer.parseInt(rs.getString("MAX(id_pedido)"));
         }
         rs.close();
         st.close();
-
-
 
         // SE PREPARA LA RELACIÓN pedido_producto
         for (int v = 0; v < infoProds.size(); ++v) {
@@ -420,16 +411,15 @@ public class Datos {
             ps.close(); // Cierra el objeto PreparedStatement
         }
 
-
-
         // ACTUALIZAR almacen EN TABLA producto
         for (int w = 0; w < infoProds.size(); ++w) {
             st = conexion.createStatement();
 
             int newAlmacen = Integer.parseInt(infoProds.get(w)[3]) - cantPerProd.get(w);
 
-            updateProd.append(newAlmacen).append(" where id_producto = ").append(infoProds.get(w)[0]);
-            st.executeUpdate(new String(updateProd)); // Nuevo número de productos almacenados tras el pedido
+            // updateProd.append(newAlmacen).append(" where id_producto = ").append(infoProds.get(w)[0]);
+            st.executeUpdate(updateProd + newAlmacen + " WHERE id_producto = "
+                    + infoProds.get(w)[0]); // Nuevo número de productos almacenados tras el pedido
             st.close();
         }
 

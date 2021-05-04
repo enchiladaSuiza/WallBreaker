@@ -12,9 +12,9 @@ import java.time.LocalDate;
 import java.util.*;
 
 public class Pedidos extends ContenidoUI {
-    private DatePicker fecha;
+    // private DatePicker fecha;
     private TextField idProducto, cantidad, idCliente;
-    private Label total;
+    // private Label total;
     private Button agregar, quitar, generar;
     private int posicionParaAgregarProducto;
     private ArrayList<Pair<TextField, TextField>> productos;
@@ -22,18 +22,18 @@ public class Pedidos extends ContenidoUI {
     Pedidos(Controller controller) {
         super(controller);
         nombreDeLaTabla = "pedido";
-        fecha = new DatePicker();
+        /*fecha = new DatePicker();
         fecha.setPromptText("Fecha");
         fecha.setPrefWidth(300);
-        fecha.setValue(LocalDate.now());
+        fecha.setValue(LocalDate.now());*/
         idProducto = new TextField();
         cantidad = new TextField();
         idCliente = new TextField();
         Controller.prepararTextField(idProducto, "Producto (ID)", Controller.TEXTFIELD_ENTERO);
         Controller.prepararTextField(cantidad, "Cantidad", Controller.TEXTFIELD_ENTERO);
         Controller.prepararTextField(idCliente, "Cliente (ID)", Controller.TEXTFIELD_ENTERO);
-        total = new Label("Total");
-        total.setTextFill(Color.WHITE);
+        /*total = new Label("Total");
+        total.setTextFill(Color.WHITE);*/
 
         agregar = new Button("Agregar");
         quitar = new Button("Quitar");
@@ -43,12 +43,12 @@ public class Pedidos extends ContenidoUI {
         generar.setOnAction(e -> generarPedido());
         quitar.setDisable(true);
 
-        Node[] nodosArray = {fecha, idProducto, cantidad, total, agregar, quitar, idCliente, generar};
-        boolean[] espacios = {true, false, false, true, false, false, true, true};
+        Node[] nodosArray = {/*fecha,*/ idProducto, cantidad, /*total,*/ agregar, quitar, idCliente, generar};
+        boolean[] espacios = {/*true,*/ false, false, /*true,*/ false, false, true, true};
 
         nodos = new ArrayList<>();
         reemplazarNodosDeGrid(nodosArray, espacios);
-        posicionParaAgregarProducto = conseguirIndice(total);
+        posicionParaAgregarProducto = conseguirIndice(/*total*/agregar);
 
         productos = new ArrayList<>();
         productos.add(new Pair<>(idProducto, cantidad));
