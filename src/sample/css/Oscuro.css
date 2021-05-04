@@ -27,12 +27,13 @@
     -fx-background-color: #191919
 }
 
-#titulo {
-    -fx-text-fill: white;
+.combo-box .list-cell: hover, .combo-box .combo-box-popup .list-cell: selected {
+    -fx-border-color: #F7A519;
+    -fx-background-color: #191919;
 }
 
-.table-view {
-    -fx-background-color: #191919;
+#titulo {
+    -fx-text-fill: white;
 }
 
 .table-cell: odd {

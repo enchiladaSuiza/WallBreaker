@@ -23,13 +23,13 @@ public class Proveedores extends ContenidoUI {
         paginaWeb = new TextField();
         idProductoProveedor = new TextField();
         idProveedor = new TextField();
-        Controller.prepararTextField(idProductoConsulta, "Prouducto (ID)", true);
-        Controller.prepararTextField(nombre, "Nombre", false);
-        Controller.prepararTextField(apellido, "Apellido", false);
-        Controller.prepararTextField(telefono, "Teléfono", true);
-        Controller.prepararTextField(paginaWeb, "Página web", false);
-        Controller.prepararTextField(idProductoProveedor, "Producto (ID)" , true);
-        Controller.prepararTextField(idProveedor, "Proveedor (ID)", true);
+        Controller.prepararTextField(idProductoConsulta, "Prouducto (ID)", Controller.TEXTFIELD_ENTERO);
+        Controller.prepararTextField(nombre, "Nombre", Controller.TEXTFIELD_CADENA);
+        Controller.prepararTextField(apellido, "Apellido", Controller.TEXTFIELD_CADENA);
+        Controller.prepararTextField(telefono, "Teléfono", Controller.TEXTFIELD_ENTERO);
+        Controller.prepararTextField(paginaWeb, "Página web", Controller.TEXTFIELD_CADENA);
+        Controller.prepararTextField(idProductoProveedor, "Producto (ID)" , Controller.TEXTFIELD_ENTERO);
+        Controller.prepararTextField(idProveedor, "Proveedor (ID)", Controller.TEXTFIELD_ENTERO);
 
         consultar = new Button("Consultar");
         verRelacionBtn = new Button("Ver relación");
@@ -78,7 +78,7 @@ public class Proveedores extends ContenidoUI {
 
     private void agregarProductoAProveedor() {
         TextField producto = new TextField();
-        Controller.prepararTextField(producto, "Producto (ID)", true);
+        Controller.prepararTextField(producto, "Producto (ID)", Controller.TEXTFIELD_ENTERO);
         productos.add(producto);
         insertarAGrid(producto, true, posicionParaAgregarProducto);
         posicionParaAgregarProducto++;
@@ -141,6 +141,15 @@ public class Proveedores extends ContenidoUI {
         } catch (Exception e) {
             Controller.mostrarError("Se produjo un error al añadir al proveedor.\n" + e.getMessage());
         }
+
+        this.nombre.clear();
+        this.apellido.clear();
+        this.telefono.clear();
+        this.paginaWeb.clear();
+        this.idProductoProveedor.clear();
+        while (productos.size() > 1) {
+            quitarProductoDeProveedor();
+        }
     }
     private void eliminarProveedor() {
         String idProveedor = this.idProveedor.getText();
@@ -173,7 +182,6 @@ public class Proveedores extends ContenidoUI {
         } catch (SQLException e) {
             Controller.mostrarError("Algo salió mal al editar al proveedor.\n" + e.getMessage());
             controller.refrescarTabla();
-            return;
         }
     }
 }

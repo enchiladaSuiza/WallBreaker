@@ -29,6 +29,9 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 
 public class Controller implements Initializable {
+    private static Alert error, informacion, confirmacion;
+    public static final int TEXTFIELD_ENTERO = 0, TEXTFILED_FLOTANTE = 1, TEXTFIELD_CADENA = 2;
+
     @FXML
     private ImageView logoView;
     @FXML
@@ -41,7 +44,6 @@ public class Controller implements Initializable {
     private TableView<ObservableList<StringProperty>> tabla;
 
     private Image logoNormal, logoOscuro;
-    private static Alert error, informacion, confirmacion;
     private ContenidoUI productos, ventas, pedidos, proveedores, personal;
     private ArrayList<Pair<Button, ContenidoUI>> botonesUi;
     private String tablaActual;
@@ -216,15 +218,24 @@ public class Controller implements Initializable {
     }
 
     // Funciones de ayuda
-    public static void prepararTextField(TextField tf, String prompt, boolean numero) {
+    public static void prepararTextField(TextField tf, String prompt, int valoresAdmisibles) {
         tf.setPromptText(prompt);
-        if (numero) {
-            tf.textProperty().addListener((observableValue, s, t1) -> {
-                if (!t1.matches("\\d*(\\.\\d*)?")) { // No tengo la menor idea
-                    tf.setText(s);
-                }
-            });
-        }
+        tf.textProperty().addListener((observableValue, s, t1) -> {
+            String regex;
+            switch (valoresAdmisibles) {
+                case TEXTFIELD_ENTERO:
+                    regex = "\\d*";
+                    break;
+                case TEXTFILED_FLOTANTE:
+                    regex = "\\d*(\\.\\d*)?";
+                    break;
+                default:
+                    return;
+            }
+            if (!t1.matches(regex)) {
+                tf.setText(s);
+            }
+        });
     }
     public static Pane nuevoEspacio(Region referencia) {
         Pane espacio = new Pane();

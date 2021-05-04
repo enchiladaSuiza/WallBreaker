@@ -16,7 +16,6 @@ public class Ventas extends ContenidoUI {
     private int posicionParaAgregarProducto;
     private ArrayList<Pair<TextField, TextField>> productos;
 
-
     public Ventas(Controller controller) {
         super(controller);
         nombreDeLaTabla = "venta";
@@ -29,11 +28,11 @@ public class Ventas extends ContenidoUI {
         efectivo = new TextField();
         idCliente = new TextField();
         idPedido = new TextField();
-        Controller.prepararTextField(idProducto, "Producto (ID)", true);
-        Controller.prepararTextField(cantidad, "Cantidad", true);
-        Controller.prepararTextField(efectivo, "Efectivo", true);
-        Controller.prepararTextField(idCliente, "Cliente (ID)", true);
-        Controller.prepararTextField(idPedido, "Pedido (ID)", true);
+        Controller.prepararTextField(idProducto, "Producto (ID)", Controller.TEXTFIELD_CADENA);
+        Controller.prepararTextField(cantidad, "Cantidad", Controller.TEXTFIELD_ENTERO);
+        Controller.prepararTextField(efectivo, "Efectivo", Controller.TEXTFILED_FLOTANTE);
+        Controller.prepararTextField(idCliente, "Cliente (ID)", Controller.TEXTFIELD_ENTERO);
+        Controller.prepararTextField(idPedido, "Pedido (ID)", Controller.TEXTFIELD_ENTERO);
         total = new Label("Total");
         cambio = new Label("Cambio");
         total.setTextFill(Color.WHITE);
@@ -63,8 +62,8 @@ public class Ventas extends ContenidoUI {
     public void agregarProductoAVenta() {
         TextField producto = new TextField();
         TextField cantidad = new TextField();
-        Controller.prepararTextField(producto, "Producto (ID)", true);
-        Controller.prepararTextField(cantidad, "Cantidad", true);
+        Controller.prepararTextField(producto, "Producto (ID)", Controller.TEXTFIELD_ENTERO);
+        Controller.prepararTextField(cantidad, "Cantidad", Controller.TEXTFIELD_ENTERO);
         productos.add(new Pair<>(producto, cantidad));
         insertarAGrid(producto, false, posicionParaAgregarProducto);
         insertarAGrid(cantidad, false, posicionParaAgregarProducto + 1);

@@ -8,11 +8,12 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
 import javafx.util.Pair;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 public class Productos extends ContenidoUI {
-    private TextField nombre, precio, almacen, idProducto;
-    private ComboBox<String> categoria;
+    private final TextField nombre, precio, almacen, idProducto;
+    private final ComboBox<String> categoria;
 
     Productos(Controller controller) {
         super(controller);
@@ -21,15 +22,19 @@ public class Productos extends ContenidoUI {
         precio = new TextField();
         almacen = new TextField();
         idProducto = new TextField();
-        Controller.prepararTextField(nombre, "Producto", false);
-        Controller.prepararTextField(precio, "Precio", true);
-        Controller.prepararTextField(almacen, "Cantidad", true);
-        Controller.prepararTextField(idProducto, "Producto (ID)", true);
+        Controller.prepararTextField(nombre, "Producto", Controller.TEXTFIELD_CADENA);
+        Controller.prepararTextField(precio, "Precio", Controller.TEXTFILED_FLOTANTE);
+        Controller.prepararTextField(almacen, "Cantidad", Controller.TEXTFIELD_ENTERO);
+        Controller.prepararTextField(idProducto, "Producto", Controller.TEXTFIELD_CADENA);
 
-        ArrayList<Pair<String, Integer>> pares = Main.conseguirDatos().conseguirCategorias();
         ArrayList<String> llaves = new ArrayList<>();
-        for (Pair<String, Integer> par : pares) {
-            llaves.add(par.getKey());
+        try {
+            ArrayList<Pair<String, Integer>> pares = Main.conseguirDatos().consultarCategorias();
+            for (Pair<String, Integer> par : pares) {
+                llaves.add(par.getKey());
+            }
+        } catch (SQLException t) {
+            Controller.mostrarError("Surgió un error consultado las cateogrías.\n\n" + t.getMessage());
         }
         categoria = new ComboBox<>(FXCollections.observableArrayList(llaves));
         categoria.setPromptText("Categoría");
@@ -52,11 +57,20 @@ public class Productos extends ContenidoUI {
         String precio = this.precio.getText();
         String cantidad = almacen.getText();
         int categoria = 0;
-        for (Pair<String, Integer> par : Main.conseguirDatos().conseguirCategorias()) {
-            if (par.getKey().equals(this.categoria.getValue())) { // Si la cadena seleccionada es igual a la llave...
-                categoria = par.getValue(); // Estamos seleccionando la misma categoría
-                break; // Quizás no sea el enfoque más efectivo, hay que estar recorriendo
+        try {
+            for (Pair<String, Integer> par : Main.conseguirDatos().consultarCategorias()) {
+                if (par.getKey().equals(this.categoria.getValue())) { // Si la cadena seleccionada es igual a la llave...
+                    categoria = par.getValue(); // Estamos seleccionando la misma categoría
+                    break; // Quizás no sea el enfoque más efectivo, hay que estar recorriendo
+                }
             }
+            if (categoria == 0) {
+                Controller.mostrarError("Por favor elija una categoría para el producto.");
+                return;
+            }
+        } catch (SQLException t) {
+            Controller.mostrarError("Surgió un error consultado las cateogrías.\n\n" + t.getMessage());
+            return;
         }
 
         if (nombre.isBlank() || precio.isBlank() || cantidad.isBlank()) {
@@ -71,6 +85,10 @@ public class Productos extends ContenidoUI {
         } catch (Exception e) {
             Controller.mostrarError("Se produjo un error al añadir el producto.\n\n" + e.getMessage());
         }
+
+        this.nombre.clear();
+        this.precio.clear();
+        this.almacen.clear();
     }
 
     // Ligada a elimnarProducto
@@ -80,25 +98,47 @@ public class Productos extends ContenidoUI {
             return;
         }
 
-        String id = idProducto.getText();
-        if (id.isBlank()) {
-            Controller.mostrarError("Porfavor ingrese el ID del producto que desea eliminar");
+        String idString = idProducto.getText();
+        if (idString.isBlank()) {
+            Controller.mostrarError("Porfavor ingrese el ID o nombre del producto que desea eliminar");
             return;
         }
 
+        int id = 0;
         try {
-            Main.conseguirDatos().deleteProduct(Integer.parseInt(id));
+            id = Integer.parseInt(idString);
+        } catch (NumberFormatException e) {
+            // Escribió el nombre del producto
+            try {
+                ArrayList<Pair<String, Integer>> pares;
+                pares = Main.conseguirDatos().consultarProductos();
+                for (Pair<String, Integer> par : pares) {
+                    if (idString.equalsIgnoreCase(par.getKey())) {
+                        id = par.getValue();
+                        break;
+                    }
+                }
+            } catch (SQLException t) {
+                Controller.mostrarError("Surgió un error al consultar los productos\n\n" + t.getMessage());
+                return;
+            }
+        }
+
+        try {
+            Main.conseguirDatos().deleteProduct(id);
             Controller.mostrarInfo("El producto fue eliminado.");
             controller.consultaTabla(nombreDeLaTabla);
         } catch (Exception e) {
             Controller.mostrarError("Se produjo un error al eliminar el producto.\n\n" + e.getMessage());
         }
+
+        this.idProducto.clear();
     }
 
     public void editar(ArrayList<String> propiedades, int columna) {
         int id = Integer.parseInt(propiedades.get(0));
-        double precio = 0;
-        int almacen = 0, idCategoria = 0;
+        double precio;
+        int almacen, idCategoria;
         String nombre = propiedades.get(1);
 
         try {
@@ -130,7 +170,6 @@ public class Productos extends ContenidoUI {
         } catch (Exception e) {
             Controller.mostrarError("Algo salió mal al editar el producto.\n" + e.getMessage());
             controller.refrescarTabla();
-            return;
         }
     }
 }

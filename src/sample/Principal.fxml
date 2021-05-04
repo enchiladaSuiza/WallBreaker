@@ -47,7 +47,7 @@
         </AnchorPane>
     </bottom>
     <center>
-        <TableView fx:id="tabla" cacheShape="false" editable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" tableMenuButtonVisible="true">
+        <TableView fx:id="tabla" cacheShape="false" editable="true" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
          <columnResizePolicy>
             <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
          </columnResizePolicy></TableView>

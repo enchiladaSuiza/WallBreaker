@@ -21,12 +21,12 @@ public class Personal extends ContenidoUI {
         telefono = new TextField();
         salario = new TextField();
         idPersonal = new TextField();
-        Controller.prepararTextField(nombre, "Nombre", false);
-        Controller.prepararTextField(apellido, "Apellido", false);
-        Controller.prepararTextField(ocupacion, "Ocupación", false);
-        Controller.prepararTextField(telefono, "Teléfono", true);
-        Controller.prepararTextField(salario, "Salario", true);
-        Controller.prepararTextField(idPersonal, "Personal (ID)", true);
+        Controller.prepararTextField(nombre, "Nombre", Controller.TEXTFIELD_CADENA);
+        Controller.prepararTextField(apellido, "Apellido", Controller.TEXTFIELD_CADENA);
+        Controller.prepararTextField(ocupacion, "Ocupación", Controller.TEXTFIELD_CADENA);
+        Controller.prepararTextField(telefono, "Teléfono", Controller.TEXTFIELD_ENTERO);
+        Controller.prepararTextField(salario, "Salario", Controller.TEXTFILED_FLOTANTE);
+        Controller.prepararTextField(idPersonal, "Personal (ID)", Controller.TEXTFIELD_ENTERO);
 
         agregar = new Button("Agregar");
         eliminar = new Button ("Eliminar");
@@ -106,7 +106,6 @@ public class Personal extends ContenidoUI {
         } catch (SQLException e) {
             Controller.mostrarError("Algo salió mal al editar al personal.\n" + e.getMessage());
             controller.refrescarTabla();
-            return;
         }
     }
 }

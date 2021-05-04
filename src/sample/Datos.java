@@ -14,7 +14,6 @@ public class Datos {
     private final HashMap<String, Integer> numcols;
     private final ConexionBase obj;
     private final Connection conexion;
-    private ArrayList<Pair<String, Integer>> categorias;
 
     /**
      * Crea objeto para interactuar con la base de datos
@@ -38,8 +37,6 @@ public class Datos {
             numcols.put("proveedor_producto", 3);
             numcols.put("venta", 7);
         }
-
-        categorias = consultarCategorias();
     }
 
     /**
@@ -395,8 +392,6 @@ public class Datos {
         ps.execute(); // Guarda el pedido en la BASE DE DATOS
         ps.close(); // Cierra el objeto PreparedStatement
 
-
-
         // SE OBTIENE EL id_pedido GENERADO
         st = conexion.createStatement();
         rs = st.executeQuery(new String(idPedido));
@@ -580,8 +575,10 @@ public class Datos {
         intoProve.append(" telefonoProveedor, pag_web)").append(" values (?, ?, ?, ?)");
 
         // SELECT ÚLTIMO id_proveedor
-        StringBuilder idProveedor = new StringBuilder("select auto_increment from information_schema.tables");
-        idProveedor.append(" where table_schema = 'wallbreaker' AND table_name = 'proveedor' ");
+        /*StringBuilder idProveedor = new StringBuilder("select auto_increment from information_schema.tables");
+        idProveedor.append(" where table_schema = 'wallbreaker' AND table_name = 'proveedor' ");*/
+
+        StringBuilder idProveedor = new StringBuilder("SELECT MAX(id_proveedor) FROM proveedor");
 
         // INSERT INTO proveedor_producto
         StringBuilder propro = new StringBuilder("insert into proveedor_producto (id_proveedor, id_producto)");
@@ -599,12 +596,11 @@ public class Datos {
         ps.execute();
         ps.close();
 
-
         // SE OBTIENE EL ÚLTIMO id_proveedor AGREGADO
         st = conexion.createStatement();
         rs = st.executeQuery(new String(idProveedor));
         while (rs.next()) {
-            id_proveed = Integer.parseInt(rs.getString("AUTO_INCREMENT"));
+            id_proveed = Integer.parseInt(rs.getString("MAX(id_proveedor)"));
         }
         rs.close();
         st.close();
@@ -828,19 +824,17 @@ public class Datos {
         return 0;
     }
 
-    /** Método para obtener el nombre e ID de las categorías
+    /** Método de ayuda para obtener el nombre e ID de alguna tabla
      * @return Una lista observables de listas observables con el nombre e ID
      * @throws SQLException Si algo sale mal en la BD
-    * */
-
-    public ArrayList<Pair<String, Integer>> consultarCategorias() throws SQLException {
+     * */
+    public ArrayList<Pair<String, Integer>> consultarNombreConId(String columnaNombre, String columnaId, String tabla)
+            throws SQLException {
         ObservableList<ObservableList<String>> resultados = FXCollections.observableArrayList();
-        String instruccion = "select nomCategoria, id_categoria from categoria";
-
+        String instruccion = "SELECT " + columnaNombre + ", " + columnaId + " FROM " + tabla;
         Statement st = conexion.createStatement();
         ResultSet rs = st.executeQuery(instruccion);
         int cols = rs.getMetaData().getColumnCount();
-
         int indiceFila = -1;
         while (rs.next()) {
             resultados.add(FXCollections.observableArrayList()); // Añade una tupla
@@ -849,18 +843,31 @@ public class Datos {
                 resultados.get(indiceFila).add(rs.getString(v)); // Añade un registro
             }
         }
-
         rs.close();
         st.close();
-
-        ArrayList<Pair<String, Integer>> categorias = new ArrayList<>();
+        ArrayList<Pair<String, Integer>> relacion = new ArrayList<>();
         for (ObservableList<String> tupla : resultados) {
-            categorias.add(new Pair<>(tupla.get(0), Integer.parseInt(tupla.get(1))));
+            relacion.add(new Pair<>(tupla.get(0), Integer.parseInt(tupla.get(1))));
         }
-        return categorias;
+        return relacion;
     }
 
-    public ArrayList<Pair<String, Integer>> conseguirCategorias() { return categorias; }
+
+    /** Método para obtener el nombre e ID de las categorías
+     * @return Una lista observables de listas observables con el nombre e ID
+     * @throws SQLException Si algo sale mal en la BD
+    * */
+    public ArrayList<Pair<String, Integer>> consultarCategorias() throws SQLException {
+        return consultarNombreConId("nomCategoria", "id_categoria", "categoria");
+    }
+
+    /** Método para obtener el nombre e ID de los productos
+     * @return Una lista observables de listas observables con el nombre e ID
+     * @throws SQLException Si algo sale mal en la BD
+     * */
+    public ArrayList<Pair<String, Integer>> consultarProductos() throws SQLException {
+        return consultarNombreConId("nomProd", "id_producto", "producto");
+    }
 
     /**
      * Cierra la conexión con el servidor de MySQL
