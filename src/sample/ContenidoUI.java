@@ -44,6 +44,18 @@ public class ContenidoUI {
         actualizarPosicionesEnGrid(nodos);
     }
 
+    protected void reemplazarNodosDeGrid(Node[] nodosArray, Boolean[] espacios) {
+        nodos.clear();
+        if (nodosArray.length != espacios.length) {
+            return;
+        }
+        for (int i = 0; i < nodosArray.length; i++) {
+            nodos.add(new Pair<>(nodosArray[i], espacios[i]));
+        }
+        controller.limpiarYAgregarNodosAGrid(nodos);
+        actualizarPosicionesEnGrid(nodos);
+    }
+
     protected void insertarAGrid(Node nodo, boolean dosEspacios, int indice) {
         nodos.add(indice, new Pair<>(nodo, dosEspacios));
         controller.agregarNodoAGrid(nodo);

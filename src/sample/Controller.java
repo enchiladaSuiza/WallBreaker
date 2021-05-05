@@ -253,6 +253,27 @@ public class Controller implements Initializable {
         ventana.showAndWait();
         return ventana.getResult();
     }
+    public static int validarProducto(String producto) {
+        int id = 0;
+        try {
+            id = Integer.parseInt(producto);
+        } catch (NumberFormatException e) {
+            // Escribió el nombre del producto
+            try {
+                ArrayList<Pair<String, Integer>> pares;
+                pares = Main.conseguirDatos().consultarProductos();
+                for (Pair<String, Integer> par : pares) {
+                    if (producto.equalsIgnoreCase(par.getKey())) {
+                        id = par.getValue();
+                        break;
+                    }
+                }
+            } catch (SQLException t) {
+                Controller.mostrarError("Surgió un error al consultar los productos\n\n" + t.getMessage());
+            }
+        }
+        return id;
+    }
 
     // Misc
     public void refrescarTabla() { tabla.refresh(); }

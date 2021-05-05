@@ -672,7 +672,6 @@ public class Datos {
         StringBuilder queryProPro = new StringBuilder("select * from proveedor_producto");
         queryProPro.append(" where id_proveedor = ").append(idProveedor);
 
-
         // OBTENER INFO DE QUE PRODS PROVEE EL PROVEEDOR ESPECIFICADO
         st = conexion.createStatement();
         rs = st.executeQuery(new String(queryProPro));
@@ -857,6 +856,25 @@ public class Datos {
      * */
     public ArrayList<Pair<String, Integer>> consultarProductos() throws SQLException {
         return consultarNombreConId("nomProd", "id_producto", "producto");
+    }
+
+    /**
+     * Obtiene los productos que provee el proveedor dado.
+     * @param idProveedor el ID del proveedor a consultar.
+     * @return Un ArrayList con los IDs de los productos que provee.
+     * @throws SQLException Si algo sale mal en la BD.
+     */
+    public ArrayList<Integer> conseguirProductosDeUnProveedor(int idProveedor) throws SQLException {
+        ArrayList<Integer> productos = new ArrayList<>();
+        String instruccion = "SELECT id_producto FROM proveedor_producto WHERE id_proveedor = " + idProveedor;
+        Statement statement = conexion.createStatement();
+        ResultSet resultSet = statement.executeQuery(instruccion);
+        while (resultSet.next()) {
+            productos.add(resultSet.getInt("id_producto"));
+        }
+        resultSet.close();
+        statement.close();
+        return productos;
     }
 
     /**

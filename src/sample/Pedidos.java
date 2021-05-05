@@ -29,7 +29,7 @@ public class Pedidos extends ContenidoUI {
         idProducto = new TextField();
         cantidad = new TextField();
         idCliente = new TextField();
-        Controller.prepararTextField(idProducto, "Producto (ID)", Controller.TEXTFIELD_ENTERO);
+        Controller.prepararTextField(idProducto, "Producto", Controller.TEXTFIELD_CADENA);
         Controller.prepararTextField(cantidad, "Cantidad", Controller.TEXTFIELD_ENTERO);
         Controller.prepararTextField(idCliente, "Cliente (ID)", Controller.TEXTFIELD_ENTERO);
         /*total = new Label("Total");
@@ -57,7 +57,7 @@ public class Pedidos extends ContenidoUI {
     public void agregarProductoAPedido() {
         TextField producto = new TextField();
         TextField cantidad = new TextField();
-        Controller.prepararTextField(producto, "Producto (ID)", Controller.TEXTFIELD_ENTERO);
+        Controller.prepararTextField(producto, "Producto", Controller.TEXTFIELD_CADENA);
         Controller.prepararTextField(cantidad, "Cantidad", Controller.TEXTFIELD_ENTERO);
         productos.add(new Pair<>(producto, cantidad));
         insertarAGrid(producto, false, posicionParaAgregarProducto);
@@ -83,7 +83,7 @@ public class Pedidos extends ContenidoUI {
         try {
             for (Pair<TextField, TextField> producto : productos) {
                 Pair<Integer, Integer> par =
-                        new Pair<>(Integer.parseInt(producto.getKey().getText()),
+                        new Pair<>(Controller.validarProducto(producto.getKey().getText()),
                                 Integer.parseInt(producto.getValue().getText()));
                 productosConCantidad.add(par);
             }

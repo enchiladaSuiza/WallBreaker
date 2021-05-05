@@ -104,25 +104,7 @@ public class Productos extends ContenidoUI {
             return;
         }
 
-        int id = 0;
-        try {
-            id = Integer.parseInt(idString);
-        } catch (NumberFormatException e) {
-            // Escribió el nombre del producto
-            try {
-                ArrayList<Pair<String, Integer>> pares;
-                pares = Main.conseguirDatos().consultarProductos();
-                for (Pair<String, Integer> par : pares) {
-                    if (idString.equalsIgnoreCase(par.getKey())) {
-                        id = par.getValue();
-                        break;
-                    }
-                }
-            } catch (SQLException t) {
-                Controller.mostrarError("Surgió un error al consultar los productos\n\n" + t.getMessage());
-                return;
-            }
-        }
+        int id = Controller.validarProducto(idString);
 
         try {
             Main.conseguirDatos().deleteProduct(id);

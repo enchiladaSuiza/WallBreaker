@@ -28,7 +28,7 @@ public class Ventas extends ContenidoUI {
         efectivo = new TextField();
         idCliente = new TextField();
         /*idPedido = new TextField();*/
-        Controller.prepararTextField(idProducto, "Producto (ID)", Controller.TEXTFIELD_CADENA);
+        Controller.prepararTextField(idProducto, "Producto", Controller.TEXTFIELD_CADENA);
         Controller.prepararTextField(cantidad, "Cantidad", Controller.TEXTFIELD_ENTERO);
         Controller.prepararTextField(efectivo, "Efectivo", Controller.TEXTFILED_FLOTANTE);
         Controller.prepararTextField(idCliente, "Cliente (ID)", Controller.TEXTFIELD_ENTERO);
@@ -63,7 +63,7 @@ public class Ventas extends ContenidoUI {
     public void agregarProductoAVenta() {
         TextField producto = new TextField();
         TextField cantidad = new TextField();
-        Controller.prepararTextField(producto, "Producto (ID)", Controller.TEXTFIELD_ENTERO);
+        Controller.prepararTextField(producto, "Producto (ID)", Controller.TEXTFIELD_CADENA);
         Controller.prepararTextField(cantidad, "Cantidad", Controller.TEXTFIELD_ENTERO);
         productos.add(new Pair<>(producto, cantidad));
         insertarAGrid(producto, false, posicionParaAgregarProducto);
@@ -91,7 +91,7 @@ public class Ventas extends ContenidoUI {
         try {
             for (Pair<TextField, TextField> producto : productos) {
                 Pair<Integer, Integer> par =
-                        new Pair<>(Integer.parseInt(producto.getKey().getText()),
+                        new Pair<>(Controller.validarProducto(producto.getKey().getText()),
                                 Integer.parseInt(producto.getValue().getText()));
                 productosConCantidad.add(par);
             }
