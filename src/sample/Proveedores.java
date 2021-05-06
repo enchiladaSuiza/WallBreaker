@@ -33,7 +33,7 @@ public class Proveedores extends ContenidoUI {
         Controller.prepararTextField(apellido, "Apellido", Controller.TEXTFIELD_CADENA);
         Controller.prepararTextField(telefono, "Teléfono", Controller.TEXTFIELD_ENTERO);
         Controller.prepararTextField(paginaWeb, "Página web", Controller.TEXTFIELD_CADENA);
-        Controller.prepararTextField(productoDeProveedor, "Producto (ID)" , Controller.TEXTFIELD_CADENA);
+        Controller.prepararTextField(productoDeProveedor, "Producto" , Controller.TEXTFIELD_CADENA);
         Controller.prepararTextField(proveedorEliminar, "Proveedor (ID)", Controller.TEXTFIELD_ENTERO);
         Controller.prepararTextField(proveedorConsultar, "Proveedor (ID)", Controller.TEXTFIELD_ENTERO);
 

@@ -14,6 +14,7 @@ public class Datos {
     private final HashMap<String, Integer> numcols;
     private final ConexionBase obj;
     private final Connection conexion;
+    private final ArrayList<String> columnasProveedor;
 
     /**
      * Crea objeto para interactuar con la base de datos
@@ -37,6 +38,17 @@ public class Datos {
             numcols.put("proveedor_producto", 3);
             numcols.put("venta", 7);
         }
+
+        columnasProveedor = new ArrayList<>(Arrays.asList(
+                "Proveedor",
+                "Nombre",
+                "Apellido",
+                "Producto",
+                "ID Producto",
+                "En Almacén",
+                "Teléfono",
+                "Web Page"
+        ));
     }
 
     /**
@@ -442,16 +454,6 @@ public class Datos {
         ResultSet rs;
         ResultSetMetaData md;
         ObservableList<ObservableList<String>> resultados = FXCollections.observableArrayList();
-        ArrayList<String> nomCols = new ArrayList<>(Arrays.asList(
-                "Proveedor",
-                "Nombre",
-                "Apellido",
-                "Producto",
-                "ID Producto",
-                "En Almacén",
-                "Teléfono",
-                "Web Page"
-        ));
 
         StringBuilder queryProveedores = new StringBuilder();
         queryProveedores.append("select proveedor.id_proveedor, nomProveedor, apelProveedor, nomProd,");
@@ -468,7 +470,7 @@ public class Datos {
         resultados.add(FXCollections.observableArrayList()); // Nombres de columnas
 
         for (int i = 1; i <= columnas; i++) {
-            resultados.get(0).add(nomCols.get(i-1)); // SANTI: AQUI CAMBIARE EL NOMBRE DE LAS COLUMNAS
+            resultados.get(0).add(columnasProveedor.get(i - 1)); // SANTI: AQUI CAMBIARE EL NOMBRE DE LAS COLUMNAS
         }
 
         int indiceFila = 0;
@@ -498,16 +500,6 @@ public class Datos {
         ResultSet rs;
         ResultSetMetaData md;
         ObservableList<ObservableList<String>> resultados = FXCollections.observableArrayList();
-        ArrayList<String> nomCols = new ArrayList<>(Arrays.asList(
-                "Proveedor",
-                "Nombre",
-                "Apellido",
-                "Producto",
-                "ID Producto",
-                "En Almacén",
-                "Teléfono",
-                "Web Page"
-        ));
 
         StringBuilder query = new StringBuilder();
         query.append("select proveedor.id_proveedor, nomProveedor, apelProveedor, nomProd, producto.id_producto,");
@@ -523,7 +515,7 @@ public class Datos {
         int columnas = md.getColumnCount();
         resultados.add(FXCollections.observableArrayList()); // Nombres de columnas
         for (int i = 1; i <= columnas; i++) {
-            resultados.get(0).add(nomCols.get(i-1)); // SANTI: AQUI CAMBIARE EL NOMBRE DE LAS COLUMNAS
+            resultados.get(0).add(columnasProveedor.get(i - 1)); // SANTI: AQUI CAMBIARE EL NOMBRE DE LAS COLUMNAS
         }
 
         int indiceFila = 0;

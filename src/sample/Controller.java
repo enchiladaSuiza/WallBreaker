@@ -2,6 +2,7 @@ package sample;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -16,6 +17,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
@@ -36,6 +38,8 @@ public class Controller implements Initializable {
     private ImageView logoView;
     @FXML
     private GridPane grid;
+    @FXML
+    private FlowPane barraDeMenu;
     @FXML
     private Label titulo;
     @FXML
@@ -67,6 +71,19 @@ public class Controller implements Initializable {
         botonesUi.add(new Pair<>(proveedoresBtn, proveedores));
         botonesUi.add(new Pair<>(pedidosBtn, pedidos));
         botonesUi.add(new Pair<>(personalBtn, personal));
+
+        barraDeMenu.widthProperty().addListener((observableValue, anterior, nuevo) -> {
+            double anchoBotones = 0;
+            for (Pair<Button, ContenidoUI> par : botonesUi) {
+                anchoBotones += par.getKey().getWidth();
+            }
+            if (anchoBotones == 0) {
+                anchoBotones = 70 * botonesUi.size();
+            }
+            double espacio = ((double)nuevo - anchoBotones) / (botonesUi.size() + 1);
+            barraDeMenu.setHgap(espacio);
+        });
+
         grid.getChildren().clear();
 
         // Ventanas
