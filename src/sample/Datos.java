@@ -76,13 +76,88 @@ public class Datos {
         return resultados;
     }
 
-    /*
-    public int verProductos() {
+    /**
+     * Método que obtiene la info de <b>todos</b> los productos para imprimirlos en la aplicación
+     * @return Devuelve un ObservableList de ObservableList de Strings, cada ObservableList es una fila, cada String es
+     * un registro. La priemra fila contiene los nombres de las columnas.
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de obtener los registros</p>
+     */
+    public ObservableList<ObservableList<String>> verProductos() throws SQLException {
+        Statement st;
+        ResultSet rs;
+
+        ObservableList<ObservableList<String>> resultados = FXCollections.observableArrayList();
+
+        StringBuilder join = new StringBuilder("select id_producto as ID, nomProd as Producto, precio as Precio,");
+        join.append(" almacen as 'En Almacen', categoria.id_categoria as Categoria from producto, categoria");
+        join.append(" where producto.id_categoria = categoria.id_categoria ");
+
+        st = conexion.createStatement();
+        rs = st.executeQuery(new String(join));
+
+        ResultSetMetaData md = rs.getMetaData();
+        int cols = md.getColumnCount();
+
+        resultados.add(FXCollections.observableArrayList()); // La primera fila serán los nombres de las columnas
+        for (int i = 1; i <= cols; i++) {
+            resultados.get(0).add(md.getColumnLabel(i));
+        }
+
+        int indiceFila = 0;
+        while (rs.next()) {
+            resultados.add(FXCollections.observableArrayList()); // Añade una tupla
+            indiceFila++;
+            for (int v = 1; v <= cols; ++v) {
+                resultados.get(indiceFila).add(rs.getString(v)); // Añade un registro
+            }
+        }
+        rs.close();
+        st.close();
+
+        return resultados;
     }
 
-    public int verProductos(int idCategoria) {
-    }
+    /**
+     * Método que obtiene la info <b>del producto especificado</b> para imprimirlos en la aplicación
+     * @param idCategoria Entero que representa el ID del producto del que se consultará la información
+     * @return Devuelve un ObservableList de ObservableList de Strings, cada ObservableList es una fila, cada String es
+     * un registro. La priemra fila contiene los nombres de las columnas.
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de obtener los registros</p>
      */
+    public ObservableList<ObservableList<String>> verProductos(int idCategoria) throws SQLException {
+        Statement st;
+        ResultSet rs;
+
+        ObservableList<ObservableList<String>> resultados = FXCollections.observableArrayList();
+
+        StringBuilder join = new StringBuilder("select id_producto as ID, nomProd as Producto, precio as Precio,");
+        join.append(" almacen as 'En Almacen', categoria.id_categoria as Categoria from producto, categoria");
+        join.append(" where producto.id_categoria = categoria.id_categoria  AND producto.id_categoria = ").append(idCategoria);
+
+        st = conexion.createStatement();
+        rs = st.executeQuery(new String(join));
+
+        ResultSetMetaData md = rs.getMetaData();
+        int cols = md.getColumnCount();
+
+        resultados.add(FXCollections.observableArrayList()); // La primera fila serán los nombres de las columnas
+        for (int i = 1; i <= cols; i++) {
+            resultados.get(0).add(md.getColumnLabel(i));
+        }
+
+        int indiceFila = 0;
+        while (rs.next()) {
+            resultados.add(FXCollections.observableArrayList()); // Añade una tupla
+            indiceFila++;
+            for (int v = 1; v <= cols; ++v) {
+                resultados.get(indiceFila).add(rs.getString(v)); // Añade un registro
+            }
+        }
+        rs.close();
+        st.close();
+
+        return resultados;
+    }
 
     /**
      * Método para agregar un producto a la base de datos
@@ -983,10 +1058,46 @@ public class Datos {
         return 0;
     }
 
-    /*
-    public int verPersonal() {
-    }
+    /**
+     * Método que obtienen información de todos el personal almacenado en la base de datos
+     * @return Devuelve un ObservableList de ObservableList de Strings, cada ObservableList es una fila, cada String es
+     * un registro. La priemra fila contiene los nombres de las columnas.
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de obtener los registros</p>
      */
+    public ObservableList<ObservableList<String>> verPersonal() throws SQLException {
+        Statement st;
+        ResultSet rs;
+
+        ObservableList<ObservableList<String>> resultados = FXCollections.observableArrayList();
+
+        StringBuilder join = new StringBuilder("select id_personal as ID, nomPersonal as Nombre,");
+        join.append(" apelPersonal as Apellido, ocupacion as Ocupacion, telefonoPersonal as Telefono,");
+        join.append(" salario as Salario from personal ");
+
+        st = conexion.createStatement();
+        rs = st.executeQuery(new String(join));
+
+        ResultSetMetaData md = rs.getMetaData();
+        int cols = md.getColumnCount();
+
+        resultados.add(FXCollections.observableArrayList()); // La primera fila serán los nombres de las columnas
+        for (int i = 1; i <= cols; i++) {
+            resultados.get(0).add(md.getColumnLabel(i));
+        }
+
+        int indiceFila = 0;
+        while (rs.next()) {
+            resultados.add(FXCollections.observableArrayList()); // Añade una tupla
+            indiceFila++;
+            for (int v = 1; v <= cols; ++v) {
+                resultados.get(indiceFila).add(rs.getString(v)); // Añade un registro
+            }
+        }
+        rs.close();
+        st.close();
+
+        return resultados;
+    }
 
     /**
      * Método que agrega personal a la base de datos
