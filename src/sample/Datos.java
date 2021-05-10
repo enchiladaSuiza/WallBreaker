@@ -590,7 +590,7 @@ public class Datos {
 
         StringBuilder join = new StringBuilder("select cliente.id_cliente as 'ID Cliente', nomCliente as Nombre,");
         join.append(" pedido.id_pedido as 'ID Pedido', fecha_pedido as 'Fecha Pedido', producto.id_producto as 'ID Producto',");
-        join.append(" nomProd as Producto, precio as 'Precio U', cantidad as '# Productos', montoF as Total");
+        join.append(" nomProd as Producto, precio as 'Precio U', cantidad as '# Productos', descuento as Descuento, montoF as Total");
         join.append(" from cliente, pedido, producto, pedido_producto where cliente.id_cliente = pedido.id_cliente");
         join.append(" AND pedido.id_pedido = pedido_producto.id_pedido AND producto.id_producto = pedido_producto.id_producto ");
 
@@ -636,7 +636,7 @@ public class Datos {
 
         StringBuilder join = new StringBuilder("select cliente.id_cliente as 'ID Cliente', nomCliente as Nombre,");
         join.append(" pedido.id_pedido as 'ID Pedido', fecha_pedido as 'Fecha Pedido', producto.id_producto as 'ID Producto',");
-        join.append(" nomProd as Producto, precio as 'Precio U', cantidad as '# Productos', montoF as Total");
+        join.append(" nomProd as Producto, precio as 'Precio U', cantidad as '# Productos', descuento as Descuento, montoF as Total");
         join.append(" from cliente, pedido, producto, pedido_producto where cliente.id_cliente = pedido.id_cliente");
         join.append(" AND pedido.id_pedido = pedido_producto.id_pedido AND producto.id_producto = pedido_producto.id_producto");
         join.append(" AND cliente.id_cliente = ").append(idCliente);
