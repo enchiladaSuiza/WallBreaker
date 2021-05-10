@@ -1,9 +1,12 @@
 package sample;
 
+import javafx.collections.ObservableList;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class TestDB {
 
@@ -11,7 +14,26 @@ public class TestDB {
         System.out.print("-> ");
         Datos test = new Datos("root", new Scanner(System.in).nextLine());
 
-        //PROBAR MÉTODO **addProveedor**
+        /*int[] c = new int[]{1, 2, 3, 4, 5, 6, 7};
+        ArrayList<Integer> oc = (ArrayList<Integer>) Arrays.stream(c).boxed().collect(Collectors.toList());
+        System.out.println(oc);
+        System.out.println(oc.contains(5));*/
+
+        ObservableList<ObservableList<String>> ventasG = test.verVentas();
+        ventasG.forEach(v -> {
+            StringBuilder reg = new StringBuilder();
+            v.forEach(w -> reg.append(w).append("\t\t"));
+            System.out.println(new String(reg));
+        });
+
+        System.out.println("\n\n\n");
+
+        ObservableList<ObservableList<String>> pedidosG = test.verPedidos();
+        pedidosG.forEach(v -> {
+            StringBuilder reg = new StringBuilder();
+            v.forEach(w -> reg.append(w).append("\t\t"));
+            System.out.println(new String(reg));
+        });
 
         test.end();
     }

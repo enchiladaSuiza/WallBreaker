@@ -9,12 +9,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class Datos {
     private final HashMap<String, Integer> numcols;
     private final ConexionBase obj;
     private final Connection conexion;
-    private final ArrayList<String> columnasProveedor;
 
     /**
      * Crea objeto para interactuar con la base de datos
@@ -38,17 +38,6 @@ public class Datos {
             numcols.put("proveedor_producto", 3);
             numcols.put("venta", 7);
         }
-
-        columnasProveedor = new ArrayList<>(Arrays.asList(
-                "Proveedor",
-                "Nombre",
-                "Apellido",
-                "Producto",
-                "ID Producto",
-                "En Almacén",
-                "Teléfono",
-                "Web Page"
-        ));
     }
 
     /**
@@ -86,6 +75,14 @@ public class Datos {
         st.close();
         return resultados;
     }
+
+    /*
+    public int verProductos() {
+    }
+
+    public int verProductos(int idCategoria) {
+    }
+     */
 
     /**
      * Método para agregar un producto a la base de datos
@@ -164,6 +161,93 @@ public class Datos {
         st.executeUpdate(new String(x));
         st.close();
         return 0;
+    }
+
+    /**
+     * Método que devuelve la información de <b>TODAS</b> las ventas relacionando todos los clientes que las realizarón
+     * añadiendo la fecha de venta, el ID, el monto total, efectivo, cambio y el ID de pedido
+     * @return Devuelve un ObservableList de ObservableList de Strings, cada ObservableList es una fila, cada String es
+     * un registro. La priemra fila contiene los nombres de las columnas.
+     * @throws SQLException posible excepción SQL<p>Excepción al consultar registros</p>
+     */
+    public ObservableList<ObservableList<String>> verVentas() throws SQLException {
+        Statement st;
+        ResultSet rs;
+
+        ObservableList<ObservableList<String>> resultados = FXCollections.observableArrayList();
+
+        StringBuilder join = new StringBuilder("select cliente.id_cliente as 'ID Cliente', nomCliente as Cliente,");
+        join.append(" id_venta as 'ID Venta', fecha_venta as 'Fecha Venta', montoF as Total,");
+        join.append(" efectivo as Efectivo, cambio as Cambio, id_pedido as 'ID Pedido' from cliente, venta");
+        join.append(" where cliente.id_cliente = venta.id_cliente ");
+
+        st = conexion.createStatement();
+        rs = st.executeQuery(new String(join));
+
+        ResultSetMetaData md = rs.getMetaData();
+        int cols = md.getColumnCount();
+
+        resultados.add(FXCollections.observableArrayList()); // La primera fila serán los nombres de las columnas
+        for (int i = 1; i <= cols; i++) {
+            resultados.get(0).add(md.getColumnLabel(i));
+        }
+
+        int indiceFila = 0;
+        while (rs.next()) {
+            resultados.add(FXCollections.observableArrayList()); // Añade una tupla
+            indiceFila++;
+            for (int v = 1; v <= cols; ++v) {
+                resultados.get(indiceFila).add(rs.getString(v)); // Añade un registro
+            }
+        }
+        rs.close();
+        st.close();
+
+        return resultados;
+    }
+
+    /**
+     * Método que devuelve la información de las ventas relacionando <b>el</b> cliente que las reqlizó añadiendo la
+     * fecha de venta, el ID, el monto total, efectivo, cambio y el ID de pedido
+     * @param idCliente Entero que representa el ID del cliente del que se desea la información
+     * @return Devuelve un ObservableList de ObservableList de Strings, cada ObservableList es una fila, cada String es
+     * un registro. La priemra fila contiene los nombres de las columnas.
+     * @throws SQLException posible excepción SQL<p>Excepción al consultar registros</p>
+     */
+    public ObservableList<ObservableList<String>> verVentasXClien(int idCliente) throws SQLException {
+        Statement st;
+        ResultSet rs;
+
+        ObservableList<ObservableList<String>> resultados = FXCollections.observableArrayList();
+
+        StringBuilder join = new StringBuilder("select cliente.id_cliente as 'ID Cliente', nomCliente as Cliente,");
+        join.append(" id_venta as 'ID Venta', fecha_venta as 'Fecha Venta', montoF as Total,");
+        join.append(" efectivo as Efectivo, cambio as Cambio, id_pedido as 'ID Pedido' from cliente, venta");
+        join.append(" where cliente.id_cliente = venta.id_cliente AND cliente.id_cliente = ").append(idCliente);
+
+        st = conexion.createStatement();
+        rs = st.executeQuery(new String(join));
+
+        ResultSetMetaData md = rs.getMetaData();
+        int cols = md.getColumnCount();
+
+        resultados.add(FXCollections.observableArrayList()); // La primera fila serán los nombres de las columnas
+        for (int i = 1; i <= cols; i++) {
+            resultados.get(0).add(md.getColumnLabel(i));
+        }
+
+        int indiceFila = 0;
+        while (rs.next()) {
+            resultados.add(FXCollections.observableArrayList()); // Añade una tupla
+            indiceFila++;
+            for (int v = 1; v <= cols; ++v) {
+                resultados.get(indiceFila).add(rs.getString(v)); // Añade un registro
+            }
+        }
+        rs.close();
+        st.close();
+
+        return resultados;
     }
 
     /**
@@ -284,9 +368,104 @@ public class Datos {
         return new Pair<>(id_ped, tot);
     }
 
-    public int editVenta(int idVenta, double efectivo, int idCliente, int idPedido) {
-        // TODO completar método
+    /**
+     * Método que modifica los valores de ciertos registros en la tabla venta<p>Nota: No todos los vaores tienen que ser
+     * modificados, pueden solo modificarse el 1 o el 2 o los 3</p>
+     * @param idVenta Entero que representa el ID del registro de venta que se modificará
+     * @param idCliente Entero que representa el nuevo ID de cliente que realizó la venta
+     * @param efectivo Nuevo double con el efectivo que <b>cubre totalmente</b> el monto total de la venta
+     * @param idPedido Nuevo ID de pedido que se reflejará en la venta
+     * @param toModify Arreglo de enteros con el número de la(s) columnas a modificar (máximo 3)
+     *                 <li>1 = id_cliente</li>
+     *                 <li>2 = efectivo</li>
+     *                 <li>3 = id_pedido</li>
+     * @return Devuelve 0 si la operación salió con éxito
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de editar la venta</p>
+     */
+    public int editVenta(int idVenta, int idCliente, double efectivo,  int idPedido, int[] toModify) throws SQLException {
+        Statement st;
+        ResultSet rs;
+        double montoF = 0.0D;
+        double efect = efectivo;
+        double cambio = 0.0D;
+        boolean flag = false;
 
+        // UPDATES
+        StringBuilder updMoF = new StringBuilder("update venta");
+        StringBuilder updEfe = new StringBuilder("update venta");
+        StringBuilder updCam = new StringBuilder("update venta");
+        StringBuilder updCli = new StringBuilder("update venta");
+        StringBuilder updIDP = new StringBuilder("update venta");
+
+        ArrayList<Integer> mod = (ArrayList<Integer>) Arrays.stream(toModify).boxed().collect(Collectors.toList());
+
+        // SE ALTERAN LOS VALORES DESDE EL PEDIDO
+        if (mod.contains(3)) {
+            flag = true;
+
+            // SELECT montoF FROM TABLE pedido
+            StringBuilder total = new StringBuilder("select montoF from pedido where id_pedido = ").append(idPedido);
+
+            // SE OBTIENE EL NUEVO venta.montoF Y cambio PARA LA TABLA venta
+            st = conexion.createStatement();
+            rs = st.executeQuery(new String(total));
+            while (rs.next()) montoF = Double.parseDouble(rs.getString("montoF")); // montoF NUEVO
+            rs.close();
+            st.close();
+
+            // NO CAMBIA EL EFECTIVO
+            if (!mod.contains(1)) {
+                StringBuilder money = new StringBuilder("select efectivo from venta where id_venta = ").append(idVenta);
+                st = conexion.createStatement();
+                rs = st.executeQuery(new String(total));
+                while (rs.next()) efect = Double.parseDouble(rs.getString("efectivo")); // efectivo
+                rs.close();
+                st.close();
+            }
+
+            // OPERACIÓN DEL CAMBIO
+            cambio = efect - montoF; // cambio NUEVO
+
+        }
+
+        // SE CAMBIA EL VALOR DEL cambio
+        if (mod.contains(1)) {
+            flag = true;
+
+            // SELECT montoF FROM TABLE venta
+            StringBuilder total = new StringBuilder("select montoF from venta where id_venta = ").append(idVenta);
+
+            // SE OBTIENE EL NUEVO venta.montoF Y cambio PARA LA TABLA venta
+            st = conexion.createStatement();
+            rs = st.executeQuery(new String(total));
+            while (rs.next()) montoF = Double.parseDouble(rs.getString("montoF")); // montoF
+            cambio = efect - montoF;
+            rs.close();
+            st.close();
+
+        }
+        // SI NO -> SOLO SE MODIFICA EL CLIENTE
+
+        // SE PREPARAN LAS ACTUAIZACIONES
+        updCli.append(" set id_cliente = ").append(idCliente).append(" where id_venta = ").append(idVenta);
+        updMoF.append(" set montoF = ").append(montoF).append(" where id_venta = ").append(idVenta);
+        updEfe.append(" set efectivo = ").append(efect).append(" where id_venta = ").append(idVenta);
+        updCam.append(" set cambio = ").append(cambio).append(" where id_venta = ").append(idVenta);
+        updIDP.append(" set id_pedido = ").append(idPedido).append(" where id_venta = ").append(idVenta);
+
+        StringBuilder[] toM = new StringBuilder[] {updCli, updEfe, updIDP};
+
+        st = conexion.createStatement();
+        for (int i : toModify) {
+            st.executeUpdate(new String(toM[(i - 1)]));
+        }
+
+        if (flag) {
+            st.executeUpdate(new String(updMoF));
+            st.executeUpdate(new String(updCam));
+        }
+
+        st.close();
         return 0;
     }
 
@@ -319,6 +498,97 @@ public class Datos {
         st.close();
 
         return infoProds;
+    }
+
+    /**
+     * Método que obtiene información de los pedidos, es decir, que clientes los realizarón, en que fecha, que productos
+     * agregarón, el precio unitario por producto, el número de productos pedidos y el monto total a pagar por sus pedidos
+     * @return Devuelve un ObservableList de ObservableList de Strings, cada ObservableList es una fila, cada String es
+     * un registro. La priemra fila contiene los nombres de las columnas.
+     * @throws SQLException posible excepción SQL<p>Excepción al consultar registros</p>
+     */
+    public ObservableList<ObservableList<String>> verPedidos() throws SQLException {
+        Statement st;
+        ResultSet rs;
+
+        ObservableList<ObservableList<String>> resultados = FXCollections.observableArrayList();
+
+        StringBuilder join = new StringBuilder("select cliente.id_cliente as 'ID Cliente', nomCliente as Nombre,");
+        join.append(" pedido.id_pedido as 'ID Pedido', fecha_pedido as 'Fecha Pedido', producto.id_producto as 'ID Producto',");
+        join.append(" nomProd as Producto, precio as 'Precio U', cantidad as '# Productos', montoF as Total");
+        join.append(" from cliente, pedido, producto, pedido_producto where cliente.id_cliente = pedido.id_cliente");
+        join.append(" AND pedido.id_pedido = pedido_producto.id_pedido AND producto.id_producto = pedido_producto.id_producto ");
+
+        st = conexion.createStatement();
+        rs = st.executeQuery(new String(join));
+
+        ResultSetMetaData md = rs.getMetaData();
+        int cols = md.getColumnCount();
+
+        resultados.add(FXCollections.observableArrayList()); // La primera fila serán los nombres de las columnas
+        for (int i = 1; i <= cols; i++) {
+            resultados.get(0).add(md.getColumnLabel(i));
+        }
+
+        int indiceFila = 0;
+        while (rs.next()) {
+            resultados.add(FXCollections.observableArrayList()); // Añade una tupla
+            indiceFila++;
+            for (int v = 1; v <= cols; ++v) {
+                resultados.get(indiceFila).add(rs.getString(v)); // Añade un registro
+            }
+        }
+        rs.close();
+        st.close();
+
+        return resultados;
+    }
+
+    /**
+     * Método que obtiene información de los <b>pedidos especifícos de un cliente</b> en que fecha se hicierón,
+     * que productos agregarón, el precio unitario por producto, el número de productos pedidos y el monto total a pagar
+     * por sus pedidos
+     * @param idCliente Entero que representa el ID del cliente del que se obtendrá la información
+     * @return Devuelve un ObservableList de ObservableList de Strings, cada ObservableList es una fila, cada String es
+     * un registro. La priemra fila contiene los nombres de las columnas.
+     * @throws SQLException posible excepción SQL<p>Excepción al consultar registros</p>
+     */
+    public ObservableList<ObservableList<String>> verPedidosXClien(int idCliente) throws SQLException {
+        Statement st;
+        ResultSet rs;
+
+        ObservableList<ObservableList<String>> resultados = FXCollections.observableArrayList();
+
+        StringBuilder join = new StringBuilder("select cliente.id_cliente as 'ID Cliente', nomCliente as Nombre,");
+        join.append(" pedido.id_pedido as 'ID Pedido', fecha_pedido as 'Fecha Pedido', producto.id_producto as 'ID Producto',");
+        join.append(" nomProd as Producto, precio as 'Precio U', cantidad as '# Productos', montoF as Total");
+        join.append(" from cliente, pedido, producto, pedido_producto where cliente.id_cliente = pedido.id_cliente");
+        join.append(" AND pedido.id_pedido = pedido_producto.id_pedido AND producto.id_producto = pedido_producto.id_producto");
+        join.append(" AND cliente.id_cliente = ").append(idCliente);
+
+        st = conexion.createStatement();
+        rs = st.executeQuery(new String(join));
+
+        ResultSetMetaData md = rs.getMetaData();
+        int cols = md.getColumnCount();
+
+        resultados.add(FXCollections.observableArrayList()); // La primera fila serán los nombres de las columnas
+        for (int i = 1; i <= cols; i++) {
+            resultados.get(0).add(md.getColumnLabel(i)); // Nombre columnas
+        }
+
+        int indiceFila = 0;
+        while (rs.next()) {
+            resultados.add(FXCollections.observableArrayList()); // Añade una tupla
+            indiceFila++;
+            for (int v = 1; v <= cols; ++v) {
+                resultados.get(indiceFila).add(rs.getString(v)); // Añade un registro
+            }
+        }
+        rs.close();
+        st.close();
+
+        return resultados;
     }
 
     /**
@@ -446,7 +716,8 @@ public class Datos {
 
     /**
      * Método que obtiene información de todos los proveedores que proveen productos
-     * @return Un ArrayList cn la información solicitada
+     * @return Devuelve un ObservableList de ObservableList de Strings, cada ObservableList es una fila, cada String es
+     * un registro. La priemra fila contiene los nombres de las columnas.
      * @throws SQLException posible excepción SQL<p>Excepción al solicitar la información</p>
      */
     public ObservableList<ObservableList<String>> proveedor() throws SQLException {
@@ -455,11 +726,10 @@ public class Datos {
         ResultSetMetaData md;
         ObservableList<ObservableList<String>> resultados = FXCollections.observableArrayList();
 
-        StringBuilder queryProveedores = new StringBuilder();
-        queryProveedores.append("select proveedor.id_proveedor, nomProveedor, apelProveedor, nomProd,");
-        queryProveedores.append(" producto.id_producto, almacen, telefonoProveedor, pag_web from proveedor, producto,");
-        queryProveedores.append(" proveedor_producto");
-        queryProveedores.append(" where proveedor.id_proveedor = proveedor_producto.id_proveedor");
+        StringBuilder queryProveedores = new StringBuilder("select proveedor.id_proveedor as 'ID Proveedor',");
+        queryProveedores.append(" nomProveedor as Nombre, apelProveedor as Apellido, telefonoProveedor as Telefono, pag_web as 'Web Page',");
+        queryProveedores.append(" producto.id_producto as 'ID Producto', nomProd as Producto, almacen as 'En Almacen'");
+        queryProveedores.append(" from proveedor, producto, proveedor_producto where proveedor.id_proveedor = proveedor_producto.id_proveedor");
         queryProveedores.append(" AND producto.id_producto = proveedor_producto.id_producto");
 
         // Obtener información de todos los proveedores que proveen productos
@@ -470,7 +740,7 @@ public class Datos {
         resultados.add(FXCollections.observableArrayList()); // Nombres de columnas
 
         for (int i = 1; i <= columnas; i++) {
-            resultados.get(0).add(columnasProveedor.get(i - 1)); // SANTI: AQUI CAMBIARE EL NOMBRE DE LAS COLUMNAS
+            resultados.get(0).add(md.getColumnLabel(i)); // Nombre columnas
         }
 
         int indiceFila = 0;
@@ -480,8 +750,6 @@ public class Datos {
             for (int p = 1; p <= 8; ++p) {
                 resultados.get(indiceFila).add(rs.getString(p));
             }
-            // reg.deleteCharAt(reg.lastIndexOf(","));
-            // resultados.add(new String(reg));
         }
 
         rs.close();
@@ -501,12 +769,12 @@ public class Datos {
         ResultSetMetaData md;
         ObservableList<ObservableList<String>> resultados = FXCollections.observableArrayList();
 
-        StringBuilder query = new StringBuilder();
-        query.append("select proveedor.id_proveedor, nomProveedor, apelProveedor, nomProd, producto.id_producto,");
-        query.append(" almacen, telefonoProveedor, pag_web from proveedor, producto, proveedor_producto");
-        query.append(" where proveedor.id_proveedor = proveedor_producto.id_proveedor");
-        query.append(" AND producto.id_producto = proveedor_producto.id_producto");
-        query.append(" AND producto.id_producto = ").append(idProducto);
+        StringBuilder query = new StringBuilder("select proveedor.id_proveedor as 'ID Proveedor',");
+        query.append(" nomProveedor as Nombre, apelProveedor as Apellido, telefonoProveedor as Telefono, pag_web as 'Web Page',");
+        query.append(" producto.id_producto as 'ID Producto', nomProd as Producto, almacen as 'En Almacen'");
+        query.append(" from proveedor, producto, proveedor_producto where proveedor.id_proveedor = proveedor_producto.id_proveedor");
+        query.append(" AND producto.id_producto = proveedor_producto.id_producto AND producto.id_producto = ");
+        query.append(idProducto);
 
         // Obtener información de los proveedores que preveen los productos especificados
         st = conexion.createStatement();
@@ -514,8 +782,9 @@ public class Datos {
         md = rs.getMetaData();
         int columnas = md.getColumnCount();
         resultados.add(FXCollections.observableArrayList()); // Nombres de columnas
+
         for (int i = 1; i <= columnas; i++) {
-            resultados.get(0).add(columnasProveedor.get(i - 1)); // SANTI: AQUI CAMBIARE EL NOMBRE DE LAS COLUMNAS
+            resultados.get(0).add(md.getColumnLabel(i)); // Nombre columnas
         }
 
         int indiceFila = 0;
@@ -525,7 +794,6 @@ public class Datos {
             for (int v = 1; v <= 8; ++v) {
                 resultados.get(indiceFila).add(rs.getString(v));
             }
-            // resultado.deleteCharAt(resultado.lastIndexOf(","));
         }
 
         rs.close();
@@ -714,6 +982,11 @@ public class Datos {
         st.close();
         return 0;
     }
+
+    /*
+    public int verPersonal() {
+    }
+     */
 
     /**
      * Método que agrega personal a la base de datos
