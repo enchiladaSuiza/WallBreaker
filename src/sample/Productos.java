@@ -10,10 +10,11 @@ import javafx.util.Pair;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 public class Productos extends ContenidoUI {
     private final TextField nombre, precio, almacen, idProducto;
-    private final ComboBox<String> categoria;
+    private final ComboBox<String> categoria, categoriaConsulta;
 
     Productos(Controller controller) {
         super(controller);
@@ -37,18 +38,36 @@ public class Productos extends ContenidoUI {
             Controller.mostrarError("Surgió un error consultado las cateogrías.\n\n" + t.getMessage());
         }
         categoria = new ComboBox<>(FXCollections.observableArrayList(llaves));
+        categoriaConsulta = new ComboBox<>(FXCollections.observableArrayList(llaves));
+        categoriaConsulta.setPromptText("Categoría");
         categoria.setPromptText("Categoría");
         categoria.setPrefWidth(300);
+        categoriaConsulta.setPrefWidth(300);
 
         Button agregarProductoBtn = new Button("Agregar producto");
         Button eliminarProductoBtn = new Button("Eliminar producto");
+        Button consultarCategoriaBtn = new Button("Consultar");
         agregarProductoBtn.setOnAction(actionEvent -> nuevoProducto());
         eliminarProductoBtn.setOnAction(actionEvent -> borrarProducto());
+        consultarCategoriaBtn.setOnAction(actionEvent -> consultarProductosPorCategoria());
 
-        Node[] nodosArray = {nombre, precio, almacen, categoria, agregarProductoBtn,
-                Controller.nuevoEspacio(agregarProductoBtn), idProducto, eliminarProductoBtn};
+        // Listen as the crowd would sing
+        LinkedHashMap<Node, Boolean> nodosConEspacios = new LinkedHashMap<>();
+        nodosConEspacios.put(categoriaConsulta, false);
+        nodosConEspacios.put(consultarCategoriaBtn, false);
+        nodosConEspacios.put(Controller.nuevoEspacio(consultarCategoriaBtn), true);
+        nodosConEspacios.put(nombre, true);
+        nodosConEspacios.put(precio, true);
+        nodosConEspacios.put(almacen, true);
+        nodosConEspacios.put(categoria, true);
+        nodosConEspacios.put(agregarProductoBtn, true);
+        nodosConEspacios.put(Controller.nuevoEspacio(agregarProductoBtn), true);
+        nodosConEspacios.put(idProducto, true);
+        nodosConEspacios.put(eliminarProductoBtn, true);
+
         nodos = new ArrayList<>();
-        for (Node nodo : nodosArray) { sumarAGrid(nodo, true); }
+        reemplazarNodosDeGrid(nodosConEspacios.keySet().toArray(new Node[0]),
+                nodosConEspacios.values().toArray(new Boolean[0]));
     }
 
     // Ligada a  agregarProducto
@@ -115,6 +134,26 @@ public class Productos extends ContenidoUI {
         }
 
         this.idProducto.clear();
+    }
+
+    public void consultarProductosPorCategoria() {
+        int categoria = 0;
+        try {
+            for (Pair<String, Integer> par : Main.conseguirDatos().consultarCategorias()) {
+                if (par.getKey().equals(this.categoriaConsulta.getValue())) {
+                    categoria = par.getValue();
+                    break;
+                }
+            }
+            if (categoria == 0) {
+                Controller.mostrarError("Por favor elija una categoría para el producto.");
+                return;
+            }
+        } catch (SQLException t) {
+            Controller.mostrarError("Surgió un error consultado las cateogrías.\n\n" + t.getMessage());
+            return;
+        }
+        controller.consultarProductosPorCategoria(categoria);
     }
 
     public void editar(ArrayList<String> propiedades, int columna) {

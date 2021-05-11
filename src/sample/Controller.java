@@ -113,9 +113,11 @@ public class Controller implements Initializable {
                 String tabla = botonUi.getValue().conseguirNombreDeLaTabla();
                 consultaTabla(tabla);
                 limpiarYAgregarNodosAGrid(botonUi.getValue().conseguirNodos());
+                return;
             }
         }
     }
+
     private void consulta(ObservableList<ObservableList<String>> consulta) {
         tabla.getItems().clear();
         tabla.getColumns().clear();
@@ -142,18 +144,26 @@ public class Controller implements Initializable {
         }
         tabla.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
     }
+
     public void consultaTabla(String nombreTabla) {
         if (!tabla.isEditable()) {
             tabla.setEditable(true);
         }
         try {
-            ObservableList<ObservableList<String>> consulta = Main.conseguirDatos().verTodo(nombreTabla);
+            ObservableList<ObservableList<String>> consulta;
+            if (nombreTabla.equals(productos.conseguirNombreDeLaTabla())) {
+                consulta = Main.conseguirDatos().verProductos();
+            }
+            else {
+                consulta = Main.conseguirDatos().verTodo(nombreTabla);
+            }
             tablaActual = nombreTabla;
             consulta(consulta);
         } catch (SQLException e) {
             mostrarError("No fue posible realizar la consulta. Error: " + e.getMessage());
         }
     }
+
     public void consultaProveedores() {
         try {
             ObservableList<ObservableList<String>> consulta = Main.conseguirDatos().proveedor();
@@ -163,9 +173,20 @@ public class Controller implements Initializable {
             mostrarError("No fue posible realizar la consulta. Error: " + throwables.getMessage());
         }
     }
+
     public void consultaProveedorPorProducto(int idProducto) {
         try {
             ObservableList<ObservableList<String>> consulta = Main.conseguirDatos().proveedor(idProducto);
+            consulta(consulta);
+            tabla.setEditable(false);
+        } catch (SQLException throwables) {
+            mostrarError("No fue posible realizar la consulta. Error: " + throwables.getMessage());
+        }
+    }
+
+    public void consultarProductosPorCategoria(int categoria) {
+        try {
+            ObservableList<ObservableList<String>> consulta = Main.conseguirDatos().verProductos(categoria);
             consulta(consulta);
             tabla.setEditable(false);
         } catch (SQLException throwables) {
