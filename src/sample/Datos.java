@@ -527,7 +527,7 @@ public class Datos {
             st.close();
 
             // NO CAMBIA EL EFECTIVO
-            if (!mod.contains(1)) {
+            if (!mod.contains(2)) {
                 StringBuilder money = new StringBuilder("select efectivo from venta where id_venta = ").append(idVenta);
                 st = conexion.createStatement();
                 rs = st.executeQuery(new String(money));
@@ -542,7 +542,7 @@ public class Datos {
         }
 
         // SE CAMBIA EL VALOR DEL cambio
-        if (mod.contains(1)) {
+        if (mod.contains(2)) {
             flag = true;
 
             // SELECT montoF FROM TABLE venta
