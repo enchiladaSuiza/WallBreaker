@@ -156,6 +156,10 @@ public class Controller implements Initializable {
                 consulta = Main.conseguirDatos().verProductos();
             } else if (nombreTabla.equals(ventas.conseguirNombreDeLaTabla())) {
                 consulta = Main.conseguirDatos().verVentas();
+            } else if (nombreTabla.equals(pedidos.conseguirNombreDeLaTabla())) {
+                consulta = Main.conseguirDatos().verPedidos();
+            } else if (nombreTabla.equals(personal.conseguirNombreDeLaTabla())) {
+                consulta = Main.conseguirDatos().verPersonal();
             }
             else {
                 consulta = Main.conseguirDatos().verTodo(nombreTabla);
