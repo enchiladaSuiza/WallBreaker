@@ -8,6 +8,16 @@ import java.sql.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * La clase Datos contiene variedad de métodos que tienen utilidades en el manejo y administración de datos almacenados
+ * en el servidor de MySQL en la base de datos wallbreaker
+ * <p>Estos métodos realizan acciones CRUD ya que se pueden crear, leer, modificar o eliminar datos almacenados en la base</p>
+ * <p><b>Importante:</b> Antes de cerrar la aplicación se recomienda que si se creó o utilizó un objeto de esta clase
+ * se llame al método {@link Datos#end()} para cerrar la conexión utilizada en su servidor local de MySQL</p>
+ *
+ * @see ConexionBase
+ * @since 16
+ */
 public class Datos {
     private final HashMap<String, Integer> numcols;
     private final ConexionBase obj;
@@ -943,9 +953,10 @@ public class Datos {
         rs.close();
         st.close();
 
-        deletePedido(idPed); // ELIMINA EL PEDIDO QUE AHORA YA ESTA MODIFICADO Y ALMACENADO EN OTRO REGISTRO
-
-        if (flag) addPedido(prods_cant, idClien); // AGREGA LOS "(NUEVOS VALORES)" EN UN NUEVO REGISTRO
+        if (flag) { // SOLO SI SE PUEDE EDITAR EL PEDIDO
+            deletePedido(idPed); // ELIMINA EL PEDIDO QUE AHORA YA ESTA MODIFICADO Y ALMACENADO EN OTRO REGISTRO
+            addPedido(prods_cant, idClien); // AGREGA LOS "(NUEVOS VALORES)" EN UN NUEVO REGISTRO
+        }
         else return new Pair<>("Imposible editar pedido! Ya esta vendido!", -1); // Pues ya se vendio, nimodo
 
         // SELECT ÚLTIMO id_pedido CREADO
@@ -961,12 +972,48 @@ public class Datos {
     }
 
     /**
-     * Método que elimina un(os) registro(s) de la base de datos en las tablas pedido y sus relaciones en la tabla<p>
-     *     A su vez, como este método se utiliza en el proceso de editar un pedido, este regresa la cantidad de
-     *     productos pedidos a la tabla productos, para que despues se genere otro pedido (en el proceso de edición del
-     *     pedido inicial) con los nuevos productos solicitados
-     * </p>
+     * Método que realiza los procesos necesarios para ejecutar la cancelación de un pedido<p>Es decir, cuando un
+     * cliente decide que no desea ya ese pedido, se utiliza este método para devolver los productos pedidos al almacen</p>
+     * <p><b>Nota:</b> Es importante saber que si un pedido ya fue vendido, ya no se puede cancelar</p>
+     * @param idPedido Entero que representa la llave primaria del pedido que será cancelado
+     * @return Devuelve 0 si la operación salió correctamente<p>Devuelve -1 si el pedido que se intenta cancelar ya
+     * esta vendido</p>
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de cancelar un pedido</p>
+     */
+    public int cancelPedido(int idPedido) throws SQLException {
+        Statement st;
+        ResultSet rs;
+        boolean flag = false; // DECIDE SI SE PUEDE CANCELAR EL PEDIDO | false -> NO CANCELABLE | true -> CANCELABLE
+
+        // SELECT pedido.staus QUE VERIFICA SI NO SE HA VENDIDO; SI ESTA VENDIDO YA NO SE PUEDE EDITAR
+        StringBuilder verSiVendido = new StringBuilder("select status from pedido where id_pedido = ").append(idPedido);
+
+        // VERIFICACIÓN DEL status DEL PEDIDO
+        st = conexion.createStatement();
+        rs = st.executeQuery(new String(verSiVendido));
+        while (rs.next()) {
+            // status = 1 -> VENDIDO -> NO SE PUEDE CANCELAR
+            // status = null -> NO ESTA VENDIDO -> SE PUEDE CANCELAR
+            flag = Objects.isNull(rs.getString("status"));
+        }
+        rs.close();
+        st.close();
+
+        if (flag) deletePedido(idPedido); // SE ELIMINA == CANCELA EL PEDIDO
+        else return -1; // NO ES POSIBLE REALIZAR LA OPERACIÓN | PEDIDO YA VENDIDO
+
+        return 0;
+    }
+
+    /**
+     * Método que elimina un(os) registro(s) de la base de datos en las tablas pedido y sus relaciones en la tabla
      * pedido_producto
+     * <p>
+     *     A su vez, como este método se utiliza en el proceso de editar o cancelar un pedido, este regresa la cantidad de
+     *     productos pedidos a la tabla productos, para que despues se genere otro pedido (caso: edición del
+     *     pedido inicial) con los nuevos productos solicitados o bien eliminarlo definitivamente (caso: cancelación del
+     *     pedido)
+     * </p>
      * @param idPedido Entero que representa el id_pedido que será eliminado de la base de datos
      * @return Devuelve 0 si no hubo errores
      * @throws SQLException posible excepción SQL<p>Excepción al tratar de eliminar un(os) registro(s)</p>
@@ -1516,7 +1563,7 @@ public class Datos {
 
     /**
      * Cierra la conexión con el servidor de MySQL
-     * Siempre llamar este método antes de terminar el método main
+     * Siempre llamar este método antes de terminar la aplicación
      * @throws SQLException posible excepción SQL
      */
     public void end() throws SQLException {
