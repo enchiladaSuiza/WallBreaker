@@ -31,6 +31,7 @@ public class Pedidos extends ContenidoUI {
         generar.setOnAction(e -> generarPedido());
         quitar.setDisable(true);
 
+        // And I discovered Sans...
         LinkedHashMap<Node, Boolean>nodosConEspacios = new LinkedHashMap<>();
         nodosConEspacios.put(idProducto, false);
         nodosConEspacios.put(cantidad, false);

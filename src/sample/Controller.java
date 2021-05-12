@@ -44,12 +44,12 @@ public class Controller implements Initializable {
     @FXML
     private Label titulo;
     @FXML
-    private Button productosBtn, ventasBtn, proveedoresBtn, pedidosBtn, personalBtn;
+    private Button productosBtn, ventasBtn, proveedoresBtn, pedidosBtn, personalBtn, clientesBtn;
     @FXML
     private TableView<ObservableList<StringProperty>> tabla;
 
     private Image logoNormal, logoOscuro;
-    private ContenidoUI productos, ventas, pedidos, proveedores, personal;
+    private ContenidoUI productos, ventas, pedidos, proveedores, personal, clientes;
     private ArrayList<Pair<Button, ContenidoUI>> botonesUi;
     private String tablaActual;
 
@@ -66,12 +66,14 @@ public class Controller implements Initializable {
         pedidos = new Pedidos(this);
         proveedores = new Proveedores(this);
         personal = new Personal(this);
+        clientes = new Clientes(this);
         botonesUi = new ArrayList<>();
         botonesUi.add(new Pair<>(productosBtn, productos));
         botonesUi.add(new Pair<>(ventasBtn, ventas));
         botonesUi.add(new Pair<>(proveedoresBtn, proveedores));
         botonesUi.add(new Pair<>(pedidosBtn, pedidos));
         botonesUi.add(new Pair<>(personalBtn, personal));
+        botonesUi.add(new Pair<>(clientesBtn, clientes));
 
         barraDeMenu.widthProperty().addListener((observableValue, anterior, nuevo) -> {
             double anchoBotones = 0;
@@ -160,6 +162,8 @@ public class Controller implements Initializable {
                 consulta = Main.conseguirDatos().verPedidos();
             } else if (nombreTabla.equals(personal.conseguirNombreDeLaTabla())) {
                 consulta = Main.conseguirDatos().verPersonal();
+            } else if (nombreTabla.equals(clientes.conseguirNombreDeLaTabla())) {
+                consulta = Main.conseguirDatos().verClientes();
             }
             else {
                 consulta = Main.conseguirDatos().verTodo(nombreTabla);
