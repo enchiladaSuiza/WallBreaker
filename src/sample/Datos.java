@@ -5,7 +5,6 @@ import javafx.collections.ObservableList;
 import javafx.util.Pair;
 
 import java.sql.*;
-import java.sql.Date;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -666,6 +665,7 @@ public class Datos {
      * Método que obtiene información de los <b>pedidos especifícos de un cliente</b> en que fecha se hicierón,
      * que productos agregarón, el precio unitario por producto, el número de productos pedidos y el monto total a pagar
      * por sus pedidos
+     * <p>La consulta esta configurada para devolver la información ordenada en forma descendente por la fecha de pedido</p>
      * @param idCliente Entero que representa el ID del cliente del que se obtendrá la información
      * @return Devuelve un ObservableList de ObservableList de Strings, cada ObservableList es una fila, cada String es
      * un registro. La priemra fila contiene los nombres de las columnas.
@@ -715,9 +715,8 @@ public class Datos {
 
     /**
      * Método que agrega un pedido a la base de datos
-     * @param prods_cant ArrayList de objtos Pair que contienen la relación de los productos y la cantidad que se piden<p>
-     *                   Pair<id_producto, cantidad>
-     * </p>
+     * @param prods_cant ArrayList de objetos Pair que contienen la relación de los productos y la cantidad que se piden:
+     *                   <p align="center"> Pair< id_producto , cantidad > </p>
      * @param idCliente Entero con el ID de cliente que realiza el pedido
      * @return Devuelve 0 si la transacción salio bien<p>Si la cantidad de productos en almacen no es suficinte para
      *         realizar el pedido se asignara 0</p>
@@ -830,10 +829,144 @@ public class Datos {
         return 0; // Everything OK
     }
 
-    public int editPedido(int idClien, int idPed, ArrayList<Pair<Integer, Integer>> prods_cant) {
-        // TODO completar método
+    /**
+     * Método que edita los valores de un pedido antes realizado<p>Se requiere del id_pedido que se modificará,
+     * el id_cliente del cliente que edita el pedido y por último un ArrayList de objetos Pair que contienen la
+     * relación de los <b>nuevos</b> productos y la cantidad de estos que se guardarán en el pedido:</p>
+     * <p align="center"> Pair< id_producto , cantidad > </p>
+     * @param idPed Entero que representa el id_pedido que se modificará
+     * @param idClien Entero que representa el id_cliente que resliza el cambio
+     * @param prods_cant ArrayList de objetos Pair que contienen la relación de los productos y la cantidad que se piden:
+     *                   <p align="center"> Pair< id_producto , cantidad > </p>
+     * @return Un objeto Pair< String , Integer > que representa el mensaje de retorno y el id_pedido nuevo generado<p>
+     *     <b>Nota:</b> Si el entero es -1 el pedido ya estaba vendido y no se puede modificar
+     * </p>
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de editar el pedido</p>
+     */
+    public Pair<String, Integer> editPedido(int idPed, int idClien, ArrayList<Pair<Integer, Integer>> prods_cant) throws SQLException {
+        Statement st;
+        ResultSet rs;
+        boolean flag = false; // DECIDE SI SE PUEDE EDITAR EL PEDIDO | false -> NO EDIT | true -> EDIT
+        int newIdPedido = 0;
+
+        // SELECT pedido.staus QUE VERIFICA SI NO SE HA VENDIDO; SI ESTA VENDIDO YA NO SE PUEDE EDITAR
+        StringBuilder verSiVendido = new StringBuilder("select status from pedido where id_pedido = ").append(idPed);
+
+        // VERIFICACIÓN DEL status DEL PEDIDO
+        st = conexion.createStatement();
+        rs = st.executeQuery(new String(verSiVendido));
+        while (rs.next()) {
+            // status = 1 -> VENDIDO -> NO SE PUEDE EDITAR
+            // status = null -> NO ESTA VENDIDO -> SE PUEDE EDITAR
+            flag = Objects.isNull(rs.getString("status"));
+        }
+        rs.close();
+        st.close();
+
+        deletePedido(idPed); // ELIMINA EL PEDIDO QUE AHORA YA ESTA MODIFICADO Y ALMACENADO EN OTRO REGISTRO
+
+        if (flag) addPedido(prods_cant, idClien); // AGREGA LOS "(NUEVOS VALORES)" EN UN NUEVO REGISTRO
+        else return new Pair<>("Imposible editar pedido! Ya esta vendido!", -1); // Pues ya se vendio, nimodo
+
+        // SELECT ÚLTIMO id_pedido CREADO
+        StringBuilder idPedido = new StringBuilder("SELECT MAX(id_pedido) FROM pedido");
+
+        st = conexion.createStatement();
+        rs = st.executeQuery(new String(idPedido));
+        while (rs.next()) newIdPedido = Integer.parseInt(rs.getString("MAX(id_pedido)"));
+        rs.close();
+        st.close();
+
+        return new Pair<>("FINE!", newIdPedido);
+    }
+
+    /**
+     * Método que elimina un(os) registro(s) de la base de datos en las tablas pedido y sus relaciones en la tabla<p>
+     *     A su vez, como este método se utiliza en el proceso de editar un pedido, este regresa la cantidad de
+     *     productos pedidos a la tabla productos, para que despues se genere otro pedido (en el proceso de edición del
+     *     pedido inicial) con los nuevos productos solicitados
+     * </p>
+     * pedido_producto
+     * @param idPedido Entero que representa el id_pedido que será eliminado de la base de datos
+     * @return Devuelve 0 si no hubo errores
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de eliminar un(os) registro(s)</p>
+     */
+    private int deletePedido(int idPedido) throws SQLException {
+        Statement st;
+        ResultSet rs;
+        ArrayList<Pair<Integer, Integer>> prods_cant = new ArrayList<>();
+        ArrayList<Pair<Integer, Integer>> actualProds = new ArrayList<>();
+
+        // SELECT DE id_pedido Y cantidad DE TABLA pedido_producto
+        StringBuilder select = new StringBuilder("select id_producto, cantidad from pedido_producto");
+        select.append(" where id_pedido = ").append(idPedido);
+
+        // OBTENCION DE CANTIDADES DE PRODUCTOS EN PEDIDO
+        st = conexion.createStatement();
+        rs = st.executeQuery(new String(select));
+        while (rs.next()) {
+            prods_cant.add(new Pair<>(Integer.parseInt(rs.getString(1)), Integer.parseInt(rs.getString(2))));
+        }
+        rs.close();
+        st.close();
 
 
+
+        // SELECT DE LOS VALORES ACTUALES DE LA TABLA producto
+        StringBuilder prods = new StringBuilder("select id_producto, almacen from producto ");
+
+        // OBTENCION DE INFORMACIÓN
+        st = conexion.createStatement();
+        rs = st.executeQuery(new String(prods));
+        while (rs.next()) {
+            actualProds.add(new Pair<>(Integer.parseInt(rs.getString(1)), Integer.parseInt(rs.getString(2))));
+        }
+        rs.close();
+        st.close();
+
+
+
+        // UPDATE QUE DEVUELVE LOS PRODUCTOS DEL PEDIDO QUE SE EDITA A LA TABLA producto
+        StringBuilder devolu;
+        int almacen;
+        /* int[] almacen = new int[]{0};
+        actualProds.forEach(v -> {
+            if (v.getKey().equals(p.getKey())) {
+                almacen[0] = v.getValue();
+            }
+        }); */
+
+        // MAKE THE CHANGE
+        for (Pair<Integer, Integer> p : prods_cant) {
+            // RECORRE EL ARRAYLIST actualProds PARA OBTENER EL 'almacen' DE LOS PRODUCTOS QUE ESTABAN EN EL PEDIDO
+            Optional<Pair<Integer, Integer>> x = actualProds.stream().filter(v -> v.getKey().equals(p.getKey())).findFirst();
+
+            almacen = x.isPresent() ? x.get().getValue() : 0; // SI ENCONTRÓ UNA COINCIDENCIA OBTIENE EL 'almacen'
+
+            devolu = new StringBuilder("update producto set almacen = ").append(almacen + p.getValue());
+            devolu.append(" where id_producto = ").append(p.getKey());
+
+            st = conexion.createStatement();
+            st.executeUpdate(new String(devolu));
+            st.close();
+        }
+
+
+
+        // DELETE ROW idPedido FROM pedido
+        StringBuilder delPed = new StringBuilder("delete from pedido where id_pedido = ").append(idPedido);
+        delPed.append(" limit 1 ");
+
+        // DELETE ROWS FROM pedido_producto WHERE idPedido
+        StringBuilder delPP = new StringBuilder("delete from pedido_producto where id_pedido = ").append(idPedido);
+
+        StringBuilder[] querys = new StringBuilder[]{delPed,delPP};
+
+        for (StringBuilder x : querys) {
+            st = conexion.createStatement();
+            st.executeUpdate(new String(x));
+            st.close();
+        }
         return 0;
     }
 
