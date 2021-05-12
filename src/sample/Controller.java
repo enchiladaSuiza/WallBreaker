@@ -2,7 +2,6 @@ package sample;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -33,6 +32,8 @@ import java.util.ResourceBundle;
 public class Controller implements Initializable {
     private static Alert error, informacion, confirmacion;
     public static final int TEXTFIELD_ENTERO = 0, TEXTFILED_FLOTANTE = 1, TEXTFIELD_CADENA = 2;
+    public static final int PROVEEDOR = 0, PROVEEDOR_POR_PRODUCTO = 1, PRODUCTOS_POR_CATEGORIA = 2,
+            VENTAS_POR_CLIENTE = 3;
 
     @FXML
     private ImageView logoView;
@@ -153,6 +154,8 @@ public class Controller implements Initializable {
             ObservableList<ObservableList<String>> consulta;
             if (nombreTabla.equals(productos.conseguirNombreDeLaTabla())) {
                 consulta = Main.conseguirDatos().verProductos();
+            } else if (nombreTabla.equals(ventas.conseguirNombreDeLaTabla())) {
+                consulta = Main.conseguirDatos().verVentas();
             }
             else {
                 consulta = Main.conseguirDatos().verTodo(nombreTabla);
@@ -164,29 +167,16 @@ public class Controller implements Initializable {
         }
     }
 
-    public void consultaProveedores() {
+    public void consultaEspecial(int tipoDeConsulta, int id) {
+        ObservableList<ObservableList<String>> consulta;
         try {
-            ObservableList<ObservableList<String>> consulta = Main.conseguirDatos().proveedor();
-            consulta(consulta);
-            tabla.setEditable(false);
-        } catch (SQLException throwables) {
-            mostrarError("No fue posible realizar la consulta. Error: " + throwables.getMessage());
-        }
-    }
-
-    public void consultaProveedorPorProducto(int idProducto) {
-        try {
-            ObservableList<ObservableList<String>> consulta = Main.conseguirDatos().proveedor(idProducto);
-            consulta(consulta);
-            tabla.setEditable(false);
-        } catch (SQLException throwables) {
-            mostrarError("No fue posible realizar la consulta. Error: " + throwables.getMessage());
-        }
-    }
-
-    public void consultarProductosPorCategoria(int categoria) {
-        try {
-            ObservableList<ObservableList<String>> consulta = Main.conseguirDatos().verProductos(categoria);
+            switch (tipoDeConsulta) {
+                case PROVEEDOR -> consulta = Main.conseguirDatos().proveedor();
+                case PROVEEDOR_POR_PRODUCTO -> consulta = Main.conseguirDatos().proveedor(id);
+                case PRODUCTOS_POR_CATEGORIA -> consulta = Main.conseguirDatos().verProductos(id);
+                case VENTAS_POR_CLIENTE -> consulta = Main.conseguirDatos().verVentasXClien(id);
+                default -> consulta = FXCollections.observableArrayList();
+            }
             consulta(consulta);
             tabla.setEditable(false);
         } catch (SQLException throwables) {
@@ -197,7 +187,7 @@ public class Controller implements Initializable {
     public void editarCelda(TablePosition<ObservableList<StringProperty>, String> posicion, String valor) {
         ObservableList<StringProperty> fila = posicion .getTableView().getItems().get(posicion.getRow());
         int columna = posicion.getColumn();
-        if (columna == 0) {
+        if (columna == 0 && !tablaActual.equals(ventas.conseguirNombreDeLaTabla())) {
             mostrarError("No es posible actualizar los IDs.");
             tabla.refresh();
             return;
@@ -220,6 +210,9 @@ public class Controller implements Initializable {
         }
         else if (tablaActual.equals(proveedores.conseguirNombreDeLaTabla())) {
             proveedores.editar(propiedades, columna);
+        }
+        else if (tablaActual.equals(ventas.conseguirNombreDeLaTabla())) {
+            ventas.editar(propiedades, columna);
         }
     }
 
