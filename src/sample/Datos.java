@@ -530,7 +530,7 @@ public class Datos {
             if (!mod.contains(1)) {
                 StringBuilder money = new StringBuilder("select efectivo from venta where id_venta = ").append(idVenta);
                 st = conexion.createStatement();
-                rs = st.executeQuery(new String(total));
+                rs = st.executeQuery(new String(money));
                 while (rs.next()) efect = Double.parseDouble(rs.getString("efectivo")); // efectivo
                 rs.close();
                 st.close();

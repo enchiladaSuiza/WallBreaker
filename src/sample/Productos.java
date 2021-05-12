@@ -153,7 +153,7 @@ public class Productos extends ContenidoUI {
             Controller.mostrarError("Surgió un error consultado las cateogrías.\n\n" + t.getMessage());
             return;
         }
-        controller.consultarProductosPorCategoria(categoria);
+        controller.consultaEspecial(Controller.PRODUCTOS_POR_CATEGORIA, categoria);
     }
 
     public void editar(ArrayList<String> propiedades, int columna) {

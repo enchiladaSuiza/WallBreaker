@@ -95,7 +95,7 @@ public class Proveedores extends ContenidoUI {
             return;
         }
         int id = Controller.validarProducto(idString);
-        controller.consultaProveedorPorProducto(id);
+        controller.consultaEspecial(Controller.PROVEEDOR_POR_PRODUCTO, id);
     }
 
     private void agregarProductoAProveedor() {
@@ -119,7 +119,7 @@ public class Proveedores extends ContenidoUI {
     }
 
     private void verRelacion() {
-        controller.consultaProveedores();
+        controller.consultaEspecial(Controller.PROVEEDOR, 0); // El parámetro aquí no importa
         verRelacionBtn.setText("Ver solo proveedores");
         verRelacionBtn.setOnAction(e -> verSoloProveedores());
     }
