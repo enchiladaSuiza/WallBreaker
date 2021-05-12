@@ -17,7 +17,7 @@ public class TestDB {
         /*int[] c = new int[]{1, 2, 3, 4, 5, 6, 7};
         ArrayList<Integer> oc = (ArrayList<Integer>) Arrays.stream(c).boxed().collect(Collectors.toList());
         System.out.println(oc);
-        System.out.println(oc.contains(5));*/
+        System.out.println(oc.contains(5));
 
         ObservableList<ObservableList<String>> ventasG = test.verVentas();
         ventasG.forEach(v -> {
@@ -32,6 +32,23 @@ public class TestDB {
         pedidosG.forEach(v -> {
             StringBuilder reg = new StringBuilder();
             v.forEach(w -> reg.append(w).append("\t\t"));
+            System.out.println(new String(reg));
+        });
+        */
+
+        ObservableList<ObservableList<String>> pedidosG = test.verPedidos();
+        pedidosG.forEach(v -> {
+            StringBuilder reg = new StringBuilder();
+            v.forEach(w -> reg.append(w).append("\t\t"));
+            System.out.println(new String(reg));
+        });
+
+        System.out.println("\n\n\n\n");
+
+        ObservableList<ObservableList<String>> pedidosC = test.verPedidosXClien(2);
+        pedidosC.forEach(a -> {
+            StringBuilder reg = new StringBuilder();
+            a.forEach(b -> reg.append(b).append("\t\t"));
             System.out.println(new String(reg));
         });
 

@@ -5,10 +5,8 @@ import javafx.collections.ObservableList;
 import javafx.util.Pair;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Random;
+import java.sql.Date;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Datos {
@@ -73,6 +71,46 @@ public class Datos {
 
         rs.close();
         st.close();
+        return resultados;
+    }
+
+    /**
+     * Método que obtiene la información de los clientes almacenados en la base de datos
+     * @return Devuelve un ObservableList de ObservableList de Strings, cada ObservableList es una fila, cada String es
+     * un registro. La priemra fila contiene los nombres de las columnas.
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de obtener la información</p>
+     */
+    public ObservableList<ObservableList<String>> verClientes() throws SQLException {
+        Statement st;
+        ResultSet rs;
+
+        ObservableList<ObservableList<String>> resultados = FXCollections.observableArrayList();
+
+        StringBuilder query = new StringBuilder("select id_cliente as 'ID Cliente', nomCliente as Nombre, apelCliente as Apellido,");
+        query.append(" telefonoCliente as Telefono from cliente");
+
+        st = conexion.createStatement();
+        rs = st.executeQuery(new String(query));
+
+        ResultSetMetaData md = rs.getMetaData();
+        int cols = md.getColumnCount();
+
+        resultados.add(FXCollections.observableArrayList()); // La primera fila serán los nombres de las columnas
+        for (int i = 1; i <= cols; i++) {
+            resultados.get(0).add(md.getColumnLabel(i));
+        }
+
+        int indiceFila = 0;
+        while (rs.next()) {
+            resultados.add(FXCollections.observableArrayList()); // Añade una tupla
+            indiceFila++;
+            for (int v = 1; v <= cols; ++v) {
+                resultados.get(indiceFila).add(rs.getString(v)); // Añade un registro
+            }
+        }
+        rs.close();
+        st.close();
+
         return resultados;
     }
 
@@ -578,6 +616,7 @@ public class Datos {
     /**
      * Método que obtiene información de los pedidos, es decir, que clientes los realizarón, en que fecha, que productos
      * agregarón, el precio unitario por producto, el número de productos pedidos y el monto total a pagar por sus pedidos
+     * <p>La consulta esta configurada para devolver la información ordenada en forma descendente por la fecha de pedido</p>
      * @return Devuelve un ObservableList de ObservableList de Strings, cada ObservableList es una fila, cada String es
      * un registro. La priemra fila contiene los nombres de las columnas.
      * @throws SQLException posible excepción SQL<p>Excepción al consultar registros</p>
@@ -588,11 +627,12 @@ public class Datos {
 
         ObservableList<ObservableList<String>> resultados = FXCollections.observableArrayList();
 
-        StringBuilder join = new StringBuilder("select cliente.id_cliente as 'ID Cliente', nomCliente as Nombre,");
-        join.append(" pedido.id_pedido as 'ID Pedido', fecha_pedido as 'Fecha Pedido', producto.id_producto as 'ID Producto',");
+        StringBuilder join = new StringBuilder("select cliente.id_cliente as 'ID Cliente', nomCliente as Nombre, apelCliente as Apellido,");
+        join.append(" pedido.id_pedido as 'ID Pedido', fecha_pedido as 'Fecha Pedido', pedido.status as Estado, producto.id_producto as 'ID Producto',");
         join.append(" nomProd as Producto, precio as 'Precio U', cantidad as '# Productos', descuento as Descuento, montoF as Total");
         join.append(" from cliente, pedido, producto, pedido_producto where cliente.id_cliente = pedido.id_cliente");
-        join.append(" AND pedido.id_pedido = pedido_producto.id_pedido AND producto.id_producto = pedido_producto.id_producto ");
+        join.append(" AND pedido.id_pedido = pedido_producto.id_pedido AND producto.id_producto = pedido_producto.id_producto");
+        join.append("  order by fecha_pedido desc ");
 
         st = conexion.createStatement();
         rs = st.executeQuery(new String(join));
@@ -610,7 +650,10 @@ public class Datos {
             resultados.add(FXCollections.observableArrayList()); // Añade una tupla
             indiceFila++;
             for (int v = 1; v <= cols; ++v) {
-                resultados.get(indiceFila).add(rs.getString(v)); // Añade un registro
+                if (v == 6) { // COLUMNA status EN EL JOIN pedido
+                    if (Objects.isNull(rs.getString(v))) resultados.get(indiceFila).add("A Pagar"); // Añade un registro
+                    else resultados.get(indiceFila).add("Vendido"); // Añade un registro
+                } else resultados.get(indiceFila).add(rs.getString(v)); // Añade un registro
             }
         }
         rs.close();
@@ -634,12 +677,13 @@ public class Datos {
 
         ObservableList<ObservableList<String>> resultados = FXCollections.observableArrayList();
 
-        StringBuilder join = new StringBuilder("select cliente.id_cliente as 'ID Cliente', nomCliente as Nombre,");
-        join.append(" pedido.id_pedido as 'ID Pedido', fecha_pedido as 'Fecha Pedido', producto.id_producto as 'ID Producto',");
+        StringBuilder join = new StringBuilder("select cliente.id_cliente as 'ID Cliente', nomCliente as Nombre, apelCliente as Apellido,");
+        join.append(" pedido.id_pedido as 'ID Pedido', fecha_pedido as 'Fecha Pedido', pedido.status as Estado, producto.id_producto as 'ID Producto',");
         join.append(" nomProd as Producto, precio as 'Precio U', cantidad as '# Productos', descuento as Descuento, montoF as Total");
         join.append(" from cliente, pedido, producto, pedido_producto where cliente.id_cliente = pedido.id_cliente");
         join.append(" AND pedido.id_pedido = pedido_producto.id_pedido AND producto.id_producto = pedido_producto.id_producto");
         join.append(" AND cliente.id_cliente = ").append(idCliente);
+        join.append("  order by fecha_pedido desc ");
 
         st = conexion.createStatement();
         rs = st.executeQuery(new String(join));
@@ -657,7 +701,10 @@ public class Datos {
             resultados.add(FXCollections.observableArrayList()); // Añade una tupla
             indiceFila++;
             for (int v = 1; v <= cols; ++v) {
-                resultados.get(indiceFila).add(rs.getString(v)); // Añade un registro
+                if (v == 6) { // COLUMNA status EN EL JOIN pedido
+                    if (Objects.isNull(rs.getString(v))) resultados.get(indiceFila).add("A Pagar"); // Añade un registro
+                    else resultados.get(indiceFila).add("Vendido"); // Añade un registro
+                } else resultados.get(indiceFila).add(rs.getString(v)); // Añade un registro
             }
         }
         rs.close();
@@ -785,6 +832,7 @@ public class Datos {
 
     public int editPedido(int idClien, int idPed, ArrayList<Pair<Integer, Integer>> prods_cant) {
         // TODO completar método
+
 
         return 0;
     }
