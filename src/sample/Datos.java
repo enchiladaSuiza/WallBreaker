@@ -114,6 +114,86 @@ public class Datos {
     }
 
     /**
+     * Método que agrega los datos de un cliente a la base de datos
+     * @param nom String que almacena el nombre del cliente
+     * @param apel String que almacena el apellido del cliente
+     * @param tel Long que almacena el teléfono del cleinte
+     * @return Devuelve 0 si la operación salió con éxito
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de agregar un cliente a la base de datos</p>
+     */
+    public int addCliente(String nom, String apel, long tel) throws SQLException {
+        PreparedStatement ps;
+
+        // INSERT EN TABLA cliente
+        StringBuilder ins = new StringBuilder("insert into cliente (nomCliente, apelCliente, telefonoCliente)");
+        ins.append(" values (?, ?, ?) ");
+
+        // SE PREPARA EL INSERT
+        ps = conexion.prepareStatement(new String(ins));
+        ps.setString(1, nom); // nomCliente
+        ps.setString(2, apel); // apelCliente
+        ps.setString(3, String.valueOf(tel)); // telefonoCliente
+
+        ps.execute();
+        ps.close();
+        return 0;
+    }
+
+    /**
+     * Método que actualiza los campos de un registro en la tabla cliente
+     * @param idCliente Entero que representa el id_cliente a ser modificado
+     * @param nom String con el nuevo nombre del cliente
+     * @param ape String con el nuevo apellido del cliente
+     * @param tel Long con el nuevo teléfono del cliente
+     * @param toModify Arreglo de enteros con el número de la(s) columnas a modificar (máximo 3)
+     *                  <li>1 = nomCliente</li>
+     *                  <li>2 = apelCliente</li>
+     *                  <li>3 = telefonoCliente</li>
+     * @return Devuelve 0 si la operación salió con éxito
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de editar el cliente</p>
+     */
+    public int editCliente(int idCliente, String nom, String ape, long tel, int[] toModify) throws SQLException {
+        Statement st;
+
+        // UPDATE REGISTRO EN TABLA cliente
+        StringBuilder updNom = new StringBuilder("update cliente set nomCliente = '");
+        StringBuilder updApe = new StringBuilder("update cliente set apelCliente = '");
+        StringBuilder updTel = new StringBuilder("update cliente set telefonoCliente = ");
+
+        updNom.append(nom).append("' where id_cliente = ").append(idCliente);
+        updApe.append(ape).append("' where id_cliente = ").append(idCliente);
+        updTel.append(tel).append(" where id_cliente = ").append(idCliente);
+
+        StringBuilder[] updates = new StringBuilder[]{updNom,updApe,updTel};
+
+        for (int p : toModify) {
+            st = conexion.createStatement();
+            st.executeUpdate(new String(updates[p - 1]));
+            st.close();
+        }
+        return 0;
+    }
+
+    /**
+     * Método que elimina un cliente de la base de datos
+     * @param idCliente Entero que representa el cliente que será borrado de la base de datos
+     * @return Devuelve 0 si la operacíon salio con éxito
+     * @throws SQLException posible exceppción SQL<p>Excepción al tratar de eliminar un cliente</p>
+     */
+    public int deleteCliente(int idCliente) throws SQLException {
+        Statement st;
+
+        // DELETE CLIENTE
+        StringBuilder del = new StringBuilder("delete from cliente where id_cliente =").append(idCliente);
+
+        // DELETE
+        st = conexion.createStatement();
+        st.executeUpdate(new String(del));
+        st.close();
+        return 0;
+    }
+
+    /**
      * Método que obtiene la info de <b>todos</b> los productos para imprimirlos en la aplicación
      * @return Devuelve un ObservableList de ObservableList de Strings, cada ObservableList es una fila, cada String es
      * un registro. La priemra fila contiene los nombres de las columnas.
