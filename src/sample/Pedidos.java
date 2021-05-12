@@ -2,19 +2,13 @@ package sample;
 
 import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.control.DatePicker;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.paint.Color;
 import javafx.util.Pair;
 
-import java.time.LocalDate;
 import java.util.*;
 
 public class Pedidos extends ContenidoUI {
-    // private DatePicker fecha;
     private TextField idProducto, cantidad, idCliente;
-    // private Label total;
     private Button agregar, quitar, generar;
     private int posicionParaAgregarProducto;
     private ArrayList<Pair<TextField, TextField>> productos;
@@ -22,18 +16,12 @@ public class Pedidos extends ContenidoUI {
     Pedidos(Controller controller) {
         super(controller);
         nombreDeLaTabla = "pedido";
-        /*fecha = new DatePicker();
-        fecha.setPromptText("Fecha");
-        fecha.setPrefWidth(300);
-        fecha.setValue(LocalDate.now());*/
         idProducto = new TextField();
         cantidad = new TextField();
         idCliente = new TextField();
         Controller.prepararTextField(idProducto, "Producto", Controller.TEXTFIELD_CADENA);
         Controller.prepararTextField(cantidad, "Cantidad", Controller.TEXTFIELD_ENTERO);
         Controller.prepararTextField(idCliente, "Cliente (ID)", Controller.TEXTFIELD_ENTERO);
-        /*total = new Label("Total");
-        total.setTextFill(Color.WHITE);*/
 
         agregar = new Button("Agregar");
         quitar = new Button("Quitar");
@@ -43,12 +31,19 @@ public class Pedidos extends ContenidoUI {
         generar.setOnAction(e -> generarPedido());
         quitar.setDisable(true);
 
-        Node[] nodosArray = {/*fecha,*/ idProducto, cantidad, /*total,*/ agregar, quitar, idCliente, generar};
-        boolean[] espacios = {/*true,*/ false, false, /*true,*/ false, false, true, true};
+        // And I discovered Sans...
+        LinkedHashMap<Node, Boolean>nodosConEspacios = new LinkedHashMap<>();
+        nodosConEspacios.put(idProducto, false);
+        nodosConEspacios.put(cantidad, false);
+        nodosConEspacios.put(agregar, false);
+        nodosConEspacios.put(quitar, false);
+        nodosConEspacios.put(idCliente, true);
+        nodosConEspacios.put(generar, true);
 
         nodos = new ArrayList<>();
-        reemplazarNodosDeGrid(nodosArray, espacios);
-        posicionParaAgregarProducto = conseguirIndice(/*total*/agregar);
+        reemplazarNodosDeGrid(nodosConEspacios.keySet().toArray(new Node[0]),
+                nodosConEspacios.values().toArray(new Boolean[0]));
+        posicionParaAgregarProducto = conseguirIndice(agregar);
 
         productos = new ArrayList<>();
         productos.add(new Pair<>(idProducto, cantidad));
