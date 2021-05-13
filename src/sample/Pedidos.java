@@ -25,7 +25,7 @@ public class Pedidos extends ContenidoUI {
 
         agregar = new Button("Agregar");
         quitar = new Button("Quitar");
-        generar = new Button("Generar");
+        generar = new Button("Generar pedido");
         agregar.setOnAction(e -> agregarProductoAPedido());
         quitar.setOnAction(e -> quitarProductoDePedido());
         generar.setOnAction(e -> generarPedido());

@@ -222,6 +222,9 @@ public class Controller implements Initializable {
         else if (tablaActual.equals(ventas.conseguirNombreDeLaTabla())) {
             ventas.editar(propiedades, columna);
         }
+        else if (tablaActual.equals(clientes.conseguirNombreDeLaTabla())) {
+            clientes.editar(propiedades, columna);
+        }
     }
 
     // Gird stuff

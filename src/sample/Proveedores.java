@@ -41,9 +41,9 @@ public class Proveedores extends ContenidoUI {
         verRelacionBtn = new Button("Ver relación");
         agregar = new Button("Agregar");
         quitar = new Button("Quitar");
-        generarProveedorBtn = new Button("Generar");
-        eliminarProveedorBtn = new Button("Eliminar");
-        editarBtn = new Button("Editar");
+        generarProveedorBtn = new Button("Generar proveedor");
+        eliminarProveedorBtn = new Button("Eliminar proveedor");
+        editarBtn = new Button("Editar proveedor");
         guardarBtn = new Button("Guardar");
         verRelacionBtn.setOnAction(e -> verRelacion());
         consultar.setOnAction(e -> consultarProveedorProducto());
@@ -71,11 +71,11 @@ public class Proveedores extends ContenidoUI {
         nodosConEspacios.put(quitar, false);
         nodosConEspacios.put(generarProveedorBtn, true);
         nodosConEspacios.put(Controller.nuevoEspacio(generarProveedorBtn), true);
-        nodosConEspacios.put(proveedorConsultar, false);
-        nodosConEspacios.put(editarBtn, false);
+        nodosConEspacios.put(proveedorConsultar, true);
+        nodosConEspacios.put(editarBtn, true);
         nodosConEspacios.put(Controller.nuevoEspacio(editarBtn), true);
-        nodosConEspacios.put(proveedorEliminar, false);
-        nodosConEspacios.put(eliminarProveedorBtn, false);
+        nodosConEspacios.put(proveedorEliminar, true);
+        nodosConEspacios.put(eliminarProveedorBtn, true);
 
         nodos = new ArrayList<>();
         reemplazarNodosDeGrid(nodosConEspacios.keySet().toArray(new Node[0]),

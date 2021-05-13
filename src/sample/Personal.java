@@ -28,8 +28,8 @@ public class Personal extends ContenidoUI {
         Controller.prepararTextField(salario, "Salario", Controller.TEXTFILED_FLOTANTE);
         Controller.prepararTextField(idPersonal, "Personal (ID)", Controller.TEXTFIELD_ENTERO);
 
-        agregar = new Button("Agregar");
-        eliminar = new Button ("Eliminar");
+        agregar = new Button("Agregar personal");
+        eliminar = new Button ("Eliminar personal");
         agregar.setOnAction(e -> agregarPersonal());
         eliminar.setOnAction(e -> eliminarPersonal());
 

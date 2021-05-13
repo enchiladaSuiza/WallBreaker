@@ -29,7 +29,7 @@ public class Ventas extends ContenidoUI {
 
         agregar = new Button("Agregar");
         quitar = new Button("Quitar");
-        generar = new Button("Generar");
+        generar = new Button("Generar venta");
         consultar = new Button("Consultar");
         agregar.setOnAction(e -> agregarProductoAVenta());
         quitar.setOnAction(e -> quitarProductoDeVenta());
