@@ -234,12 +234,14 @@ public class Controller implements Initializable {
             grid.getChildren().addAll(nodo.getKey());
         }
     }
+
     public void agregarNodoAGrid(Node nodo) {
         grid.getChildren().add(nodo);
     }
     public void quitarNodoDeGrid(Node nodo) {
         grid.getChildren().remove(nodo);
     }
+
     public static void actualizarPosicionesEnGrid(ArrayList<Pair<Node, Boolean>> nodos) {
         int offset = 0;
         for (int i = 0; i < nodos.size(); i++) {
@@ -279,6 +281,7 @@ public class Controller implements Initializable {
             }
         });
     }
+
     public static Pane nuevoEspacio(Region referencia) {
         Pane espacio = new Pane();
         espacio.minHeightProperty().bind(referencia.heightProperty());
@@ -295,6 +298,7 @@ public class Controller implements Initializable {
         ventana.showAndWait();
         return ventana.getResult();
     }
+
     public static int validarProducto(String producto) {
         int id = 0;
         try {

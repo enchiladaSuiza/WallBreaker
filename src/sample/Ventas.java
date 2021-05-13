@@ -39,13 +39,13 @@ public class Ventas extends ContenidoUI {
 
         // Now the old king is dead, LOL
         LinkedHashMap<Node, Boolean> nodosConEspacios = new LinkedHashMap<>();
-        nodosConEspacios.put(idClienteConsultar, false);
-        nodosConEspacios.put(consultar, false);
+        nodosConEspacios.put(idClienteConsultar, true);
+        nodosConEspacios.put(consultar, true);
         nodosConEspacios.put(Controller.nuevoEspacio(consultar), true);
-        nodosConEspacios.put(idProducto, false);
-        nodosConEspacios.put(cantidad, false);
         nodosConEspacios.put(agregar, false);
         nodosConEspacios.put(quitar, false);
+        nodosConEspacios.put(idProducto, false);
+        nodosConEspacios.put(cantidad, false);
         nodosConEspacios.put(efectivo, true);
         nodosConEspacios.put(idCliente, true);
         nodosConEspacios.put(generar, true);
@@ -53,7 +53,7 @@ public class Ventas extends ContenidoUI {
         nodos = new ArrayList<>();
         reemplazarNodosDeGrid(nodosConEspacios.keySet().toArray(new Node[0]),
                 nodosConEspacios.values().toArray(new Boolean[0]));
-        posicionParaAgregarProducto = conseguirIndice(agregar);
+        posicionParaAgregarProducto = conseguirIndice(idProducto);
 
         productos = new ArrayList<>();
         productos.add(new Pair<>(idProducto, cantidad));
@@ -63,7 +63,7 @@ public class Ventas extends ContenidoUI {
     public void agregarProductoAVenta() {
         TextField producto = new TextField();
         TextField cantidad = new TextField();
-        Controller.prepararTextField(producto, "Producto (ID)", Controller.TEXTFIELD_CADENA);
+        Controller.prepararTextField(producto, "Producto", Controller.TEXTFIELD_CADENA);
         Controller.prepararTextField(cantidad, "Cantidad", Controller.TEXTFIELD_ENTERO);
         productos.add(new Pair<>(producto, cantidad));
         insertarAGrid(producto, false, posicionParaAgregarProducto);

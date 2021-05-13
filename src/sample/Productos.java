@@ -53,8 +53,8 @@ public class Productos extends ContenidoUI {
 
         // Listen as the crowd would sing
         LinkedHashMap<Node, Boolean> nodosConEspacios = new LinkedHashMap<>();
-        nodosConEspacios.put(categoriaConsulta, false);
-        nodosConEspacios.put(consultarCategoriaBtn, false);
+        nodosConEspacios.put(categoriaConsulta, true);
+        nodosConEspacios.put(consultarCategoriaBtn, true);
         nodosConEspacios.put(Controller.nuevoEspacio(consultarCategoriaBtn), true);
         nodosConEspacios.put(nombre, true);
         nodosConEspacios.put(precio, true);

@@ -7,6 +7,7 @@ import javafx.scene.control.TextField;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 public class Personal extends ContenidoUI {
     private TextField nombre, apellido, ocupacion, telefono, salario, idPersonal;
@@ -33,12 +34,21 @@ public class Personal extends ContenidoUI {
         agregar.setOnAction(e -> agregarPersonal());
         eliminar.setOnAction(e -> eliminarPersonal());
 
-        Node[] nodosArray = {nombre, apellido, ocupacion, telefono, salario,
-                agregar, Controller.nuevoEspacio(agregar), idPersonal, eliminar};
-        boolean[] espacios = {false, false, false, false, false, false, true, false, false};
+        // I hear Jackie Chan singing
+        LinkedHashMap<Node, Boolean> nodosConEspacios = new LinkedHashMap<>();
+        nodosConEspacios.put(nombre, true);
+        nodosConEspacios.put(apellido, true);
+        nodosConEspacios.put(ocupacion, true);
+        nodosConEspacios.put(telefono, true);
+        nodosConEspacios.put(salario, true);
+        nodosConEspacios.put(agregar, true);
+        nodosConEspacios.put(Controller.nuevoEspacio(agregar), true);
+        nodosConEspacios.put(idPersonal, true);
+        nodosConEspacios.put(eliminar, true);
 
         nodos = new ArrayList<>();
-        reemplazarNodosDeGrid(nodosArray, espacios);
+        reemplazarNodosDeGrid(nodosConEspacios.keySet().toArray(new Node[0]),
+                nodosConEspacios.values().toArray(new Boolean[0]));
     }
 
     private void agregarPersonal() {

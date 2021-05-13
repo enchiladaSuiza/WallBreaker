@@ -43,7 +43,7 @@ public class Proveedores extends ContenidoUI {
         quitar = new Button("Quitar");
         generarProveedorBtn = new Button("Generar proveedor");
         eliminarProveedorBtn = new Button("Eliminar proveedor");
-        editarBtn = new Button("Editar proveedor");
+        editarBtn = new Button("Editar");
         guardarBtn = new Button("Guardar");
         verRelacionBtn.setOnAction(e -> verRelacion());
         consultar.setOnAction(e -> consultarProveedorProducto());
@@ -57,22 +57,22 @@ public class Proveedores extends ContenidoUI {
 
         // I used to roll the dice
         LinkedHashMap<Node, Boolean> nodosConEspacios = new LinkedHashMap<>();
-        nodosConEspacios.put(productoConsulta, false);
-        nodosConEspacios.put(consultar, false);
-        nodosConEspacios.put(Controller.nuevoEspacio(consultar), true);
         nodosConEspacios.put(verRelacionBtn, true);
+        nodosConEspacios.put(Controller.nuevoEspacio(consultar), true);
+        nodosConEspacios.put(productoConsulta, true);
+        nodosConEspacios.put(consultar, true);
         nodosConEspacios.put(Controller.nuevoEspacio(verRelacionBtn), true);
-        nodosConEspacios.put(nombre, false);
-        nodosConEspacios.put(apellido, false);
-        nodosConEspacios.put(telefono, false);
-        nodosConEspacios.put(paginaWeb, false);
-        nodosConEspacios.put(productoDeProveedor, true);
         nodosConEspacios.put(agregar, false);
         nodosConEspacios.put(quitar, false);
+        nodosConEspacios.put(nombre, true);
+        nodosConEspacios.put(apellido, true);
+        nodosConEspacios.put(telefono, true);
+        nodosConEspacios.put(paginaWeb, true);
+        nodosConEspacios.put(productoDeProveedor, true);
         nodosConEspacios.put(generarProveedorBtn, true);
         nodosConEspacios.put(Controller.nuevoEspacio(generarProveedorBtn), true);
-        nodosConEspacios.put(proveedorConsultar, true);
-        nodosConEspacios.put(editarBtn, true);
+        nodosConEspacios.put(proveedorConsultar, false);
+        nodosConEspacios.put(editarBtn, false);
         nodosConEspacios.put(Controller.nuevoEspacio(editarBtn), true);
         nodosConEspacios.put(proveedorEliminar, true);
         nodosConEspacios.put(eliminarProveedorBtn, true);
@@ -80,7 +80,7 @@ public class Proveedores extends ContenidoUI {
         nodos = new ArrayList<>();
         reemplazarNodosDeGrid(nodosConEspacios.keySet().toArray(new Node[0]),
                 nodosConEspacios.values().toArray(new Boolean[0]));
-        posicionParaAgregarProducto = conseguirIndice(agregar);
+        posicionParaAgregarProducto = conseguirIndice(generarProveedorBtn);
         posicionParaMostrarPorductos = conseguirIndice(editarBtn) + 1;
 
         productosPrevistos = new ArrayList<>();
@@ -198,7 +198,11 @@ public class Proveedores extends ContenidoUI {
     }
 
     private void editarProductosProvistos() {
-        idProveedorActual = Integer.parseInt(this.proveedorConsultar.getText());
+        try {
+            idProveedorActual = Integer.parseInt(this.proveedorConsultar.getText());
+        } catch (NumberFormatException e) {
+            return;
+        }
 
         for (TextField producto : productosConsultados) {
             quitarDeGrid(producto);
