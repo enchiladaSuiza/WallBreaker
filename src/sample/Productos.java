@@ -28,21 +28,13 @@ public class Productos extends ContenidoUI {
         Controller.prepararTextField(almacen, "Cantidad", Controller.TEXTFIELD_ENTERO);
         Controller.prepararTextField(idProducto, "Producto", Controller.TEXTFIELD_CADENA);
 
-        ArrayList<String> llaves = new ArrayList<>();
-        try {
-            ArrayList<Pair<String, Integer>> pares = Main.conseguirDatos().consultarCategorias();
-            for (Pair<String, Integer> par : pares) {
-                llaves.add(par.getKey());
-            }
-        } catch (SQLException t) {
-            Controller.mostrarError("Surgió un error consultado las cateogrías.\n\n" + t.getMessage());
-        }
-        categoria = new ComboBox<>(FXCollections.observableArrayList(llaves));
-        categoriaConsulta = new ComboBox<>(FXCollections.observableArrayList(llaves));
+        categoria = new ComboBox<>();
+        categoriaConsulta = new ComboBox<>();
         categoriaConsulta.setPromptText("Categoría");
         categoria.setPromptText("Categoría");
         categoria.setPrefWidth(300);
         categoriaConsulta.setPrefWidth(300);
+        actualizarCategorias();
 
         Button agregarProductoBtn = new Button("Agregar producto");
         Button eliminarProductoBtn = new Button("Eliminar producto");
@@ -103,6 +95,7 @@ public class Productos extends ContenidoUI {
             controller.consultaTabla(nombreDeLaTabla);
         } catch (Exception e) {
             Controller.mostrarError("Se produjo un error al añadir el producto.\n\n" + e.getMessage());
+            return;
         }
 
         this.nombre.clear();
@@ -154,6 +147,22 @@ public class Productos extends ContenidoUI {
             return;
         }
         controller.consultaEspecial(Controller.PRODUCTOS_POR_CATEGORIA, categoria);
+    }
+
+    public void actualizarCategorias() {
+        categoria.getItems().clear();
+        categoriaConsulta.getItems().clear();
+        ArrayList<String> llaves = new ArrayList<>();
+        try {
+            ArrayList<Pair<String, Integer>> pares = Main.conseguirDatos().consultarCategorias();
+            for (Pair<String, Integer> par : pares) {
+                llaves.add(par.getKey());
+            }
+        } catch (SQLException t) {
+            Controller.mostrarError("Surgió un error consultado las cateogrías.\n\n" + t.getMessage());
+        }
+        categoria.setItems(FXCollections.observableArrayList(llaves));
+        categoriaConsulta.setItems(FXCollections.observableArrayList(llaves));
     }
 
     public void editar(ArrayList<String> propiedades, int columna) {

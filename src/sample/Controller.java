@@ -44,12 +44,12 @@ public class Controller implements Initializable {
     @FXML
     private Label titulo;
     @FXML
-    private Button productosBtn, ventasBtn, proveedoresBtn, pedidosBtn, personalBtn, clientesBtn;
+    private Button productosBtn, ventasBtn, proveedoresBtn, pedidosBtn, personalBtn, clientesBtn, categoriasBtn;
     @FXML
     private TableView<ObservableList<StringProperty>> tabla;
 
     private Image logoNormal, logoOscuro;
-    private ContenidoUI productos, ventas, pedidos, proveedores, personal, clientes;
+    private ContenidoUI productos, ventas, pedidos, proveedores, personal, clientes, categorias;
     private ArrayList<Pair<Button, ContenidoUI>> botonesUi;
     private String tablaActual;
 
@@ -67,6 +67,7 @@ public class Controller implements Initializable {
         proveedores = new Proveedores(this);
         personal = new Personal(this);
         clientes = new Clientes(this);
+        categorias = new Categorias(this);
         botonesUi = new ArrayList<>();
         botonesUi.add(new Pair<>(productosBtn, productos));
         botonesUi.add(new Pair<>(ventasBtn, ventas));
@@ -74,6 +75,7 @@ public class Controller implements Initializable {
         botonesUi.add(new Pair<>(pedidosBtn, pedidos));
         botonesUi.add(new Pair<>(personalBtn, personal));
         botonesUi.add(new Pair<>(clientesBtn, clientes));
+        botonesUi.add(new Pair<>(categoriasBtn, categorias));
 
         barraDeMenu.widthProperty().addListener((observableValue, anterior, nuevo) -> {
             double anchoBotones = 0;
@@ -319,6 +321,11 @@ public class Controller implements Initializable {
             }
         }
         return id;
+    }
+
+    public void actualizarCategorias() {
+        ((Productos)productos).actualizarCategorias(); // Quizás no sea el mejor enfoque...
+        ((Categorias)categorias).actualizarCategorias();
     }
 
     // Misc
