@@ -83,9 +83,68 @@ public class Datos {
         return resultados;
     }
 
-    public int verCategos() {
-        // TODO completar método
-        return  0;
+    /**
+     * Método que consulta las categorías almacenadas en la base de datos junto con la cantidad de productos que
+     * pertenecen a esa categoría
+     * @return Devuelve un ObservableList de ObservableList de Strings, cada ObservableList es una fila, cada String es
+     * un registro. La priemra fila contiene los nombres de las columnas.
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de obtener la información</p>
+     */
+    public ObservableList<ObservableList<String>> verCategos() throws SQLException {
+        Statement st;
+        ResultSet rs;
+        ArrayList<Integer> numCategos = new ArrayList<>();
+        ArrayList<Integer> cant_prods = new ArrayList<>();
+
+        ObservableList<ObservableList<String>> resultados = FXCollections.observableArrayList();
+
+        StringBuilder numCategs = new StringBuilder("select id_categoria from categoria ");
+        StringBuilder cuantosPdeCateg;
+        StringBuilder verCategs = new StringBuilder("select id_categoria as ID, nomCategoria as Categoria, descripcion as Descripcion from categoria ");
+
+        // OBTIENEN EL LOS ID DE CATEGORÍAS EN LA BASE DE DATOS
+        st = conexion.createStatement();
+        rs = st.executeQuery(new String(numCategs));
+        while (rs.next()) numCategos.add(Integer.parseInt(rs.getString(1)));
+        rs.close();
+        st.close();
+
+        // OBTIENE CUANTOS PRODUCTOS TIENE ESA CATAGORIA
+        st = conexion.createStatement();
+        for (int v : numCategos) {
+            cuantosPdeCateg = new StringBuilder("select count(id_categoria) from producto where id_categoria = ");
+            rs = st.executeQuery(new String(cuantosPdeCateg.append(v)));
+            while (rs.next()) cant_prods.add(Integer.parseInt(rs.getString(1)));
+            rs.close();
+        }
+        st.close();
+
+
+        // CONSULTA FINAL
+        st = conexion.createStatement();
+        rs = st.executeQuery(new String(verCategs));
+        ResultSetMetaData md = rs.getMetaData();
+        int cols = md.getColumnCount();
+
+        resultados.add(FXCollections.observableArrayList()); // La primera fila serán los nombres de las columnas
+        for (int i = 1; i <= cols + 1; i++) {
+            if (i == 3) resultados.get(0).add("# Productos");
+            else resultados.get(0).add(md.getColumnLabel(i));
+        }
+
+        int indiceFila = 0;
+        while (rs.next()) {
+            resultados.add(FXCollections.observableArrayList()); // Añade una tupla
+            indiceFila++;
+            for (int v = 1; v <= cols + 1; ++v) {
+                if (v == 3) resultados.get(indiceFila).add(String.valueOf(cant_prods.get(indiceFila))); // Añade un registro
+                resultados.get(indiceFila).add(rs.getString(v)); // Añade un registro
+            }
+        }
+        rs.close();
+        st.close();
+
+        return resultados;
     }
 
     /**
@@ -109,31 +168,61 @@ public class Datos {
         return 0;
     }
 
-    public int editCategoria(int idCategoria, String categoria, String descrip) {
-        // TODO competar método
-        // if (idCategoria == 12) return -1;
-        return 0;
+    /**
+     * Método que actualiza los campos de un registro en la tabla categoria<p><b>Nota:</b> Si solo se desea editar el
+     * nombre de categoría y no la descripción, en el atributo descrip se envia un null. Si solo se desea editar la
+     * descripíon y no el nombre de categoría, en el atributo categoria se envia un null</p><p><b>Importante:</b> Ambos
+     * atributos no pueden ser null, ya que no se editaría nada 😂</p>
+     * @param idCategoria Entero que representa el ID de la gategoría a editar
+     * @param categoria String con el nuevo nombre de la categoría
+     * @param descrip String con la nueva descripción de la categoría
+     * @return Devuelve un objeto Pair< String, Integer > con un string del mensaje de salida y el status (0 ó -1)
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de editar una categoría</p>
+     */
+    public Pair<String, Integer> editCategoria(int idCategoria, String categoria, String descrip) throws SQLException {
+        Statement st;
+
+        // UPDATE REGISTRO EN TABLA categoria
+        StringBuilder updCat = new StringBuilder("update categoria set nomCategoria = '").append(categoria);
+        updCat.append("' where id_categoria = ").append(idCategoria);
+
+        StringBuilder updDes = new StringBuilder("update categoria set descripcion = '").append(descrip);
+        updDes.append("' where id_categoria = ").append(idCategoria);
+
+        if (idCategoria == 12) return new Pair<>("Categoría no editable", -1);
+
+        // VERIFICA CUAL EJECUTARÁ
+        st = conexion.createStatement();
+        if (Objects.isNull(categoria)) { // Actualiza solo descripción
+            st.executeUpdate(new String(updDes));
+        } else if (Objects.isNull(descrip)) { // Actualiza solo nomCategoria
+            st.executeUpdate(new String(updCat));
+        } else { // Actualiza nomCategoria y descripcion
+            st.executeUpdate(new String(updCat));
+            st.executeUpdate(new String(updDes));
+        }
+        st.close();
+        return new Pair<>("Todo bien :)", 0);
     }
 
     /**
      * Método que elimina una categoría de la base de datos<p>Al eliminarse una categoría, los productos que pertenecían
      * a esta se les asignará el valor por default</p>
      * @param idCategoria Entero que representa el ID de la categoría a eliminar
-     * @return Devuelve 0 si la operación salió con éxito
+     * @return Devuelve un objeto Pair< String, Integer > con un string del mensaje de salida y el status (0 ó -1)
      * @throws SQLException posible excepción SQL<p>Excepción al tratar de eliminar la categoría</p>
      */
-    public int deleteCategoria(int idCategoria) throws SQLException {
+    public Pair<String, Integer> deleteCategoria(int idCategoria) throws SQLException {
         // DELETE ONE
         StringBuilder del = new StringBuilder("delete from categoria where id_categoria = ").append(idCategoria).append(" limit 1 ");
 
-        // TODO editar método
-        // if (idCategoria == 12) return -1;
+        if (idCategoria == 12) return new Pair<>("Categoría no editable", -1);
 
         // BAI BAI
         Statement s = conexion.createStatement();
         s.executeUpdate(new String(del));
         s.close();
-        return 0;
+        return new Pair<>("Todo bien :)", 0);
     }
 
     /**
@@ -212,10 +301,10 @@ public class Datos {
      *                  <li>1 = nomCliente</li>
      *                  <li>2 = apelCliente</li>
      *                  <li>3 = telefonoCliente</li>
-     * @return Devuelve 0 si la operación salió con éxito
+     * @return Devuelve un objeto Pair< String, Integer > con un string del mensaje de salida y el status (0 ó -1)
      * @throws SQLException posible excepción SQL<p>Excepción al tratar de editar el cliente</p>
      */
-    public int editCliente(int idCliente, String nom, String ape, long tel, int[] toModify) throws SQLException {
+    public Pair<String, Integer> editCliente(int idCliente, String nom, String ape, long tel, int[] toModify) throws SQLException {
         Statement st;
 
         // UPDATE REGISTRO EN TABLA cliente
@@ -229,38 +318,36 @@ public class Datos {
 
         StringBuilder[] updates = new StringBuilder[]{updNom,updApe,updTel};
 
-        // TODO editar método
-        // if (idCliente == 100000) return -1;
+        if (idCliente == 100000) return new Pair<>("Cliente no editable", -1);
 
         for (int p : toModify) {
             st = conexion.createStatement();
             st.executeUpdate(new String(updates[p - 1]));
             st.close();
         }
-        return 0;
+        return new Pair<>("Todo bien :)", 0);
     }
 
     /**
      * Método que elimina un cliente de la base de datos<p>Al eliminarse un cliente, los pedidos y ventas que pertenecían
      * a este se les asignará el valor por default</p>
      * @param idCliente Entero que representa el cliente que será borrado de la base de datos
-     * @return Devuelve 0 si la operacíon salio con éxito
+     * @return Devuelve un objeto Pair< String, Integer > con un string del mensaje de salida y el status (0 ó -1)
      * @throws SQLException posible exceppción SQL<p>Excepción al tratar de eliminar un cliente</p>
      */
-    public int deleteCliente(int idCliente) throws SQLException {
+    public Pair<String, Integer> deleteCliente(int idCliente) throws SQLException {
         Statement st;
 
         // DELETE CLIENTE
         StringBuilder del = new StringBuilder("delete from cliente where id_cliente =").append(idCliente);
 
-        // TODO editar método
-        // if (idCliente == 100000) return -1;
+        if (idCliente == 100000) return new Pair<>("Cliente no editable", -1);
 
         // DELETE
         st = conexion.createStatement();
         st.executeUpdate(new String(del));
         st.close();
-        return 0;
+        return new Pair<>("Todo bien :)", 0);
     }
 
     /**
