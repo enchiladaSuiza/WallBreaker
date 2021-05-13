@@ -83,6 +83,59 @@ public class Datos {
         return resultados;
     }
 
+    public int verCategos() {
+        // TODO completar método
+        return  0;
+    }
+
+    /**
+     * Método que agrega una categoría de herramientas a la base de datos
+     * @param categoria String con el nombre de la categoría nueva
+     * @param descrip String con la descripción de la nueva categoría
+     * @return Devuelve 0 si la operación salió con éxito
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de agreagr una categoría</p>
+     */
+    public int addCategoria(String categoria, String descrip) throws SQLException {
+        Statement st;
+
+        // INSERT INTO categoria
+        StringBuilder ins = new StringBuilder("insert into categoria (nomCategoria, descripcion) values ('");
+        ins.append(categoria).append("', '").append(descrip).append("') ");
+
+        // MAKE INSERT
+        st = conexion.createStatement();
+        st.executeUpdate(new String(ins));
+        st.close();
+        return 0;
+    }
+
+    public int editCategoria(int idCategoria, String categoria, String descrip) {
+        // TODO competar método
+        // if (idCategoria == 12) return -1;
+        return 0;
+    }
+
+    /**
+     * Método que elimina una categoría de la base de datos<p>Al eliminarse una categoría, los productos que pertenecían
+     * a esta se les asignará el valor por default</p>
+     * @param idCategoria Entero que representa el ID de la categoría a eliminar
+     * @return Devuelve 0 si la operación salió con éxito
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de eliminar la categoría</p>
+     */
+    public int deleteCategoria(int idCategoria) throws SQLException {
+        // DELETE ONE
+        StringBuilder del = new StringBuilder("delete from categoria where id_categoria = ").append(idCategoria).append(" limit 1 ");
+
+        // TODO editar método
+        // if (idCategoria == 12) return -1;
+
+        // BAI BAI
+        Statement s = conexion.createStatement();
+        s.executeUpdate(new String(del));
+        s.close();
+        return 0;
+    }
+
     /**
      * Método que obtiene la información de los clientes almacenados en la base de datos
      * @return Devuelve un ObservableList de ObservableList de Strings, cada ObservableList es una fila, cada String es
@@ -176,6 +229,9 @@ public class Datos {
 
         StringBuilder[] updates = new StringBuilder[]{updNom,updApe,updTel};
 
+        // TODO editar método
+        // if (idCliente == 100000) return -1;
+
         for (int p : toModify) {
             st = conexion.createStatement();
             st.executeUpdate(new String(updates[p - 1]));
@@ -185,7 +241,8 @@ public class Datos {
     }
 
     /**
-     * Método que elimina un cliente de la base de datos
+     * Método que elimina un cliente de la base de datos<p>Al eliminarse un cliente, los pedidos y ventas que pertenecían
+     * a este se les asignará el valor por default</p>
      * @param idCliente Entero que representa el cliente que será borrado de la base de datos
      * @return Devuelve 0 si la operacíon salio con éxito
      * @throws SQLException posible exceppción SQL<p>Excepción al tratar de eliminar un cliente</p>
@@ -195,6 +252,9 @@ public class Datos {
 
         // DELETE CLIENTE
         StringBuilder del = new StringBuilder("delete from cliente where id_cliente =").append(idCliente);
+
+        // TODO editar método
+        // if (idCliente == 100000) return -1;
 
         // DELETE
         st = conexion.createStatement();
@@ -379,9 +439,9 @@ public class Datos {
         ObservableList<ObservableList<String>> resultados = FXCollections.observableArrayList();
 
         StringBuilder join = new StringBuilder("select cliente.id_cliente as 'ID Cliente', nomCliente as Cliente,");
-        join.append(" id_venta as 'ID Venta', fecha_venta as 'Fecha Venta', montoF as Total,");
+        join.append(" apelCliente as Apellido, id_venta as 'ID Venta', fecha_venta as 'Fecha Venta', montoF as Total,");
         join.append(" efectivo as Efectivo, cambio as Cambio, id_pedido as 'ID Pedido' from cliente, venta");
-        join.append(" where cliente.id_cliente = venta.id_cliente ");
+        join.append(" where cliente.id_cliente = venta.id_cliente ").append("order by fecha_venta desc ");
 
         st = conexion.createStatement();
         rs = st.executeQuery(new String(join));
@@ -423,9 +483,10 @@ public class Datos {
         ObservableList<ObservableList<String>> resultados = FXCollections.observableArrayList();
 
         StringBuilder join = new StringBuilder("select cliente.id_cliente as 'ID Cliente', nomCliente as Cliente,");
-        join.append(" id_venta as 'ID Venta', fecha_venta as 'Fecha Venta', montoF as Total,");
+        join.append(" apelCliente as Apellido, id_venta as 'ID Venta', fecha_venta as 'Fecha Venta', montoF as Total,");
         join.append(" efectivo as Efectivo, cambio as Cambio, id_pedido as 'ID Pedido' from cliente, venta");
         join.append(" where cliente.id_cliente = venta.id_cliente AND cliente.id_cliente = ").append(idCliente);
+        join.append(" order by fecha_venta desc ");
 
         st = conexion.createStatement();
         rs = st.executeQuery(new String(join));
@@ -1295,7 +1356,8 @@ public class Datos {
     }
 
     /**
-     * Método que edita los productos que provee determinado proveedor
+     * Método que edita los productos que provee determinado proveedor<p>Cambia los productos que provee dicha persona
+     * por otros diferentes</p><p><b>Nota:</b> No le agrega nuevos productos para proveer a un determinado proveedor</p>
      * @param idProveedor Entero que representa la llave primaria que identifica el proveedor del que se editarán
      *                    sus productos
      * @param oldIDProds ArrayList de enteros que almacena los (id_producto) del proveedor (idProveedor) que
@@ -1347,6 +1409,58 @@ public class Datos {
             st.executeUpdate(new String(updProds));
             st.close();
         }
+        return 0;
+    }
+
+    /**
+     * Método que agrega IDs de productos proveidos por un proveedor específico a la tabla proveedor_producto en la
+     * base de datos<p>Este método puede agreagr uno o varios ID de productos a la vez a la relación de proveedor con
+     * producto por medio del ID del proveedor y un ArrayList con los IDs de los productos que provee que <b>no tenía
+     * ya antes asignados</b></p>
+     * @param idProveedor Entero que representa el ID del proveedor al que se le asignarán productos
+     * @param prods ArrayList de enteros que contiene <b>el o los</b> ID de producto(s) que provee ese proveedor
+     * @return Devuelve 0 si la operación salió con éxito
+     * @throws SQLException posible excepción SQL<p>Excepción al agregar información en la tabla proveedor_producto</p>
+     */
+    public int addProdToProveedor(int idProveedor, ArrayList<Integer> prods) throws SQLException {
+        PreparedStatement ps;
+
+        // INSERT INTO proveedor_producto
+        StringBuilder ins = new StringBuilder("insert into proveedor_producto (id_proveedor, id_producto)");
+        ins.append(" values (?, ?) ");
+
+        // SE PREPARA LA RELACIÓN
+        for (int v : prods) {
+            ps = conexion.prepareStatement(new String(ins));
+            ps.setInt(1, idProveedor);
+            ps.setInt(2, v);
+
+            ps.execute();
+            ps.close();
+        }
+        return 0;
+    }
+
+    /**
+     * Método que elimina la relación de un producto específico con el proveedor específico<p>Es decir, este método
+     * quita un producto de ser proveido por un determinado proveedor</p>
+     * @param idProveedor Entero que representa el ID del proveedor al que se le desasignará un producto
+     * @param idProducto Entero que representa el ID del producto que ya no será proveido por el proveedor
+     * @return Devuelve 0 si la operación salió con éxito
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de desasignar un producto de un proveedor</p>
+     */
+    public int deleteProdFromProvee(int idProveedor, int idProducto) throws SQLException {
+        Statement st;
+
+        // DELETE FROM proveedor_producto
+        StringBuilder del = new StringBuilder("delete from proveedor_producto where id_proveedor = ").append(idProveedor);
+        del.append(" AND id_producto = ").append(idProducto).append(" limit 1 ");
+
+        // MAKE THE DELETION
+        st = conexion.createStatement();
+        st.executeUpdate(new String(del));
+        st.close();
+
         return 0;
     }
 
