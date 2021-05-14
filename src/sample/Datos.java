@@ -127,19 +127,20 @@ public class Datos {
         int cols = md.getColumnCount();
 
         resultados.add(FXCollections.observableArrayList()); // La primera fila serán los nombres de las columnas
-        for (int i = 1; i <= cols + 1; i++) {
-            if (i == 3) resultados.get(0).add("# Productos");
-            else resultados.get(0).add(md.getColumnLabel(i));
+        // No entendí muy bien qué quisiste hacer aquí Gacchan, lo cambié, me daba bugs :(
+        for (int i = 1; i <= cols; i++) {
+            resultados.get(0).add(md.getColumnLabel(i));
         }
+        resultados.get(0).add("# Productos");
 
         int indiceFila = 0;
         while (rs.next()) {
             resultados.add(FXCollections.observableArrayList()); // Añade una tupla
             indiceFila++;
-            for (int v = 1; v <= cols + 1; ++v) {
-                if (v == 3) resultados.get(indiceFila).add(String.valueOf(cant_prods.get(indiceFila))); // Añade un registro
+            for (int v = 1; v <= cols; ++v) {
                 resultados.get(indiceFila).add(rs.getString(v)); // Añade un registro
             }
+            resultados.get(indiceFila).add(String.valueOf(cant_prods.get(indiceFila - 1))); // Añade un registro
         }
         rs.close();
         st.close();

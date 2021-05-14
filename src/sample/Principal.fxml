@@ -20,7 +20,7 @@
             <children>
                 <Label fx:id="titulo" alignment="CENTER" contentDisplay="CENTER" layoutY="26.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" />
                 <TextField fx:id="busquedaAyuda" alignment="CENTER_RIGHT" layoutX="536.0" layoutY="17.0" promptText="Ayuda" AnchorPane.rightAnchor="15.0" />
-                <FlowPane fx:id="barraDeMenu" alignment="CENTER" columnHalignment="CENTER" hgap="50.0" layoutY="49.0" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefWrapLength="700.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                <FlowPane fx:id="barraDeMenu" alignment="CENTER" columnHalignment="CENTER" hgap="35.0" layoutY="49.0" maxWidth="1.7976931348623157E308" minHeight="-Infinity" prefWrapLength="700.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
                     <children>
                         <Button fx:id="productosBtn" mnemonicParsing="false" onAction="#eventoConsultar" text="Productos" />
                         <Button fx:id="ventasBtn" mnemonicParsing="false" onAction="#eventoConsultar" text="Ventas" />
@@ -28,6 +28,7 @@
                         <Button fx:id="pedidosBtn" layoutX="209.0" layoutY="10.0" mnemonicParsing="false" onAction="#eventoConsultar" text="Pedidos" />
                         <Button fx:id="personalBtn" layoutX="265.0" layoutY="10.0" mnemonicParsing="false" onAction="#eventoConsultar" text="Personal" />
                   <Button fx:id="clientesBtn" mnemonicParsing="false" onAction="#eventoConsultar" text="Clientes" />
+                  <Button fx:id="categoriasBtn" mnemonicParsing="false" onAction="#eventoConsultar" text="Categorías" />
                     </children>
                 </FlowPane>
                 <ImageView fx:id="logoView" fitHeight="67.0" fitWidth="116.0" pickOnBounds="true" preserveRatio="true">

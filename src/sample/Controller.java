@@ -44,12 +44,12 @@ public class Controller implements Initializable {
     @FXML
     private Label titulo;
     @FXML
-    private Button productosBtn, ventasBtn, proveedoresBtn, pedidosBtn, personalBtn, clientesBtn;
+    private Button productosBtn, ventasBtn, proveedoresBtn, pedidosBtn, personalBtn, clientesBtn, categoriasBtn;
     @FXML
     private TableView<ObservableList<StringProperty>> tabla;
 
     private Image logoNormal, logoOscuro;
-    private ContenidoUI productos, ventas, pedidos, proveedores, personal, clientes;
+    private ContenidoUI productos, ventas, pedidos, proveedores, personal, clientes, categorias;
     private ArrayList<Pair<Button, ContenidoUI>> botonesUi;
     private String tablaActual;
 
@@ -67,6 +67,7 @@ public class Controller implements Initializable {
         proveedores = new Proveedores(this);
         personal = new Personal(this);
         clientes = new Clientes(this);
+        categorias = new Categorias(this);
         botonesUi = new ArrayList<>();
         botonesUi.add(new Pair<>(productosBtn, productos));
         botonesUi.add(new Pair<>(ventasBtn, ventas));
@@ -74,6 +75,7 @@ public class Controller implements Initializable {
         botonesUi.add(new Pair<>(pedidosBtn, pedidos));
         botonesUi.add(new Pair<>(personalBtn, personal));
         botonesUi.add(new Pair<>(clientesBtn, clientes));
+        botonesUi.add(new Pair<>(categoriasBtn, categorias));
 
         barraDeMenu.widthProperty().addListener((observableValue, anterior, nuevo) -> {
             double anchoBotones = 0;
@@ -153,7 +155,7 @@ public class Controller implements Initializable {
             tabla.setEditable(true);
         }
         try {
-            ObservableList<ObservableList<String>> consulta;
+            ObservableList<ObservableList<String>> consulta; // My soooooooooooos
             if (nombreTabla.equals(productos.conseguirNombreDeLaTabla())) {
                 consulta = Main.conseguirDatos().verProductos();
             } else if (nombreTabla.equals(ventas.conseguirNombreDeLaTabla())) {
@@ -164,14 +166,15 @@ public class Controller implements Initializable {
                 consulta = Main.conseguirDatos().verPersonal();
             } else if (nombreTabla.equals(clientes.conseguirNombreDeLaTabla())) {
                 consulta = Main.conseguirDatos().verClientes();
-            }
-            else {
+            } else if (nombreTabla.equals(categorias.conseguirNombreDeLaTabla())) {
+                consulta = Main.conseguirDatos().verCategos();
+            } else {
                 consulta = Main.conseguirDatos().verTodo(nombreTabla);
             }
             tablaActual = nombreTabla;
             consulta(consulta);
         } catch (SQLException e) {
-            mostrarError("No fue posible realizar la consulta. Error: " + e.getMessage());
+            mostrarError("No fue posible realizar la consulta.\n\n" + e.getMessage());
         }
     }
 
@@ -195,11 +198,18 @@ public class Controller implements Initializable {
     public void editarCelda(TablePosition<ObservableList<StringProperty>, String> posicion, String valor) {
         ObservableList<StringProperty> fila = posicion .getTableView().getItems().get(posicion.getRow());
         int columna = posicion.getColumn();
-        if (columna == 0 && !tablaActual.equals(ventas.conseguirNombreDeLaTabla())) {
+
+        if (tablaActual.equals(pedidos.conseguirNombreDeLaTabla())) { // Pedidos es... raro
+            Controller.mostrarError("Por favor modifique los pedidos mediante la interfaz de la derecha.");
+            return;
+        }
+
+        if (columna == 0 && !tablaActual.equals(ventas.conseguirNombreDeLaTabla())) { // No aplica para ventas
             mostrarError("No es posible actualizar los IDs.");
             tabla.refresh();
             return;
         }
+
         ArrayList<String> propiedades = new ArrayList<>();
         for (int i = 0; i < fila.size(); i++) {
             if (i == columna) {
@@ -210,20 +220,11 @@ public class Controller implements Initializable {
             }
         }
 
-        if (tablaActual.equals(productos.conseguirNombreDeLaTabla())) {
-            productos.editar(propiedades, columna);
-        }
-        else if (tablaActual.equals(personal.conseguirNombreDeLaTabla())) {
-            personal.editar(propiedades, columna);
-        }
-        else if (tablaActual.equals(proveedores.conseguirNombreDeLaTabla())) {
-            proveedores.editar(propiedades, columna);
-        }
-        else if (tablaActual.equals(ventas.conseguirNombreDeLaTabla())) {
-            ventas.editar(propiedades, columna);
-        }
-        else if (tablaActual.equals(clientes.conseguirNombreDeLaTabla())) {
-            clientes.editar(propiedades, columna);
+        for (Pair<Button, ContenidoUI> par : botonesUi) {
+            if (tablaActual.equals(par.getValue().conseguirNombreDeLaTabla())) {
+                par.getValue().editar(propiedades, columna);
+                break;
+            }
         }
     }
 
@@ -289,8 +290,12 @@ public class Controller implements Initializable {
     }
 
     // Funciones de ventanas
-    public static ButtonType mostrarError(String contenido) { return mostrarVentana(error, contenido); }
-    public static ButtonType mostrarInfo(String contenido) { return mostrarVentana(informacion, contenido); }
+    public static void mostrarError(String contenido) {
+        mostrarVentana(error, contenido);
+    }
+    public static void mostrarInfo(String contenido) {
+        mostrarVentana(informacion, contenido);
+    }
     public static ButtonType mostrarConfirmacion(String contenido) { return mostrarVentana(confirmacion, contenido); }
     private static ButtonType mostrarVentana(Alert ventana, String contenido) {
         ventana.setContentText(contenido);
@@ -319,6 +324,11 @@ public class Controller implements Initializable {
             }
         }
         return id;
+    }
+
+    public void actualizarCategorias() {
+        ((Productos)productos).actualizarCategorias(); // Quizás no sea el mejor enfoque...
+        ((Categorias)categorias).actualizarCategorias();
     }
 
     // Misc
