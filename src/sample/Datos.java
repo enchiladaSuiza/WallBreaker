@@ -1228,20 +1228,20 @@ public class Datos {
 
 
 
-        // DELETE ROW idPedido FROM pedido
+        // DELETE pedido
         StringBuilder delPed = new StringBuilder("delete from pedido where id_pedido = ").append(idPedido);
         delPed.append(" limit 1 ");
 
-        // DELETE ROWS FROM pedido_producto WHERE idPedido
+        /* DELETE ROWS FROM pedido_producto WHERE idPedido
         StringBuilder delPP = new StringBuilder("delete from pedido_producto where id_pedido = ").append(idPedido);
 
-        StringBuilder[] querys = new StringBuilder[]{delPed,delPP};
+        StringBuilder[] querys = new StringBuilder[]{delPed,delPP};*/
 
-        for (StringBuilder x : querys) {
+        //for (StringBuilder x : querys) {
             st = conexion.createStatement();
-            st.executeUpdate(new String(x));
+            st.executeUpdate(new String(delPed));
             st.close();
-        }
+        //}
         return 0;
     }
 
