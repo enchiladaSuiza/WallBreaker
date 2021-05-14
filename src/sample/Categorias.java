@@ -30,6 +30,7 @@ public class Categorias extends ContenidoUI {
         eliminar.setOnAction(e -> eliminarCategoria());
 
         categoriaEliminar = new ComboBox<>();
+        actualizarCategorias();
         categoriaEliminar.setPromptText("Categoría");
         categoriaEliminar.setPrefWidth(300);
 
@@ -105,5 +106,22 @@ public class Categorias extends ContenidoUI {
             Controller.mostrarError("Surgió un error consultando las categorías.\n\n" + t.getMessage());
         }
         categoriaEliminar.setItems(FXCollections.observableArrayList(llaves));
+    }
+
+    public void editar(ArrayList<String> propiedades, int columna) {
+        if (columna == 3) {
+            Controller.mostrarError("No es posible modificar esta columna.");
+            controller.refrescarTabla();
+            return;
+        }
+
+        int id = Integer.parseInt(propiedades.get(0));
+        try {
+            Main.conseguirDatos().editCategoria(id, propiedades.get(1), propiedades.get(2));
+            controller.actualizarCategorias();
+        } catch (SQLException throwables) {
+            Controller.mostrarError("No fue posible editar la categoría.\n\n" + throwables.getMessage());
+            controller.refrescarTabla();
+        }
     }
 }
