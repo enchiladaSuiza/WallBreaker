@@ -11,11 +11,12 @@ import java.util.LinkedHashMap;
 
 public class Proveedores extends ContenidoUI {
     private Button consultar, verRelacionBtn, agregar, quitar, generarProveedorBtn;
-    private Button eliminarProveedorBtn, editarBtn, guardarBtn;
+    private Button eliminarProveedorBtn, editarBtn, guardarBtn, agregarEditar, quitarEditar;
     private TextField productoConsulta, nombre, apellido, telefono, paginaWeb, productoDeProveedor;
     private TextField proveedorEliminar, proveedorConsultar;
     private ArrayList<TextField> productosPrevistos, productosConsultados;
-    private int posicionParaAgregarProducto, posicionParaMostrarPorductos, idProveedorActual;
+    private ArrayList<Integer> productosAnteriores;
+    private int posicionAgregarNuevo, posicionMostrar, posicionAgregarEditar, idProveedorActual;
 
     public Proveedores(Controller controller) {
         super(controller);
@@ -41,6 +42,8 @@ public class Proveedores extends ContenidoUI {
         verRelacionBtn = new Button("Ver relación");
         agregar = new Button("Agregar");
         quitar = new Button("Quitar");
+        agregarEditar = new Button("Agregar");
+        quitarEditar = new Button("Quitar");
         generarProveedorBtn = new Button("Generar proveedor");
         eliminarProveedorBtn = new Button("Eliminar proveedor");
         editarBtn = new Button("Editar");
@@ -53,7 +56,12 @@ public class Proveedores extends ContenidoUI {
         eliminarProveedorBtn.setOnAction(e -> eliminarProveedor());
         editarBtn.setOnAction(e -> editarProductosProvistos());
         guardarBtn.setOnAction(e -> guardarCambios());
+        agregarEditar.setOnAction(e -> agregarProductoAEditar());
+        quitarEditar.setOnAction(e -> quitarProductoDeEditar());
         quitar.setDisable(true);
+        agregarEditar.setDisable(true);
+        quitarEditar.setDisable(true);
+        guardarBtn.setDisable(true);
 
         // I used to roll the dice
         LinkedHashMap<Node, Boolean> nodosConEspacios = new LinkedHashMap<>();
@@ -71,8 +79,11 @@ public class Proveedores extends ContenidoUI {
         nodosConEspacios.put(productoDeProveedor, true);
         nodosConEspacios.put(generarProveedorBtn, true);
         nodosConEspacios.put(Controller.nuevoEspacio(generarProveedorBtn), true);
+        nodosConEspacios.put(agregarEditar, false);
+        nodosConEspacios.put(quitarEditar, false);
         nodosConEspacios.put(proveedorConsultar, false);
         nodosConEspacios.put(editarBtn, false);
+        nodosConEspacios.put(guardarBtn, true);
         nodosConEspacios.put(Controller.nuevoEspacio(editarBtn), true);
         nodosConEspacios.put(proveedorEliminar, true);
         nodosConEspacios.put(eliminarProveedorBtn, true);
@@ -80,8 +91,9 @@ public class Proveedores extends ContenidoUI {
         nodos = new ArrayList<>();
         reemplazarNodosDeGrid(nodosConEspacios.keySet().toArray(new Node[0]),
                 nodosConEspacios.values().toArray(new Boolean[0]));
-        posicionParaAgregarProducto = conseguirIndice(generarProveedorBtn);
-        posicionParaMostrarPorductos = conseguirIndice(editarBtn) + 1;
+        posicionAgregarNuevo = conseguirIndice(generarProveedorBtn);
+        posicionMostrar = conseguirIndice(editarBtn) + 1;
+        posicionAgregarEditar = posicionMostrar;
 
         productosPrevistos = new ArrayList<>();
         productosPrevistos.add(productoDeProveedor);
@@ -102,17 +114,22 @@ public class Proveedores extends ContenidoUI {
         TextField producto = new TextField();
         Controller.prepararTextField(producto, "Producto", Controller.TEXTFIELD_CADENA);
         productosPrevistos.add(producto);
-        insertarAGrid(producto, true, posicionParaAgregarProducto);
-        posicionParaAgregarProducto++;
+        insertarAGrid(producto, true, posicionAgregarNuevo);
+        posicionAgregarNuevo++;
+        posicionMostrar++;
+        posicionAgregarEditar++; // Lord please end it all
         if (quitar.isDisabled()) {
             quitar.setDisable(false);
         }
     }
+
     private void quitarProductoDeProveedor() {
         TextField producto = productosPrevistos.get(productosPrevistos.size() - 1);
         productosPrevistos.remove(producto);
         quitarDeGrid(producto);
-        posicionParaAgregarProducto--;
+        posicionAgregarNuevo--;
+        posicionMostrar--;
+        posicionAgregarEditar--;
         if (productosPrevistos.size() <= 1) {
             quitar.setDisable(true);
         }
@@ -123,6 +140,7 @@ public class Proveedores extends ContenidoUI {
         verRelacionBtn.setText("Ver solo proveedores");
         verRelacionBtn.setOnAction(e -> verSoloProveedores());
     }
+
     private void verSoloProveedores() {
         controller.consultaTabla(nombreDeLaTabla);
         verRelacionBtn.setText("Ver relación");
@@ -207,23 +225,28 @@ public class Proveedores extends ContenidoUI {
         for (TextField producto : productosConsultados) {
             quitarDeGrid(producto);
         }
-        quitarDeGrid(guardarBtn);
+        guardarBtn.setDisable(false);
         productosConsultados.clear();
 
         try {
-            ArrayList<Integer> productos = Main.conseguirDatos().conseguirProductosDeUnProveedor(idProveedorActual);
-            if (productos.isEmpty()) {
+            productosAnteriores = Main.conseguirDatos().conseguirProductosDeUnProveedor(idProveedorActual);
+            if (productosAnteriores.isEmpty()) {
                 Controller.mostrarError("El proveedor no existe, o no provee ningún producto.");
                 return;
             }
 
-            for (int i = 0; i < productos.size(); i++) {
-                TextField productoTf = new TextField(String.valueOf(productos.get(i)));
+            for (int i = 0; i < productosAnteriores.size(); i++) {
+                TextField productoTf = new TextField(String.valueOf(productosAnteriores.get(i)));
                 Controller.prepararTextField(productoTf, "Producto", Controller.TEXTFIELD_CADENA);
                 productosConsultados.add(productoTf);
-                insertarAGrid(productoTf, true, posicionParaMostrarPorductos + i);
+                insertarAGrid(productoTf, true, posicionMostrar + i);
             }
-            insertarAGrid(guardarBtn, true, posicionParaMostrarPorductos + productos.size());
+            posicionAgregarEditar = posicionMostrar + productosAnteriores.size();
+
+            agregarEditar.setDisable(false);
+            if (productosConsultados.size() > 1) {
+                quitarEditar.setDisable(false);
+            }
 
         } catch (SQLException t) {
             Controller.mostrarError("Error al consultar los productos en relación al proveedor.\n\n"
@@ -232,25 +255,77 @@ public class Proveedores extends ContenidoUI {
     }
 
     private void guardarCambios() {
-        ArrayList<Integer> nuevosProductos = new ArrayList<>();
+        ArrayList<Integer> productosNuevos = new ArrayList<>();
         for (TextField productoTf : productosConsultados) {
-            nuevosProductos.add(Integer.parseInt(productoTf.getText()));
+            productosNuevos.add(Controller.validarProducto(productoTf.getText()));
         }
 
-        try {
-            Main.conseguirDatos().editProdsProv(idProveedorActual,
-                    Main.conseguirDatos().conseguirProductosDeUnProveedor(idProveedorActual),
-                    nuevosProductos);
-            Controller.mostrarInfo("Productos actualizados correctamente.");
 
-            for (TextField producto : productosConsultados) {
-                quitarDeGrid(producto);
+        if (productosAnteriores.size() == productosNuevos.size()) {
+            try {
+                Main.conseguirDatos().editProdsProv(idProveedorActual,
+                        Main.conseguirDatos().conseguirProductosDeUnProveedor(idProveedorActual),
+                        productosNuevos);
+                Controller.mostrarInfo("Productos actualizados correctamente.");
+                productosAnteriores = productosNuevos;
+            } catch (SQLException t) {
+                Controller.mostrarError("Error al conseguir los productos del proveedor.\n\n" + t.getMessage());
+                return;
             }
-            quitarDeGrid(guardarBtn);
-            productosConsultados.clear();
-            proveedorConsultar.clear();
-        } catch (SQLException t) {
-            Controller.mostrarError("Error al conseguir los productos del proveedor.\n\n" + t.getMessage());
+        } else {
+            for (int producto : productosAnteriores) { // Quitar
+                if (!productosNuevos.contains(producto)) {
+                    try {
+                        Main.conseguirDatos().deleteProdFromProvee(idProveedorActual, producto);
+                    } catch (SQLException t) {
+                        Controller.mostrarError("Error al eliminar productos de proveedor.\n\n" + t.getMessage());
+                        return;
+                    }
+                }
+            }
+            ArrayList<Integer> productosParaAgregar = new ArrayList<>();
+            productosNuevos.forEach(producto -> { // Agregar
+                if (!productosAnteriores.contains(producto)) {
+                    productosParaAgregar.add(producto);
+                }
+            });
+
+            try {
+                Main.conseguirDatos().addProdToProveedor(idProveedorActual, productosParaAgregar);
+            } catch (SQLException t) {
+                Controller.mostrarError("Error al agregar productos al proveedor.\n\n" + t.getMessage());
+                return;
+            }
+
+            Controller.mostrarInfo("Productos actualizados correctamente.");
+        }
+
+        for (TextField producto : productosConsultados) {
+            quitarDeGrid(producto);
+        }
+        guardarBtn.setDisable(true);
+        productosConsultados.clear();
+        proveedorConsultar.clear();
+    }
+
+    private void agregarProductoAEditar() {
+        TextField producto = new TextField();
+        Controller.prepararTextField(producto, "Producto", Controller.TEXTFIELD_CADENA);
+        productosConsultados.add(producto);
+        insertarAGrid(producto, true, posicionAgregarEditar);
+        posicionAgregarEditar++;
+        if (quitarEditar.isDisabled()) {
+            quitarEditar.setDisable(false);
+        }
+    }
+
+    private void quitarProductoDeEditar() {
+        TextField producto = productosConsultados.get(productosConsultados.size() - 1);
+        productosConsultados.remove(producto);
+        quitarDeGrid(producto);
+        posicionAgregarEditar--;
+        if (productosConsultados.size() <= 1) {
+            quitarEditar.setDisable(true);
         }
     }
 
@@ -259,7 +334,7 @@ public class Proveedores extends ContenidoUI {
         String nombre = propiedades.get(1);
         String apellido = propiedades.get(2);
         String paginaWeb = propiedades.get(4);
-        long telefono = 0;
+        long telefono;
 
         try {
             telefono = Long.parseLong(propiedades.get(3));
