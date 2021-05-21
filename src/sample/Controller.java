@@ -26,6 +26,7 @@ import javafx.util.Pair;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.ResourceBundle;
 
@@ -44,9 +45,14 @@ public class Controller implements Initializable {
     @FXML
     private Label titulo;
     @FXML
-    private Button productosBtn, ventasBtn, proveedoresBtn, pedidosBtn, personalBtn, clientesBtn, categoriasBtn;
+    private ScrollPane derecha;
+    @FXML
+    private Button productosBtn, ventasBtn, proveedoresBtn, pedidosBtn, personalBtn, clientesBtn, categoriasBtn,
+            notificacionesBtn;
     @FXML
     private TableView<ObservableList<StringProperty>> tabla;
+    @FXML
+    private TextField busquedaAyuda;
 
     private Image logoNormal, logoOscuro;
     private ContenidoUI productos, ventas, pedidos, proveedores, personal, clientes, categorias;
@@ -168,6 +174,8 @@ public class Controller implements Initializable {
                 consulta = Main.conseguirDatos().verClientes();
             } else if (nombreTabla.equals(categorias.conseguirNombreDeLaTabla())) {
                 consulta = Main.conseguirDatos().verCategos();
+            } else if (nombreTabla.equals(proveedores.conseguirNombreDeLaTabla())) {
+                consulta = Main.conseguirDatos().verProveedores();
             } else {
                 consulta = Main.conseguirDatos().verTodo(nombreTabla);
             }
@@ -191,7 +199,7 @@ public class Controller implements Initializable {
             consulta(consulta);
             tabla.setEditable(false);
         } catch (SQLException throwables) {
-            mostrarError("No fue posible realizar la consulta. Error: " + throwables.getMessage());
+            mostrarError("No fue posible realizar la consulta.\n\n" + throwables.getMessage());
         }
     }
 
@@ -333,6 +341,7 @@ public class Controller implements Initializable {
 
     // Misc
     public void refrescarTabla() { tabla.refresh(); }
+
     public void cambiarTema() {
         if (Main.cambiarCss()) {
             logoView.setImage(logoNormal);
@@ -340,5 +349,46 @@ public class Controller implements Initializable {
         else {
             logoView.setImage(logoOscuro);
         }
+    }
+
+    public void ayuda() { // XD
+        String texto = busquedaAyuda.getText().toLowerCase();
+        if (texto.contains("prod")) {
+            titulo.setText(productosBtn.getText());
+            consultaTabla(productos.conseguirNombreDeLaTabla());
+            limpiarYAgregarNodosAGrid(productos.conseguirNodos());
+        } else if (texto.contains("ven")) {
+            titulo.setText(ventasBtn.getText());
+            consultaTabla(ventas.conseguirNombreDeLaTabla());
+            limpiarYAgregarNodosAGrid(ventas.conseguirNodos());
+        } else if (texto.contains("prov")) {
+            titulo.setText(proveedoresBtn.getText());
+            consultaTabla(proveedores.conseguirNombreDeLaTabla());
+            limpiarYAgregarNodosAGrid(proveedores.conseguirNodos());
+        } else if (texto.contains("ped")) {
+            titulo.setText(pedidosBtn.getText());
+            consultaTabla(pedidos.conseguirNombreDeLaTabla());
+            limpiarYAgregarNodosAGrid(pedidos.conseguirNodos());
+        } else if (texto.contains("per")) {
+            titulo.setText(personalBtn.getText());
+            consultaTabla(personal.conseguirNombreDeLaTabla());
+            limpiarYAgregarNodosAGrid(personal.conseguirNodos());
+        } else if (texto.contains("cli")) {
+            titulo.setText(clientesBtn.getText());
+            consultaTabla(clientes.conseguirNombreDeLaTabla());
+            limpiarYAgregarNodosAGrid(clientes.conseguirNodos());
+        } else if (texto.contains("cat")) {
+            titulo.setText(categoriasBtn.getText());
+            consultaTabla(categorias.conseguirNombreDeLaTabla());
+            limpiarYAgregarNodosAGrid(categorias.conseguirNodos());
+        }
+    }
+
+    public void mostrarNotificaciones() { // For some reason I can't explain
+        Alert notifs = new Alert(Alert.AlertType.INFORMATION);
+        notifs.setTitle("Notificaciones");
+        notifs.setHeaderText("Notificaciones (0)");
+        notifs.setContentText("No hay notificaciones por el momento.");
+        notifs.show();
     }
 }

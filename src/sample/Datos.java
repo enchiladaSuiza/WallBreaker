@@ -1247,6 +1247,47 @@ public class Datos {
     }
 
     /**
+     * Método que obtienen información de los proveedores almacenados en la base de datos
+     * @return Devuelve un ObservableList de ObservableList de Strings, cada ObservableList es una fila, cada String es
+     * un registro. La priemra fila contiene los nombres de las columnas.
+     * @throws SQLException posible excepción SQL<p>Excepción al tratar de obtener los registros</p>
+     */
+    public ObservableList<ObservableList<String>> verProveedores() throws SQLException {
+        Statement st;
+        ResultSet rs;
+
+        ObservableList<ObservableList<String>> resultados = FXCollections.observableArrayList();
+
+        StringBuilder join = new StringBuilder("select id_proveedor as ID, nomProveedor as Nombre,");
+        join.append(" apelProveedor as Apellido, telefonoProveedor as Teléfono,");
+        join.append(" pag_web as PáginaWeb from proveedor ");
+
+        st = conexion.createStatement();
+        rs = st.executeQuery(new String(join));
+
+        ResultSetMetaData md = rs.getMetaData();
+        int cols = md.getColumnCount();
+
+        resultados.add(FXCollections.observableArrayList()); // La primera fila serán los nombres de las columnas
+        for (int i = 1; i <= cols; i++) {
+            resultados.get(0).add(md.getColumnLabel(i));
+        }
+
+        int indiceFila = 0;
+        while (rs.next()) {
+            resultados.add(FXCollections.observableArrayList()); // Añade una tupla
+            indiceFila++;
+            for (int v = 1; v <= cols; ++v) {
+                resultados.get(indiceFila).add(rs.getString(v)); // Añade un registro
+            }
+        }
+        rs.close();
+        st.close();
+
+        return resultados;
+    }
+
+    /**
      * Método que obtiene información de todos los proveedores que proveen productos
      * @return Devuelve un ObservableList de ObservableList de Strings, cada ObservableList es una fila, cada String es
      * un registro. La priemra fila contiene los nombres de las columnas.
